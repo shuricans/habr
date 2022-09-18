@@ -21,4 +21,8 @@
         <java.version>11</java.version>
     </properties>
 
+    <modules>
+        <module>database</module>
+    </modules>
+
 </project>
