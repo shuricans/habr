@@ -24,6 +24,7 @@
     <modules>
         <module>database</module>
         <module>backend-api-app</module>
+        <module>picture-service</module>
     </modules>
 
 </project>
