@@ -19,6 +19,9 @@
 
     <properties>
         <java.version>11</java.version>
+        <testcontainers.version>1.17.3</testcontainers.version>
+        <spring-boot.version>2.7.3</spring-boot.version>
+        <liquibase.version>4.15.0</liquibase.version>
     </properties>
 
     <modules>

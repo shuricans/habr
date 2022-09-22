@@ -1,0 +1,154 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="shuricans (generated)" id="1663834229321-1">
+        <createSequence incrementBy="1" sequenceName="posts_post_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-2">
+        <createSequence incrementBy="1" sequenceName="roles_role_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-3">
+        <createSequence incrementBy="1" sequenceName="tags_tag_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-4">
+        <createSequence incrementBy="1" sequenceName="topics_topic_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-5">
+        <createSequence incrementBy="1" sequenceName="users_user_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-6">
+        <createTable tableName="posts">
+            <column name="post_id" type="BIGINT" defaultValueSequenceNext="posts_post_id_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="postsPK"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="condition" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="topic_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-7">
+        <createTable tableName="posts_tags">
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="posts_tagsPK"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="posts_tagsPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-8">
+        <createTable tableName="roles">
+            <column name="role_id" type="BIGINT" defaultValueSequenceNext="roles_role_id_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="rolesPK"/>
+            </column>
+            <column name="name" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-9">
+        <createTable tableName="tags">
+            <column name="tag_id" type="BIGINT" defaultValueSequenceNext="tags_tag_id_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tagsPK"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="name" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-10">
+        <createTable tableName="topics">
+            <column name="topic_id" type="BIGINT" defaultValueSequenceNext="topics_topic_id_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="topicsPK"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-11">
+        <createTable tableName="users">
+            <column name="user_id" type="BIGINT" defaultValueSequenceNext="users_user_id_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="usersPK"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="about_me" type="VARCHAR(255)"/>
+            <column name="birthday" type="date"/>
+            <column name="condition" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(50)"/>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-12">
+        <createTable tableName="users_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_rolesPK"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_rolesPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-13">
+        <addUniqueConstraint columnNames="name" constraintName="UC_ROLESNAME_COL" tableName="roles"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-14">
+        <addUniqueConstraint columnNames="name" constraintName="UC_TAGSNAME_COL" tableName="tags"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-15">
+        <addUniqueConstraint columnNames="username" constraintName="UC_USERSUSERNAME_COL" tableName="users"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-16">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="users_roles" constraintName="FK2o0jvgh89lemvvo17cbqvdxaa" deferrable="false" initiallyDeferred="false" referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-17">
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="posts_tags" constraintName="FK4svsmj4juqu2l8yaw6whr1v4v" deferrable="false" initiallyDeferred="false" referencedColumnNames="tag_id" referencedTableName="tags" validate="true"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-18">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="posts" constraintName="FK5lidm6cqbc7u4xhqpxm898qme" deferrable="false" initiallyDeferred="false" referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-19">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="posts_tags" constraintName="FKcreclgob71ibo58gsm6l5wp6" deferrable="false" initiallyDeferred="false" referencedColumnNames="post_id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-20">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="users_roles" constraintName="FKj6m8fwv7oqv74fcehir1a9ffy" deferrable="false" initiallyDeferred="false" referencedColumnNames="role_id" referencedTableName="roles" validate="true"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1663834229321-21">
+        <addForeignKeyConstraint baseColumnNames="topic_id" baseTableName="posts" constraintName="FKrfchr8dax0kfngvvkbteh5n7h" deferrable="false" initiallyDeferred="false" referencedColumnNames="topic_id" referencedTableName="topics" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
