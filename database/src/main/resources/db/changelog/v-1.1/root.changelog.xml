@@ -12,25 +12,18 @@
         http://www.liquibase.org/xml/ns/pro
         http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.3.xsd">
 
-    <preConditions>
-        <dbms type="postgresql"/>
-        <runningAs username="postgres"/>
-    </preConditions>
-
-    <changeSet id="0" author="shuricans">
-        <tagDatabase tag="db_init"/>
-    </changeSet>
-
-    <include file="db/changelog/v-1.0/root.changelog.xml"/>
-
-    <changeSet id="100" author="shuricans">
-        <tagDatabase tag="v-1.0"/>
-    </changeSet>
-
-    <include file="db/changelog/v-1.1/root.changelog.xml"/>
-
-    <changeSet id="110" author="shuricans">
-        <tagDatabase tag="v-1.1"/>
+    <changeSet id="1663834229321-24" author="shuricans">
+        <comment>Changing type field "content", from default VARCHAR to TEXT</comment>
+        <modifyDataType
+                columnName="content"
+                newDataType="TEXT"
+                tableName="posts"/>
+        <rollback>
+            <modifyDataType
+                    columnName="content"
+                    newDataType="varchar(255)"
+                    tableName="posts"/>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
