@@ -1,1 +1,6 @@
-<p>post-page works!</p>
+<h6>
+ngx-markdown@{{ ngxMarkdownVersion }}
+</h6>
+<br>
+<textarea class="variable-textarea" [(ngModel)]="markdown"></textarea>
+<markdown class="variable-binding" [data]="markdown"></markdown>

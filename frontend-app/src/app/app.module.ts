@@ -13,6 +13,8 @@ import { DesignPageComponent } from './page/design-page/design-page.component';
 import { SearchPageComponent } from './page/search-page/search-page.component';
 import { LoginPageComponent } from './page/login-page/login-page.component';
 import { PostPageComponent } from './page/post-page/post-page.component';
+import { MarkdownModule } from 'ngx-markdown';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -28,10 +30,12 @@ import { PostPageComponent } from './page/post-page/post-page.component';
     LoginPageComponent,
     PostPageComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        MarkdownModule.forRoot(),
+        FormsModule
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })
