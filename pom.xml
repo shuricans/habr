@@ -22,6 +22,7 @@
         <testcontainers.version>1.17.3</testcontainers.version>
         <spring-boot.version>2.7.3</spring-boot.version>
         <liquibase.version>4.15.0</liquibase.version>
+        <springdoc.version>1.6.11</springdoc.version>
     </properties>
 
     <modules>

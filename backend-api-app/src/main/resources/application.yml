@@ -1,0 +1,35 @@
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+#    org.springframework.boot.autoconfigure: DEBUG
+
+server:
+  servlet:
+    context-path: /api/v1
+
+jwt:
+  private.key: classpath:app.key
+  public.key: classpath:app.pub
+
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/habr
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: password
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    hibernate.ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+
+app:
+  jwt:
+    expirationMs: 600000
+    refreshExpirationMs: 1200000000
