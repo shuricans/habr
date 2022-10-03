@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +46,33 @@ class UserSpecificationTest {
         tagRepository.deleteAll();
         underTest.deleteAll();
         roleRepository.deleteAll();
+    }
+
+    @Test
+    void shouldFindUsersById() {
+        // given
+        // create user
+        User user = User.builder()
+                .username("username")
+                .firstName("firstName")
+                .password("password")
+                .build();
+        User savedUser = underTest.save(user);
+        Long userId = savedUser.getId();
+
+        // create search pattern
+        Specification<User> spec = Specification
+                .where(UserSpecification.id(userId));
+
+        // when
+        Optional<User> optionalUser = underTest.findOne(spec);
+
+        // then
+        assertThat(optionalUser).isPresent();
+
+        User userFromDb = optionalUser.get();
+
+        assertThat(userFromDb).isEqualTo(user);
     }
 
     @Test

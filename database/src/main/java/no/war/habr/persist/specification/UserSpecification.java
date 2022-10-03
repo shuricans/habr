@@ -8,6 +8,11 @@ import javax.persistence.criteria.JoinType;
 
 public class UserSpecification {
 
+    public static Specification<User> id(Long userId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("id"), userId);
+    }
+
     public static Specification<User> usernameLike(String username) {
         return (root, query, builder) ->
                 builder.like(builder.lower(root.get("username")), "%" + username.toLowerCase() + "%");
