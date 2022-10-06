@@ -22,8 +22,8 @@ public class AuthServiceImpl implements AuthService {
 
     final AuthenticationManager authenticationManager;
 
-    @Value("${app.jwt.expirationMs}")
-    private int jwtExpirationMs;
+    @Value("${app.jwt.expirationS}")
+    private int jwtExpirationS;
 
     private final JwtEncoder encoder;
 
@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
-                .expiresAt(now.plusSeconds(jwtExpirationMs))
+                .expiresAt(now.plusSeconds(jwtExpirationS))
                 .subject(username)
                 .claim("scope", scope)
                 .build();

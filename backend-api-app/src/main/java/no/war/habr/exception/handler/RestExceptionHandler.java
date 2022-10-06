@@ -1,5 +1,8 @@
 package no.war.habr.exception.handler;
 
+import no.war.habr.exception.BadRequestException;
+import no.war.habr.exception.ForbiddenException;
+import no.war.habr.exception.UserNotFoundException;
 import no.war.habr.exception.details.ExceptionDetails;
 import no.war.habr.exception.details.ValidationExceptionDetails;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +35,26 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ExceptionDetails.createExceptionDetails(ex, status), status);
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDetails handleBadRequestException(BadRequestException ex) {
+        return ExceptionDetails
+                .createExceptionDetails(ex, HttpStatus.BAD_REQUEST, "Bad Request");
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDetails handleUserNotFoundException(UserNotFoundException ex) {
+        return ExceptionDetails
+                .createExceptionDetails(ex, HttpStatus.NOT_FOUND, "User not found.");
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDetails handleForbiddenException(ForbiddenException ex) {
+        return ExceptionDetails
+                .createExceptionDetails(ex, HttpStatus.FORBIDDEN, "Forbidden.");
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

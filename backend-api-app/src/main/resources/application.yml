@@ -31,5 +31,12 @@ spring:
 
 app:
   jwt:
-    expirationMs: 600000
+    expirationS: 1800  # 10 min
     refreshExpirationMs: 1200000000
+  defaultSizePerPage:
+    users: 10
+    posts: 5
+  defaultSortField:
+    users: id
+  defaultSortDirection:
+    users: ASC
