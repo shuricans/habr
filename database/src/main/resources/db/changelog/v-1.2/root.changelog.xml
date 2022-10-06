@@ -12,31 +12,6 @@
         http://www.liquibase.org/xml/ns/pro
         http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.3.xsd">
 
-    <preConditions>
-        <dbms type="postgresql"/>
-        <runningAs username="postgres"/>
-    </preConditions>
-
-    <changeSet id="0" author="shuricans">
-        <tagDatabase tag="db_init"/>
-    </changeSet>
-
-    <include file="db/changelog/v-1.0/root.changelog.xml"/>
-
-    <changeSet id="100" author="shuricans">
-        <tagDatabase tag="v-1.0"/>
-    </changeSet>
-
-    <include file="db/changelog/v-1.1/root.changelog.xml"/>
-
-    <changeSet id="110" author="shuricans">
-        <tagDatabase tag="v-1.1"/>
-    </changeSet>
-
-    <include file="db/changelog/v-1.2/root.changelog.xml"/>
-
-    <changeSet id="120" author="shuricans">
-        <tagDatabase tag="v-1.2"/>
-    </changeSet>
+    <include file="db/changelog/v-1.2/db.changelog-20221006-152352157.xml"/>
 
 </databaseChangeLog>
