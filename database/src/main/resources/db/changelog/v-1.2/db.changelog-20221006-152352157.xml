@@ -1,0 +1,32 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="shuricans (generated)" id="1665069839858-1">
+        <createSequence incrementBy="1" sequenceName="refresh_tokens_rt_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1665069839858-2">
+        <createTable tableName="refresh_tokens">
+            <column name="rt_id" type="BIGINT" defaultValueSequenceNext="refresh_tokens_rt_id_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="refresh_tokensPK"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="expiryDate" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1665069839858-3">
+        <addUniqueConstraint columnNames="token" constraintName="UC_REFRESH_TOKENSTOKEN_COL" tableName="refresh_tokens"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1665069839858-4">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="refresh_tokens" constraintName="FK1lih5y2npsf8u5o3vhdb9y0os" deferrable="false" initiallyDeferred="false" referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
