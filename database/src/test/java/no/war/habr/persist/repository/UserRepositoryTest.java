@@ -66,4 +66,28 @@ class UserRepositoryTest {
         assertThat(userFound.getUsername()).isEqualTo(username);
         assertThat(userFound.getRoles()).hasSize(1).contains(roleUser);
     }
+
+    @Test
+    @DisplayName("existsByUsername returns true when username already exists")
+    void shouldReturnTrueWhenUsernameAlreadyExists() {
+        // given
+        // create role user
+        Role roleUser = Role.builder().name(ERole.ROLE_USER).build();
+        roleRepository.save(roleUser);
+        // create user
+        String username = "username";
+        User user = User.builder()
+                .username(username)
+                .firstName("firstName")
+                .password("password")
+                .roles(Set.of(roleUser))
+                .build();
+        underTest.save(user);
+
+        // when
+        boolean exists = underTest.existsByUsername(username);
+
+        // then
+        assertThat(exists).isTrue();
+    }
 }
