@@ -4,6 +4,7 @@ package no.war.habr.persist.repository;
 import no.war.habr.persist.model.ERole;
 import no.war.habr.persist.model.Role;
 import no.war.habr.persist.model.User;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,13 @@ class UserRepositoryTest {
     @BeforeEach
     void setUp() {
         underTest.deleteAll();
+        roleRepository.deleteAll();
+    }
+
+    @AfterAll
+    public static void afterAll(@Autowired UserRepository userRepository,
+                                @Autowired RoleRepository roleRepository) {
+        userRepository.deleteAll();
         roleRepository.deleteAll();
     }
 
