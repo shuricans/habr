@@ -1,9 +1,6 @@
 package no.war.habr.service.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -12,6 +9,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
+@EqualsAndHashCode
 public class RefreshTokenDto {
 
     private Long id;
