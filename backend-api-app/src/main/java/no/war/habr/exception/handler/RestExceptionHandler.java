@@ -1,8 +1,6 @@
 package no.war.habr.exception.handler;
 
-import no.war.habr.exception.BadRequestException;
-import no.war.habr.exception.ForbiddenException;
-import no.war.habr.exception.UserNotFoundException;
+import no.war.habr.exception.*;
 import no.war.habr.exception.details.ExceptionDetails;
 import no.war.habr.exception.details.ValidationExceptionDetails;
 import org.springframework.http.HttpHeaders;
@@ -69,6 +67,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ExceptionDetails handleAccessDeniedException(AccessDeniedException ex) {
         return ExceptionDetails
                 .createExceptionDetails(ex, HttpStatus.FORBIDDEN, "Access Denied");
+    }
+
+    @ExceptionHandler(TokenRefreshException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDetails handleTokenRefreshException(TokenRefreshException ex) {
+        return ExceptionDetails
+                .createExceptionDetails(ex, HttpStatus.FORBIDDEN, "Refresh Token Error");
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDetails handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+        return ExceptionDetails
+                .createExceptionDetails(ex, HttpStatus.BAD_REQUEST, "User Already Exists");
     }
 
     @Override
