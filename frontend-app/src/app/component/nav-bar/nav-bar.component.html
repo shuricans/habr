@@ -1,0 +1,59 @@
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">Хабр</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item">
+          <a class="nav-link"
+             [class.active]="isDesignPage"
+             [attr.aria-current]="isDesignPage ? 'page' : undefined"
+             routerLink="/design">Дизайн</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             [class.active]="isWebDevPage"
+             [attr.aria-current]="isWebDevPage ? 'page' : undefined"
+             routerLink="/web">Веб-разработка</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             [class.active]="isMobileDevPage"
+             [attr.aria-current]="isMobileDevPage ? 'page' : undefined"
+             routerLink="/mobile">Мобильная разработка</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             [class.active]="isMarketingPage"
+             [attr.aria-current]="isMarketingPage ? 'page' : undefined"
+             routerLink="/marketing">Маркетинг</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav mb-2 mb-md-0">
+        <li class="nav-item">
+          <a class="nav-link"
+             [class.active]="isHelpPage"
+             [attr.aria-current]="isHelpPage ? 'page' : undefined"
+             routerLink="/help">
+            <i class="fa-solid fa-question fa-xl"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             [class.active]="isSearchPage"
+             [attr.aria-current]="isSearchPage ? 'page' : undefined"
+             routerLink="/search">
+            <i class="fa-solid fa-magnifying-glass fa-xl"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             [class.active]="isLoginPage"
+             [attr.aria-current]="isLoginPage ? 'page' : undefined"
+             routerLink="/login"><i class="fa-solid fa-user fa-xl"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
