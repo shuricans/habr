@@ -11,6 +11,9 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     @EntityGraph(attributePaths = {"roles"})
+    Optional<User> findById(@Param("userId") Long userId);
+
+    @EntityGraph(attributePaths = {"roles"})
     Optional<User> findByUsername(@Param("username") String username);
 
     boolean existsByUsername(String username);
