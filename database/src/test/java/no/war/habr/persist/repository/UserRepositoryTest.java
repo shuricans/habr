@@ -46,6 +46,36 @@ class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("findById returns user when successful")
+    void shouldFindUserByIdAndFetchRoles() {
+        // given
+        // create role user
+        Role roleUser = Role.builder().name(ERole.ROLE_USER).build();
+        roleRepository.save(roleUser);
+        // create user
+        String username = "username";
+        User user = User.builder()
+                .username(username)
+                .firstName("firstName")
+                .password("password")
+                .roles(Set.of(roleUser))
+                .build();
+        User savedUser = underTest.save(user);
+
+        // when
+        Optional<User> optionalUser = underTest.findById(savedUser.getId());
+
+        // then
+        assertThat(optionalUser).isPresent();
+
+        User userFound = optionalUser.get();
+
+        assertThat(userFound).isEqualTo(user);
+        assertThat(userFound.getUsername()).isEqualTo(username);
+        assertThat(userFound.getRoles()).hasSize(1).contains(roleUser);
+    }
+
+    @Test
     @DisplayName("findByUsername returns user when successful")
     void shouldFindUserByUsernameAndFetchRoles() {
         // given
