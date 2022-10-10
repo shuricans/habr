@@ -11,6 +11,8 @@ public class UserCreator {
 
     public static final Long ID = 1L;
     public static final String USERNAME = "shuricans";
+    public static final String ADMIN = "admin";
+    public static final String MODERATOR = "moderator";
     public static final String FIRSTNAME = "Sasha";
     public static final String PASSWORD = "password";
     public static final Set<Role> ROLES = Set.of(Role.builder().name(ERole.ROLE_USER).build());

@@ -1,4 +1,0 @@
-app:
-  jwt:
-    expirationS: 1800  # 30 min
-    refreshExpirationS: 18000 # 5 h

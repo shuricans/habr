@@ -1,0 +1,31 @@
+server:
+  servlet:
+    context-path: /api/v1
+
+jwt:
+  private.key: classpath:app.key
+  public.key: classpath:app.pub
+
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:14.5-alpine:///integration-tests-db
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    properties:
+      hibernate:
+        format_sql: 'true'
+    show-sql: 'false'
+    hibernate:
+      ddl-auto: create-drop
+
+app:
+  jwt:
+    expirationS: 1800  # 30 min
+    refreshExpirationS: 18000 # 5 h
+  defaultSizePerPage:
+    users: 10
+    posts: 5
+  defaultSortField:
+    users: id
+  defaultSortDirection:
+    users: ASC

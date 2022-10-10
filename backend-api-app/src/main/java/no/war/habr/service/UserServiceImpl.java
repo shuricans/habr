@@ -216,7 +216,7 @@ public class UserServiceImpl implements UserService {
             int managerPriority = managerRoles.stream().mapToInt(ERole::ordinal).sum();
 
             if (managerPriority <= userPriority) {
-                throw new ForbiddenException("Insufficient rights to delete user with roles " + userRoles);
+                throw new ForbiddenException("Insufficient rights to edit user with roles " + userRoles);
             }
         }
         return user;
