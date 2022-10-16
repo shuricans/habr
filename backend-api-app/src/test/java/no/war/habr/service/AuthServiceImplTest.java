@@ -15,6 +15,7 @@ import no.war.habr.persist.model.User;
 import no.war.habr.persist.repository.RoleRepository;
 import no.war.habr.persist.repository.UserRepository;
 import no.war.habr.service.dto.RefreshTokenDto;
+import no.war.habr.util.user.UserCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -101,8 +102,10 @@ class AuthServiceImplTest {
         given(jwtMock.getTokenValue())
                 .willReturn(AuthCreator.TOKEN);
 
+        User user = createUser();
+
         given(userRepository.findByUsername(any(String.class)))
-                .willReturn(Optional.of(mock(User.class)));
+                .willReturn(Optional.of(user));
 
         given(refreshTokenService.create(any(User.class)))
                 .willReturn(mock(RefreshTokenDto.class));
@@ -169,8 +172,10 @@ class AuthServiceImplTest {
         given(refreshTokenService.verifyExpiration(ArgumentMatchers.any(RefreshTokenDto.class)))
                 .willReturn(refreshTokenDto);
 
+        User user = createUser();
+
         given(userRepository.findByUsername(any(String.class)))
-                .willReturn(Optional.of(mock(User.class)));
+                .willReturn(Optional.of(user));
 
         Jwt jwtMock = mock(Jwt.class);
 

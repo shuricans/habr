@@ -29,7 +29,11 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -56,13 +60,9 @@ public class AuthServiceImpl implements AuthService {
 
         String username = authentication.getName();
 
-        String scope = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(" "));
-
-        String jwtToken = generateToken(username, scope);
-
         User user = getUserByUsername(username);
+
+        String jwtToken = generateToken(user);
 
         RefreshTokenDto refreshTokenDto = refreshTokenService.create(user);
 
@@ -109,11 +109,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = getUserByUsername(username);
 
-        String scope = user.getRoles().stream()
-                .map(role -> role.getName().name())
-                .collect(Collectors.joining(" "));
-
-        String accessToken = generateToken(username, scope);
+        String accessToken = generateToken(user);
 
         return TokenRefreshResponse.builder()
                 .accessToken(accessToken)
@@ -131,19 +127,28 @@ public class AuthServiceImpl implements AuthService {
         return new MessageResponse("Log out successful");
     }
 
-    private String generateToken(String username, String scope) {
+    private String generateToken(User user) {
         Instant now = Instant.now();
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        String authorities = user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.joining(" "));
+
+        JwtClaimsSet jwtClaimsSet = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(jwtExpirationS))
-                .subject(username)
-                .claim("scope", scope)
+                .subject(user.getUsername())
+                .claims(claims -> {
+                    claims.put("id", user.getId());
+                    claims.put("username", user.getUsername());
+                    claims.put("firstName", user.getFirstName());
+                    claims.put("scope", authorities);
+                })
                 .build();
 
         return encoder
-                .encode(JwtEncoderParameters.from(claims))
+                .encode(JwtEncoderParameters.from(jwtClaimsSet))
                 .getTokenValue();
     }
 
