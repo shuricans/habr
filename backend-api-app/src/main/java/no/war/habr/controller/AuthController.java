@@ -73,11 +73,6 @@ public class AuthController {
     })
     public ResponseEntity<MessageResponse> logout() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        if (authentication instanceof AnonymousAuthenticationToken || principal == null) {
-            throw new BadRequestException("You are not logged in.");
-        }
 
         String username = authentication.getName();
 

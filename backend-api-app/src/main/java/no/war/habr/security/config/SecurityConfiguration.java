@@ -56,6 +56,7 @@ public class SecurityConfiguration {
 
         http
                 .authorizeHttpRequests((authorize) -> authorize
+                        .antMatchers("/auth/logout").authenticated()
                         .antMatchers("/auth/**").permitAll()
                         .antMatchers("/swagger-ui/**").permitAll()
                         .antMatchers("/v3/api-docs/**").permitAll()

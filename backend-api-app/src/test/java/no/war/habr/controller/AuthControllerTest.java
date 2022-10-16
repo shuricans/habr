@@ -184,19 +184,14 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("logout Returns 400 BadRequest When User Not Logged")
-    void logout_Returns400BadRequest_WhenUserNotLogged() throws Exception {
+    @DisplayName("logout Returns 401 Unauthorized When Token Not Provided")
+    void logout_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
         MockHttpServletRequestBuilder logoutRequest = MockMvcRequestBuilders
                 .delete("/auth/logout")
                 .contentType(MediaType.APPLICATION_JSON);
 
         mvc.perform(logoutRequest)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title", is("Bad Request")))
-                .andExpect(jsonPath("$.details", is("You are not logged in.")))
-                .andExpect(jsonPath("$.developerMessage").exists())
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.timestamp").exists());
+                .andExpect(status().isUnauthorized());
     }
 
     private JwtResponse getJwtResponseAfterSignin() {
