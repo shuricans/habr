@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  db:
+    container_name: habr-db
+    image: shuricans/habr-db:v-1.0
+    restart: unless-stopped
+    ports:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: password
+      PGDATA: postgres
+
+  backend-app:
+    container_name: habr-backend-api-app
+    image: shuricans/habr-backend-api-app:v-1.0
+    restart: unless-stopped
+    ports:
+      - "8080"
+    depends_on:
+      - db
+    environment:
+      PROFILE: docker
+      DB_HOST: habr-db
+      DB_PORT: 5432
+
+  frontend-app:
+    container_name: habr-frontend-app
+    image: shuricans/habr-frontend-app:v-1.0
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+      - backend-app

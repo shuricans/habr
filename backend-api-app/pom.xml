@@ -14,6 +14,10 @@
     <name>backend-api-app</name>
     <description>backend-api-app</description>
 
+    <properties>
+        <app.image.name>habr-backend-api-app</app.image.name>
+        <app.image.tag>v-1.0</app.image.tag>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -103,6 +107,40 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <configuration>
+                    <from>
+                        <image>adoptopenjdk/openjdk11:alpine-jre</image>
+                    </from>
+                    <to>
+                        <image>${user.name}/${app.image.name}:${app.image.tag}</image>
+                    </to>
+                    <container>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                        <format>OCI</format>
+                        <entrypoint>
+                            /entrypoint.sh
+                        </entrypoint>
+                    </container>
+                    <extraDirectories>
+                        <permissions>
+                            <permission>
+                                <file>/entrypoint.sh</file>
+                                <mode>755</mode>
+                            </permission>
+                            <permission>
+                                <file>/wait-for-service.sh</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
                 </configuration>
             </plugin>
         </plugins>
