@@ -9,6 +9,10 @@ import {HelpPageComponent} from "./page/help-page/help-page.component";
 import {SearchPageComponent} from "./page/search-page/search-page.component";
 import {LoginPageComponent} from "./page/login-page/login-page.component";
 import {PostPageComponent} from "./page/post-page/post-page.component";
+import { AuthGuard } from './guard/auth-guard';
+import { LkPageComponent } from './page/lk-page/lk-page.component';
+import { LkGuard } from './guard/lk-guard';
+import { SignupPageComponent } from './page/signup-page/signup-page.component';
 
 const routes: Routes = [
   {path: "", pathMatch: "full", redirectTo: "habr"},
@@ -20,7 +24,9 @@ const routes: Routes = [
   {path: "marketing", component: MarketingPageComponent},
   {path: "help", component: HelpPageComponent},
   {path: "search", component: SearchPageComponent},
-  {path: "login", component: LoginPageComponent}
+  {path: "login", component: LoginPageComponent, canActivate: [AuthGuard]},
+  {path: "lk", component: LkPageComponent, canActivate: [LkGuard]},
+  {path: "signup", component: SignupPageComponent, canActivate: [AuthGuard]}
 ];
 
 @NgModule({

@@ -47,12 +47,32 @@
              routerLink="/search">
             <i class="fa-solid fa-magnifying-glass fa-xl"></i></a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="!isLoggedIn() else loggedIn">
           <a class="nav-link"
              [class.active]="isLoginPage"
              [attr.aria-current]="isLoginPage ? 'page' : undefined"
              routerLink="/login"><i class="fa-solid fa-user fa-xl"></i></a>
         </li>
+        <ng-template #loggedIn>
+          <li class="nav-item">
+            <div class="btn-group">
+              <a class="btn btn-outline-secondary nav-link"
+                 [class.active]="isLkPage"
+                 [attr.aria-current]="isLkPage ? 'page' : undefined"
+                 routerLink="/lk" role="button">
+                <i class="fa-solid fa-face-smile fa-xl"></i>
+              </a>
+              <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" routerLink="/lk">Личный кабинет</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" (click)="logout()">Выйти</a></li>
+              </ul>
+            </div>
+          </li>
+        </ng-template>
       </ul>
     </div>
   </div>

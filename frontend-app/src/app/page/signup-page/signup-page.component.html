@@ -1,0 +1,76 @@
+<div class="container mt-5">
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-6">
+        <div class="card px-5 py-5" *ngIf="!success else success_signup">
+          <h2 class="text-center mb-5">Регистрация</h2>
+          <form (ngSubmit)="submitForm()" [formGroup]="form" autocomplete="off">
+    
+            <div class="alert alert-danger text-center" *ngIf="isUsernameAlreadyExists" role="alert" >
+              Username already exists
+            </div>
+
+            <div class="alert alert-danger text-center" *ngIf="isServerError" role="alert" >
+              Server Error
+            </div>
+            
+            <div class="alert alert-danger text-center" *ngIf="isUnknownError" role="alert" >
+              Something went wrong
+            </div>
+
+            <div class="mb-3">
+                <label for="username" class="form-label">username</label>
+                <input type="text" 
+                       formControlName="username" 
+                       class="form-control" 
+                       [ngClass]="{'is-invalid': form.controls['username'].invalid && form.controls['username'].touched}"
+                       id="username"
+                       name="username">
+                <div class="invalid-feedback" 
+                     *ngIf="form.controls['username'].invalid && form.controls['username'].touched">
+                  укажите username, кол-во символов min = 3, max = 30
+                </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="firstName" class="form-label">firstName</label>
+              <input type="text" 
+                     formControlName="firstName" 
+                     class="form-control" 
+                     [ngClass]="{'is-invalid': form.controls['firstName'].invalid && form.controls['firstName'].touched}"
+                     id="firstName"
+                     name="firstName">
+              <div class="invalid-feedback" 
+                   *ngIf="form.controls['firstName'].invalid && form.controls['firstName'].touched">
+                укажите Ваше настоящее имя
+              </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="password" class="form-label">password</label>
+              <input type="password"
+                     formControlName="password"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': form.controls['password'].invalid && form.controls['password'].touched}"
+                     id="password"
+                     name="password">
+              <div class="invalid-feedback"
+                   *ngIf="form.controls['password'].invalid && form.controls['password'].touched">
+                введите пароль, кол-во символов min = 6
+              </div>
+            </div>
+  
+            <button type="submit" class="btn btn-primary me-3">Зарегистрироваться</button>
+            <a routerLink="/login">У меня уже есть аккаунт</a>
+          </form>
+        </div>
+        <ng-template #success_signup>
+            <div class="card px-5 py-5">
+                <h2 class="text-center">Добро пожаловать, {{username}}</h2>
+                <h2 class="text-center mb-5">Регистрация, прошла успешно!</h2>
+                <a class="btn btn-primary" routerLink="/login" role="button">Перейти на страницу авторизации <i class="fa-solid fa-arrow-right-to-bracket fa-lg"></i></a>
+            </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+  

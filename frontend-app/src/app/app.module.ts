@@ -15,6 +15,11 @@ import { LoginPageComponent } from './page/login-page/login-page.component';
 import { PostPageComponent } from './page/post-page/post-page.component';
 import { MarkdownModule } from 'ngx-markdown';
 import {FormsModule} from "@angular/forms";
+import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { TokenInterceptorProvider } from './interceptor/token.interceptor';
+import { LkPageComponent } from './page/lk-page/lk-page.component';
+import { SignupPageComponent } from './page/signup-page/signup-page.component';
 
 @NgModule({
   declarations: [
@@ -28,15 +33,19 @@ import {FormsModule} from "@angular/forms";
     DesignPageComponent,
     SearchPageComponent,
     LoginPageComponent,
-    PostPageComponent
+    PostPageComponent,
+    LkPageComponent,
+    SignupPageComponent
   ],
     imports: [
         BrowserModule,
         AppRoutingModule,
         MarkdownModule.forRoot(),
-        FormsModule
+        FormsModule,
+        ReactiveFormsModule,
+        HttpClientModule,
     ],
-  providers: [],
+  providers: [TokenInterceptorProvider],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

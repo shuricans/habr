@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from "@angular/router";
-import {filter} from "rxjs";
+import {filter, map} from "rxjs";
+import { AuthService } from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -17,35 +18,44 @@ export class NavBarComponent implements OnInit {
   isHelpPage: boolean = false;
   isSearchPage: boolean = false;
   isLoginPage: boolean = false;
+  isLkPage: boolean = false;
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute) {
+  constructor(private router: Router, 
+              private authService: AuthService) {
   }
 
   ngOnInit(): void {
-    // this.router.events.pipe(filter(event => event instanceof NavigationEnd))
-    //   .subscribe((event: NavigationEnd) => {
-    //     this.isHabrPage = event.url === '/' || event.url === '/habr';
-    //     this.isDesignPage = event.url === '/design';
-    //     this.isWebDevPage = event.url === '/web';
-    //     this.isMobileDevPage = event.url === '/mobile';
-    //     this.isMarketingPage = event.url === '/marketing';
-    //     this.isSearchPage = event.url === '/search';
-    //   });
-    // this.router.events.subscribe(event => {
-    //   if (event instanceof NavigationEnd) {
-    //     this.isHabrPage = event.url === '/' || event.url === '/habr';
-    //     this.isDesignPage = event.url === '/design';
-    //     this.isWebDevPage = event.url === '/web';
-    //     this.isMobileDevPage = event.url === '/mobile';
-    //     this.isMarketingPage = event.url === '/marketing';
-    //     this.isSearchPage = event.url === '/search';
-    //   }
-    // });
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      console.log(this.activatedRoute.root);
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map(e => e.url)
+    ).subscribe(url => {
+      this.activateNavLink(url);
     });
   }
 
+  public isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  public logout() {
+    this.authService.logout().subscribe({
+      next: success => {
+        if (success) {
+          this.router.navigate(['/login']);
+        }
+      }
+    });
+  }
+
+  private activateNavLink(url: string) {
+    this.isHabrPage = url === '/habr' || url === '/';
+    this.isDesignPage = url === '/design';
+    this.isWebDevPage = url === '/web';
+    this.isMobileDevPage = url === '/mobile';
+    this.isMarketingPage = url === '/marketing';
+    this.isHelpPage = url === '/help';
+    this.isSearchPage = url === '/search';
+    this.isLoginPage = url === '/login';
+    this.isLkPage = url === '/lk';
+  }
 }
