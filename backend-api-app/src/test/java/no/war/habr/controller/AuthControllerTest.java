@@ -1,7 +1,11 @@
 package no.war.habr.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import no.war.habr.auth.AuthCreator;
+import no.war.habr.payload.request.LoginRequest;
+import no.war.habr.payload.request.SignupRequest;
+import no.war.habr.payload.request.TokenRefreshRequest;
 import no.war.habr.payload.response.JwtResponse;
 import no.war.habr.persist.model.ERole;
 import no.war.habr.persist.model.Role;
@@ -20,12 +24,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Set;
 
+import static no.war.habr.util.signin.AuthenticationUtils.signin;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -74,12 +78,16 @@ class AuthControllerTest {
     @Test
     @DisplayName("signIn Returns JwtResponse When Successful")
     void signIn_ReturnsJwtResponse_WhenSuccessful() throws Exception {
-        String loginRequest = getLoginRequestBody(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+        LoginRequest loginRequest = LoginRequest.builder()
+                .username(AuthCreator.USERNAME)
+                .password(AuthCreator.PASSWORD)
+                .build();
+        String requestBody = objectMapper.writeValueAsString(loginRequest);
 
         MockHttpServletRequestBuilder signInRequest = MockMvcRequestBuilders
                 .post("/auth/signin")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(loginRequest);
+                .content(requestBody);
 
         mvc.perform(signInRequest)
                 .andExpect(status().isOk())
@@ -93,12 +101,16 @@ class AuthControllerTest {
     @Test
     @DisplayName("signIn Returns 400 BadRequest When Bad Credentials")
     void signIn_Returns400BadRequest_WhenBadCredentials() throws Exception {
-        String loginRequest = getLoginRequestBody("notExistentUsername", AuthCreator.PASSWORD);
+        LoginRequest loginRequest = LoginRequest.builder()
+                .username("notExistentUsername")
+                .password(AuthCreator.PASSWORD)
+                .build();
+        String requestBody = objectMapper.writeValueAsString(loginRequest);
 
         MockHttpServletRequestBuilder signInRequest = MockMvcRequestBuilders
                 .post("/auth/signin")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(loginRequest);
+                .content(requestBody);
 
         mvc.perform(signInRequest)
                 .andExpect(status().isBadRequest())
@@ -112,12 +124,17 @@ class AuthControllerTest {
     @Test
     @DisplayName("signUp Save User When Successful")
     void signUp_SaveUser_WhenSuccessful() throws Exception {
-        String signupRequestBody = getSignupRequestBody("newUsername", AuthCreator.PASSWORD, AuthCreator.FIRSTNAME);
+        SignupRequest signupRequest = SignupRequest.builder()
+                .username("newUsername")
+                .password(AuthCreator.PASSWORD)
+                .firstName(AuthCreator.FIRSTNAME)
+                .build();
+        String requestBody = objectMapper.writeValueAsString(signupRequest);
 
         MockHttpServletRequestBuilder signUpRequest = MockMvcRequestBuilders
                 .post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(signupRequestBody);
+                .content(requestBody);
 
         mvc.perform(signUpRequest)
                 .andExpect(status().isCreated())
@@ -127,14 +144,19 @@ class AuthControllerTest {
     @Test
     @DisplayName("signUp Returns 400 BadRequest When User Already Exists")
     void signUp_Returns400BadRequest_WhenUserAlreadyExists() throws Exception {
-        String signupRequestBody = getSignupRequestBody(AuthCreator.USERNAME, AuthCreator.PASSWORD, AuthCreator.FIRSTNAME);
+        SignupRequest signupRequest = SignupRequest.builder()
+                .username(AuthCreator.USERNAME)
+                .password(AuthCreator.PASSWORD)
+                .firstName(AuthCreator.FIRSTNAME)
+                .build();
+        String requestBody = objectMapper.writeValueAsString(signupRequest);
 
         String expectedDetails = "User with username [" + AuthCreator.USERNAME + "] already exists";
 
         MockHttpServletRequestBuilder signUpRequest = MockMvcRequestBuilders
                 .post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(signupRequestBody);
+                .content(requestBody);
 
         mvc.perform(signUpRequest)
                 .andExpect(status().isBadRequest())
@@ -149,15 +171,20 @@ class AuthControllerTest {
     @DisplayName("refreshToken Returns Token Refresh When Successful")
     void refreshToken_ReturnsTokenRefresh_WhenSuccessful() throws Exception {
 
-        JwtResponse jwtResponse = getJwtResponseAfterSignin();
+        JwtResponse jwtResponse = signin(AuthCreator.USERNAME, AuthCreator.PASSWORD, objectMapper, mvc);
         assert jwtResponse != null;
         String refreshToken = jwtResponse.getRefreshToken();
-        String tokenRefreshRequestBody = getTokenRefreshRequestBody(refreshToken);
+
+        TokenRefreshRequest refreshRequest = TokenRefreshRequest.builder()
+                .refreshToken(refreshToken)
+                .build();
+
+        String requestBody = objectMapper.writeValueAsString(refreshRequest);
 
         MockHttpServletRequestBuilder refreshTokenRequest = MockMvcRequestBuilders
                 .post("/auth/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(tokenRefreshRequestBody);
+                .content(requestBody);
 
         mvc.perform(refreshTokenRequest)
                 .andExpect(status().isOk())
@@ -169,9 +196,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("logout Removes Refresh Tokens When Successful")
     void logout_RemovesRefreshTokens_WhenSuccessful() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin();
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
 
         MockHttpServletRequestBuilder logoutRequest = MockMvcRequestBuilders
                 .delete("/auth/logout")
@@ -194,34 +219,14 @@ class AuthControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    private JwtResponse getJwtResponseAfterSignin() {
-        String loginRequest = getLoginRequestBody(AuthCreator.USERNAME, AuthCreator.PASSWORD);
-        MockHttpServletRequestBuilder signInRequest = MockMvcRequestBuilders
-                .post("/auth/signin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginRequest);
-
-        try {
-            MvcResult mvcResult = mvc.perform(signInRequest)
-                    .andExpect(status().isOk()).andReturn();
-            String contentAsString = mvcResult.getResponse().getContentAsString();
-            return objectMapper.readValue(contentAsString, JwtResponse.class);
-        } catch (Exception ignore) {
-        }
-        return null;
-    }
-
-    private String getLoginRequestBody(String username, String password) {
-        return String.format("{\"username\":\"%s\",\"password\":\"%s\"}",
-                username, password);
-    }
-
-    private String getSignupRequestBody(String username, String password, String firstName) {
-        return String.format("{\"username\":\"%s\",\"password\":\"%s\",\"firstName\":\"%s\"}",
-                username, password, firstName);
-    }
-
-    private String getTokenRefreshRequestBody(String refreshToken) {
-        return String.format("{\"refreshToken\":\"%s\"}", refreshToken);
+    @SneakyThrows
+    private String getAccessToken(String username, String password) {
+        JwtResponse jwtResponse = signin(
+                username,
+                password,
+                objectMapper,
+                mvc);
+        assert jwtResponse != null;
+        return jwtResponse.getToken();
     }
 }

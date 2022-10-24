@@ -1,6 +1,7 @@
 package no.war.habr.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import no.war.habr.payload.request.ConditionRequest;
 import no.war.habr.payload.request.PromoteRequest;
 import no.war.habr.payload.response.JwtResponse;
@@ -25,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static no.war.habr.util.signin.AuthenticationUtils.signin;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -93,9 +94,7 @@ class UserControllerTest {
     @Test
     @DisplayName("listAll Returns 403 Forbidden When Insufficient Rights")
     void listAll_Returns403Forbidden_WhenInsufficientRights() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.USERNAME, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.USERNAME, UserCreator.PASSWORD);
 
         MockHttpServletRequestBuilder listAllUsersRequest = MockMvcRequestBuilders
                 .get("/users")
@@ -114,9 +113,7 @@ class UserControllerTest {
     @Test
     @DisplayName("listAll Returns List Of Users Inside Page Object When Successful")
     void listAll_ReturnsListOfUsersInsidePageObject_WhenSuccessful() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.MODERATOR, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.MODERATOR, UserCreator.PASSWORD);
 
         MockHttpServletRequestBuilder listAllUsersRequest = MockMvcRequestBuilders
                 .get("/users")
@@ -152,9 +149,7 @@ class UserControllerTest {
     @Test
     @DisplayName("findById Returns 403 Forbidden When Insufficient Rights")
     void findById_Returns403Forbidden_WhenInsufficientRights() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.USERNAME, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.USERNAME, UserCreator.PASSWORD);
 
         MockHttpServletRequestBuilder findByIdRequest = MockMvcRequestBuilders
                 .get("/users/1")
@@ -173,9 +168,7 @@ class UserControllerTest {
     @Test
     @DisplayName("findById Returns User By Id When Successful")
     void findById_ReturnsUserById_WhenSuccessful() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.ADMIN, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.ADMIN, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.USERNAME);
         assert optionalUser.isPresent();
@@ -215,9 +208,7 @@ class UserControllerTest {
     @Test
     @DisplayName("findByUsername Returns 403 Forbidden When Insufficient Rights")
     void findByUsername_Returns403Forbidden_WhenInsufficientRights() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.USERNAME, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.USERNAME, UserCreator.PASSWORD);
 
         MockHttpServletRequestBuilder findByUsernameRequest = MockMvcRequestBuilders
                 .get("/users/username/" + UserCreator.USERNAME)
@@ -236,9 +227,7 @@ class UserControllerTest {
     @Test
     @DisplayName("findByUsername Returns User By Id When Successful")
     void findByUsername_ReturnsUserById_WhenSuccessful() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.ADMIN, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.ADMIN, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.USERNAME);
         assert optionalUser.isPresent();
@@ -286,9 +275,7 @@ class UserControllerTest {
     @Test
     @DisplayName("promote Returns 403 Forbidden When Insufficient Rights")
     void promote_Returns403Forbidden_WhenInsufficientRights() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.USERNAME, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.USERNAME, UserCreator.PASSWORD);
 
         PromoteRequest promoteRequest = PromoteRequest.builder()
                 .userId(1L)
@@ -315,9 +302,7 @@ class UserControllerTest {
     @Test
     @DisplayName("promote Updates User Roles When Successful")
     void promote_UpdatesUserRoles_WhenSuccessful() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.ADMIN, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.ADMIN, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.USERNAME);
         assert optionalUser.isPresent();
@@ -345,9 +330,7 @@ class UserControllerTest {
     @Test
     @DisplayName("promote Returns 403 Forbidden When Try Promote Yourself")
     void promote_Returns403Forbidden_WhenTryPromoteYourself() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.ADMIN, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.ADMIN, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.ADMIN);
         assert optionalUser.isPresent();
@@ -378,9 +361,7 @@ class UserControllerTest {
     @Test
     @DisplayName("promote Returns 404 Not Found When Promoted User Does Not Exists")
     void promote_Returns404NotFound_WhenPromotedUserDoesNotExists() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.ADMIN, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.ADMIN, UserCreator.PASSWORD);
 
         long wrongUserId = 250L;
         PromoteRequest promoteRequest = PromoteRequest.builder()
@@ -428,9 +409,7 @@ class UserControllerTest {
     @Test
     @DisplayName("condition Returns 400 Bad Request When Request Body Invalid")
     void condition_Returns400BadRequest_WhenRequestBodyInvalid() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.ADMIN, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.ADMIN, UserCreator.PASSWORD);
 
         ConditionRequest conditionRequest = ConditionRequest.builder()
                 .userId(1L)
@@ -457,9 +436,7 @@ class UserControllerTest {
     @Test
     @DisplayName("condition Returns 403 Forbidden When Insufficient Rights")
     void condition_Returns403Forbidden_WhenInsufficientRights() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.USERNAME, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.USERNAME, UserCreator.PASSWORD);
 
         ConditionRequest conditionRequest = ConditionRequest.builder()
                 .userId(1L)
@@ -486,9 +463,7 @@ class UserControllerTest {
     @Test
     @DisplayName("condition Returns 403 Forbidden When Try Edit Yourself")
     void condition_Returns403Forbidden_WhenTryEditYourself() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.MODERATOR, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.MODERATOR, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.MODERATOR);
         assert optionalUser.isPresent();
@@ -519,9 +494,7 @@ class UserControllerTest {
     @Test
     @DisplayName("condition Returns 403 Forbidden When Try Edit User With Higher Role")
     void condition_Returns403Forbidden_WhenTryEditUserWithHigherRole() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.MODERATOR, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.MODERATOR, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.ADMIN);
         assert optionalUser.isPresent();
@@ -556,9 +529,7 @@ class UserControllerTest {
     @Test
     @DisplayName("condition Changes Condition When Successful")
     void condition_ChangesCondition_WhenSuccessful() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.MODERATOR, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.MODERATOR, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.USERNAME);
         assert optionalUser.isPresent();
@@ -602,9 +573,7 @@ class UserControllerTest {
     @Test
     @DisplayName("delete Changes Condition To DELETED When Successful")
     void delete_ChangesConditionToDELETED_WhenSuccessful() throws Exception {
-        JwtResponse jwtResponse = getJwtResponseAfterSignin(UserCreator.MODERATOR, UserCreator.PASSWORD);
-        assert jwtResponse != null;
-        String token = jwtResponse.getToken();
+        String token = getAccessToken(UserCreator.MODERATOR, UserCreator.PASSWORD);
 
         Optional<User> optionalUser = userRepository.findByUsername(UserCreator.USERNAME);
         assert optionalUser.isPresent();
@@ -622,26 +591,15 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message", is(expectedMessage)));
     }
 
-    private JwtResponse getJwtResponseAfterSignin(String username, String password) {
-        String loginRequest = getLoginRequestBody(username, password);
-        MockHttpServletRequestBuilder signInRequest = MockMvcRequestBuilders
-                .post("/auth/signin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginRequest);
-
-        try {
-            MvcResult mvcResult = mvc.perform(signInRequest)
-                    .andExpect(status().isOk()).andReturn();
-            String contentAsString = mvcResult.getResponse().getContentAsString();
-            return objectMapper.readValue(contentAsString, JwtResponse.class);
-        } catch (Exception ignore) {
-        }
-        return null;
-    }
-
-    private String getLoginRequestBody(String username, String password) {
-        return String.format("{\"username\":\"%s\",\"password\":\"%s\"}",
-                username, password);
+    @SneakyThrows
+    private String getAccessToken(String username, String password) {
+        JwtResponse jwtResponse = signin(
+                username,
+                password,
+                objectMapper,
+                mvc);
+        assert jwtResponse != null;
+        return jwtResponse.getToken();
     }
 
     private static User getUser(String username, Role role, PasswordEncoder passwordEncoder) {
