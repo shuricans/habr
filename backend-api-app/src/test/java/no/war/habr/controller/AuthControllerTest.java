@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Set;
 
+import static no.war.habr.util.signin.AuthenticationUtils.clearCache;
 import static no.war.habr.util.signin.AuthenticationUtils.signin;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -170,6 +171,8 @@ class AuthControllerTest {
     @Test
     @DisplayName("refreshToken Returns Token Refresh When Successful")
     void refreshToken_ReturnsTokenRefresh_WhenSuccessful() throws Exception {
+
+        clearCache(); // clear test cache, (force authentication)
 
         JwtResponse jwtResponse = signin(AuthCreator.USERNAME, AuthCreator.PASSWORD, objectMapper, mvc);
         assert jwtResponse != null;

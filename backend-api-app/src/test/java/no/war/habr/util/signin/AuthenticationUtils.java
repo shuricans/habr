@@ -49,4 +49,8 @@ public class AuthenticationUtils {
         jwtResponseMap.put(username, jwtResponse);
         return jwtResponse;
     }
+
+    public static void clearCache() {
+        jwtResponseMap.clear();
+    }
 }
