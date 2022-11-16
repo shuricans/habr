@@ -27,5 +27,7 @@ app:
     posts: 5
   defaultSortField:
     users: id
+    posts: created
   defaultSortDirection:
     users: ASC
+    posts: DESC

@@ -47,6 +47,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 .createExceptionDetails(ex, HttpStatus.NOT_FOUND, "User not found.");
     }
 
+    @ExceptionHandler(TopicNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDetails handleTopicNotFoundException(TopicNotFoundException ex) {
+        return ExceptionDetails
+                .createExceptionDetails(ex, HttpStatus.NOT_FOUND, "Topic not found.");
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ExceptionDetails handleForbiddenException(ForbiddenException ex) {
