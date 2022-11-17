@@ -5,33 +5,33 @@
         <h2 class="text-center mb-5">Привет</h2>
         <form (ngSubmit)="submitForm()" [formGroup]="form" autocomplete="off">
 
-          <div class="alert alert-danger text-center" *ngIf="badCredentials" role="alert" >
+          <div class="alert alert-danger text-center" *ngIf="badCredentials" role="alert">
             Bad Credentials
           </div>
 
-          <div class="alert alert-danger text-center" *ngIf="isServerError" role="alert" >
+          <div class="alert alert-danger text-center" *ngIf="isServerError" role="alert">
             Server Error
           </div>
 
-          <div class="alert alert-danger text-center" *ngIf="isZeroError" role="alert" >
+          <div class="alert alert-danger text-center" *ngIf="isZeroError" role="alert">
             A client-side or network error occurred
           </div>
-          
-          <div class="alert alert-danger text-center" *ngIf="isUnknownError" role="alert" >
+
+          <div class="alert alert-danger text-center" *ngIf="isUnknownError" role="alert">
             Something went wrong
           </div>
 
           <div class="mb-3">
             <label for="username" class="form-label">username</label>
-            <input type="text" 
-                   formControlName="username" 
-                   class="form-control" 
+            <input type="text"
+                   formControlName="username"
+                   class="form-control"
                    [ngClass]="{'is-invalid': form.controls['username'].invalid && form.controls['username'].touched}"
                    id="username"
                    name="username">
-            <div class="invalid-feedback" 
+            <div class="invalid-feedback"
                  *ngIf="form.controls['username'].invalid && form.controls['username'].touched">
-              укажите Ваш username
+              Укажите Ваш username
             </div>
           </div>
 
@@ -45,7 +45,7 @@
                    name="password">
             <div class="invalid-feedback"
                  *ngIf="form.controls['password'].invalid && form.controls['password'].touched">
-              введите пароль
+              Введите пароль
             </div>
           </div>
 
