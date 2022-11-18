@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.war.habr.exception.BadRequestException;
 import no.war.habr.exception.ForbiddenException;
 import no.war.habr.exception.UserNotFoundException;
+import no.war.habr.payload.request.UpdateUserInfoRequest;
 import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.ERole;
 import no.war.habr.persist.model.EUserCondition;
@@ -126,15 +127,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserDto update(UserDto user) {
-        Long userId = user.getId();
-        User fetchedUser = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException("User with id = " + userId + " not found."));
+    public UserDto update(String username, UpdateUserInfoRequest request) {
+        User fetchedUser = userRepository.findByUsername(username).orElseThrow(
+                () -> new UserNotFoundException("User by username = " + username + " not found."));
 
-        fetchedUser.setFirstName(user.getFirstName());
-        fetchedUser.setLastName(user.getLastName());
-        fetchedUser.setAboutMe(user.getAboutMe());
-        fetchedUser.setBirthday(user.getBirthday());
+        fetchedUser.setFirstName(request.getFirstName());
+        fetchedUser.setLastName(request.getLastName());
+        fetchedUser.setAboutMe(request.getAboutMe());
+        fetchedUser.setBirthday(request.getBirthday());
 
         User updatedUser = userRepository.save(fetchedUser);
 

@@ -1,5 +1,6 @@
 package no.war.habr.service;
 
+import no.war.habr.payload.request.UpdateUserInfoRequest;
 import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.EUserCondition;
 import no.war.habr.service.dto.UserDto;
@@ -26,7 +27,7 @@ public interface UserService {
 
     MessageResponse deleteById(Long userId);
 
-    UserDto update(UserDto user);
+    UserDto update(String username, UpdateUserInfoRequest updateUserInfoRequest);
 
     MessageResponse promote(Long userId, Set<String> roles);
 
