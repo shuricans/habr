@@ -45,4 +45,10 @@
         <tagDatabase tag="v-1.3"/>
     </changeSet>
 
+    <include file="db/changelog/v-1.4/root.changelog.xml"/>
+
+    <changeSet id="160" author="shuricans">
+        <tagDatabase tag="v-1.4"/>
+    </changeSet>
+
 </databaseChangeLog>
