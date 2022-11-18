@@ -26,7 +26,7 @@ public interface UserService {
 
     MessageResponse deleteById(Long userId);
 
-    UserDto save(UserDto user);
+    UserDto update(UserDto user);
 
     MessageResponse promote(Long userId, Set<String> roles);
 

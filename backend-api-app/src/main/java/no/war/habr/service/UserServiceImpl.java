@@ -124,9 +124,21 @@ public class UserServiceImpl implements UserService {
                         EUserCondition.DELETED);
     }
 
+    @Transactional
     @Override
-    public UserDto save(UserDto user) {
-        return null;
+    public UserDto update(UserDto user) {
+        Long userId = user.getId();
+        User fetchedUser = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User with id = " + userId + " not found."));
+
+        fetchedUser.setFirstName(user.getFirstName());
+        fetchedUser.setLastName(user.getLastName());
+        fetchedUser.setAboutMe(user.getAboutMe());
+        fetchedUser.setBirthday(user.getBirthday());
+
+        User updatedUser = userRepository.save(fetchedUser);
+
+        return userMapper.fromUser(updatedUser);
     }
 
     @Transactional
