@@ -72,6 +72,7 @@ class PostSpecificationTest {
                 .title("awesome title")
                 .content("savage content")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .tags(Collections.singleton(Tag.builder().name("tag").build()))
                 .build();
@@ -116,6 +117,7 @@ class PostSpecificationTest {
                 .content("savage content_1")
                 .owner(user1)
                 .topic(designTopic)
+                .description("description")
                 .tags(Collections.singleton(tag))
                 .build();
 
@@ -126,6 +128,7 @@ class PostSpecificationTest {
                 .title("awesome title_2")
                 .content("savage content_2")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .build();
 
@@ -163,6 +166,7 @@ class PostSpecificationTest {
                 .title("awesome title")
                 .content("savage content")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .tags(Collections.singleton(Tag.builder().name("tag").build()))
                 .build();
@@ -202,6 +206,7 @@ class PostSpecificationTest {
                 .title("awesome title")
                 .content("savage content")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .tags(Collections.singleton(tag))
                 .build();

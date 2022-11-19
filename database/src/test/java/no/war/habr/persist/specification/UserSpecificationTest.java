@@ -325,6 +325,7 @@ class UserSpecificationTest {
         Post post = Post.builder()
                 .title("awesome title")
                 .content("savage content")
+                .description("description")
                 .owner(user1)
                 .topic(designTopic)
                 .tags(Collections.singleton(Tag.builder().name("tag").build()))
