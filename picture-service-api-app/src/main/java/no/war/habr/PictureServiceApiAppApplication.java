@@ -2,12 +2,13 @@ package no.war.habr;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+@EnableJpaAuditing
 @SpringBootApplication
-public class PictureServiceApplication {
+public class PictureServiceApiAppApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PictureServiceApplication.class, args);
+        SpringApplication.run(PictureServiceApiAppApplication.class, args);
     }
-
 }

@@ -1,0 +1,27 @@
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+#    org.springframework.boot.autoconfigure: DEBUG
+
+server:
+  servlet:
+    context-path: /api/v1
+
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:14.5-alpine:///integration-tests-db
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    properties:
+      hibernate:
+        format_sql: 'true'
+    show-sql: 'false'
+    hibernate:
+      ddl-auto: create-drop
+
+app:
+  picture:
+    storage:
+      path: src/test/resources
