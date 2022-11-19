@@ -1,0 +1,35 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="shuricans (generated)" id="1668876159702-1">
+        <createSequence incrementBy="1" sequenceName="pictures_picture_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1668876159702-2">
+        <createTable tableName="pictures">
+            <column name="picture_id" type="BIGINT" defaultValueSequenceNext="pictures_picture_id_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="picturesPK"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="content_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="storage_file_name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1668876159702-3">
+        <addUniqueConstraint columnNames="storage_file_name" constraintName="UC_PICTURESSTORAGE_FILE_NAME_COL" tableName="pictures"/>
+    </changeSet>
+    <changeSet author="shuricans (generated)" id="1668876159702-4">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="pictures" constraintName="FKkrfm1myqaikatwd5kpw7rj0ip" deferrable="false" initiallyDeferred="false" referencedColumnNames="post_id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
