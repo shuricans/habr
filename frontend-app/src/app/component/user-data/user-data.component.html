@@ -1,0 +1,46 @@
+<div class="card px-5 py-5" *ngIf="userDto">
+  <form (ngSubmit)="submitForm()">
+    <div class="form-row">
+      <div class="col-md-8 mb-3">
+        <label for="validationDefault01">Имя</label>
+        <input type="text"
+               class="form-control"
+               id="validationDefault01"
+               placeholder="Имя"
+               value="{{userDto.firstName}}"
+               required>
+      </div>
+    </div>
+
+    <div class="col-md-8 mb-3">
+      <label for="validationDefault02">Фамилия</label>
+      <input type="text"
+             class="form-control"
+             id="validationDefault02"
+             placeholder="Фамилия"
+             value="{{userDto.lastName}}"
+             required>
+    </div>
+
+    <div class="form-row">
+      <div class="col-md-6 mb-3">
+        <label for="validationDefault03">Год рождения</label>
+        <input type="date"
+               class="form-control"
+               id="validationDefault03"
+               placeholder="Год рождения"
+               value="{{userDto.birthday}}"
+               required>
+      </div>
+
+      <div class="col-md-8 mb-3">
+        <label for="" class="form-label">О себе</label>
+        <textarea class="form-control" id="" rows="3">{{userDto.aboutMe}}</textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Сохранить</button>
+  </form>
+</div>
+
+

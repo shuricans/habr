@@ -1,27 +1,46 @@
-<div class="container overflow-hidden">
-  <div class="row gy-5">
-    <div class="row-cols-sm-4">
-      <div class="p-3 border bg-light"><h5><small class="text-primary">Личные данные</small></h5>
-        <a class="dropdown-item" href="#"><li>Редактировать <i
-          class="fas fa-edit"></i></li></a>
-        <a class="dropdown-item" href="#"><li>Удалить</li></a>
+<div class="row">
+  <div class="col-4">
+    <div class="row gy-3">
+      <div class="row-cols-md-1">
+        <div class="p-3 border bg-light"><h5><small class="text-primary">Личные данные</small></h5>
+          <a class="dropdown-item" href="#">
+            <li>Редактировать <i
+              class="fas fa-edit"></i></li>
+          </a>
+          <a class="dropdown-item" href="#">
+            <li>Удалить</li>
+          </a>
+        </div>
       </div>
-    </div>
 
-    <div class="row-cols-sm-4">
-      <div class="p-3 border bg-light"><h5><small class="text-primary">Мои статьи</small></h5>
-        <a class="dropdown-item" href="#"><li>Написать новую</li></a>
-        <a class="dropdown-item" href="#"><li>Опубликованные</li></a>
-        <a class="dropdown-item" href="#"><li>Черновики</li></a>
+      <div class="row-cols-md-1">
+        <div class="p-3 border bg-light"><h5><small class="text-primary">Мои статьи</small></h5>
+          <a class="dropdown-item" href="#">
+            <li>Написать новую</li>
+          </a>
+          <a class="dropdown-item" href="#">
+            <li>Опубликованные</li>
+          </a>
+          <a class="dropdown-item" href="#">
+            <li>Черновики</li>
+          </a>
+        </div>
+      </div>
+
+      <div class="row-cols-md-1">
+        <div class="p-3 border bg-light"><h5><small class="text-primary">Обсуждения</small></h5>
+          <a class="dropdown-item" href="#">
+            <li>Мои комментарии</li>
+          </a>
+          <a class="dropdown-item" href="#">
+            <li>Комментарии к моим статьям</li>
+          </a>
+        </div>
       </div>
     </div>
-    
-    <div class="row-cols-sm-4">
-      <div class="p-3 border bg-light"><h5><small class="text-primary">Обсуждения</small></h5>
-        <a class="dropdown-item" href="#"><li>Мои комментарии</li></a>
-        <a class="dropdown-item" href="#"><li>Комментарии к моим статьям</li></a>
-      </div>
-    </div>
+  </div>
+  <div class="col-8">
+    <app-user-data></app-user-data>
   </div>
 </div>
 

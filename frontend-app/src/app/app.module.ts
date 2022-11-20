@@ -20,6 +20,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { TokenInterceptorProvider } from './interceptor/token.interceptor';
 import { LkPageComponent } from './page/lk-page/lk-page.component';
 import { SignupPageComponent } from './page/signup-page/signup-page.component';
+import { UserDataComponent } from './component/user-data/user-data.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { SignupPageComponent } from './page/signup-page/signup-page.component';
     LoginPageComponent,
     PostPageComponent,
     LkPageComponent,
-    SignupPageComponent
+    SignupPageComponent,
+    UserDataComponent
   ],
     imports: [
         BrowserModule,
