@@ -37,4 +37,12 @@ public class PostSpecification {
             return builder.conjunction();
         };
     }
+
+    public static Specification<Post> fetchPictures() {
+        return (root, query, builder) -> {
+            query.distinct(true);
+            root.fetch("pictures", JoinType.LEFT);
+            return builder.conjunction();
+        };
+    }
 }

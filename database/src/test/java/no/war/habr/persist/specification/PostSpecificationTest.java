@@ -72,6 +72,7 @@ class PostSpecificationTest {
                 .title("awesome title")
                 .content("savage content")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .tags(Collections.singleton(Tag.builder().name("tag").build()))
                 .build();
@@ -116,6 +117,7 @@ class PostSpecificationTest {
                 .content("savage content_1")
                 .owner(user1)
                 .topic(designTopic)
+                .description("description")
                 .tags(Collections.singleton(tag))
                 .build();
 
@@ -126,6 +128,7 @@ class PostSpecificationTest {
                 .title("awesome title_2")
                 .content("savage content_2")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .build();
 
@@ -163,6 +166,7 @@ class PostSpecificationTest {
                 .title("awesome title")
                 .content("savage content")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .tags(Collections.singleton(Tag.builder().name("tag").build()))
                 .build();
@@ -202,6 +206,7 @@ class PostSpecificationTest {
                 .title("awesome title")
                 .content("savage content")
                 .owner(user1)
+                .description("description")
                 .topic(designTopic)
                 .tags(Collections.singleton(tag))
                 .build();
@@ -215,6 +220,67 @@ class PostSpecificationTest {
         assertThat(posts)
                 .hasSize(1)
                 .contains(post);
+
+        Set<Tag> tags = posts.get(0).getTags();
+        assertThat(tags)
+                .hasSize(1)
+                .contains(tag);
+    }
+
+    @Test
+    void shouldFindPostAndFetchTags_AndFetchPictures() {
+        // given
+        Specification<Post> spec = Specification
+                .where(PostSpecification.fetchPictures())
+                .and(PostSpecification.fetchTags());
+
+        // create user
+        User user1 = User.builder()
+                .username("username_1")
+                .firstName("name_1")
+                .password("password")
+                .build();
+        userRepository.save(user1);
+
+        // create topic
+        Topic designTopic = Topic.builder().name("Design").build();
+        topicRepository.save(designTopic);
+
+        // create post
+        Tag tag = Tag.builder().name("tag").build();
+        Post post = Post.builder()
+                .title("awesome title")
+                .content("savage content")
+                .owner(user1)
+                .description("description")
+                .topic(designTopic)
+                .tags(Collections.singleton(tag))
+                .build();
+
+        // create picture
+        String picName = "picName";
+        Picture picture = Picture.builder()
+                .post(post)
+                .contentType("contentType")
+                .storageFileName("storageFileName")
+                .name(picName)
+                .build();
+
+        post.getPictures().add(picture);
+
+        underTest.save(post);
+
+        // when
+        List<Post> posts = underTest.findAll(spec);
+
+        // then
+        assertThat(posts)
+                .hasSize(1)
+                .contains(post);
+
+        List<Picture> pictures = posts.get(0).getPictures();
+        assertThat(pictures).hasSize(1);
+        assertThat(pictures.get(0).getName()).isEqualTo(picName);
 
         Set<Tag> tags = posts.get(0).getTags();
         assertThat(tags)

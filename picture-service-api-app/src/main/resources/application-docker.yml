@@ -9,14 +9,9 @@ server:
   servlet:
     context-path: /api/v1
 
-jwt:
-  private.key: classpath:app.key
-  public.key: classpath:app.pub
-
-
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/habr
+    url: jdbc:postgresql://habr-db:5432/habr
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: password
@@ -30,15 +25,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQL10Dialect
 
 app:
-  jwt:
-    expirationS: 1800  # 30 min
-    refreshExpirationS: 18000 # 5 h
-  defaultSizePerPage:
-    users: 10
-    posts: 5
-  defaultSortField:
-    users: id
-    posts: created
-  defaultSortDirection:
-    users: ASC
-    posts: DESC
+  picture:
+    storage:
+      path: ~/storage

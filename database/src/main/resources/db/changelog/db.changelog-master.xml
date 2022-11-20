@@ -39,4 +39,22 @@
         <tagDatabase tag="v-1.2"/>
     </changeSet>
 
+    <include file="db/changelog/v-1.3/root.changelog.xml"/>
+
+    <changeSet id="140" author="shuricans">
+        <tagDatabase tag="v-1.3"/>
+    </changeSet>
+
+    <include file="db/changelog/v-1.4/root.changelog.xml"/>
+
+    <changeSet id="160" author="shuricans">
+        <tagDatabase tag="v-1.4"/>
+    </changeSet>
+
+    <include file="db/changelog/v-1.5/root.changelog.xml"/>
+
+    <changeSet id="180" author="shuricans">
+        <tagDatabase tag="v-1.5"/>
+    </changeSet>
+
 </databaseChangeLog>

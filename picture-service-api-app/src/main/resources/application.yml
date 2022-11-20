@@ -8,11 +8,7 @@ logging:
 server:
   servlet:
     context-path: /api/v1
-
-jwt:
-  private.key: classpath:app.key
-  public.key: classpath:app.pub
-
+  port: 8081
 
 spring:
   datasource:
@@ -30,15 +26,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQL10Dialect
 
 app:
-  jwt:
-    expirationS: 1800  # 30 min
-    refreshExpirationS: 18000 # 5 h
-  defaultSizePerPage:
-    users: 10
-    posts: 5
-  defaultSortField:
-    users: id
-    posts: created
-  defaultSortDirection:
-    users: ASC
-    posts: DESC
+  picture:
+    storage:
+      path: /home/shuricans/pictures

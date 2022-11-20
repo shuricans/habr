@@ -1,0 +1,1 @@
+ALTER SEQUENCE topics_topic_id_seq RESTART;

@@ -1,10 +1,13 @@
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+#    org.springframework.boot.autoconfigure: DEBUG
+
 server:
   servlet:
     context-path: /api/v1
-
-jwt:
-  private.key: classpath:app.key
-  public.key: classpath:app.pub
 
 spring:
   datasource:
@@ -19,15 +22,6 @@ spring:
       ddl-auto: create-drop
 
 app:
-  jwt:
-    expirationS: 1800  # 30 min
-    refreshExpirationS: 18000 # 5 h
-  defaultSizePerPage:
-    users: 10
-    posts: 5
-  defaultSortField:
-    users: id
-    posts: created
-  defaultSortDirection:
-    users: ASC
-    posts: DESC
+  picture:
+    storage:
+      path: src/test/resources

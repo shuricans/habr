@@ -29,6 +29,7 @@
         <module>database</module>
         <module>backend-api-app</module>
         <module>picture-service</module>
+        <module>picture-service-api-app</module>
     </modules>
 
     <build>

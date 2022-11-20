@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import no.war.habr.exception.UserNotFoundException;
 import no.war.habr.payload.request.ConditionRequest;
 import no.war.habr.payload.request.PromoteRequest;
+import no.war.habr.payload.request.UpdateUserInfoRequest;
 import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.service.UserService;
 import no.war.habr.service.dto.UserDto;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -130,5 +133,39 @@ public class UserController {
     })
     public ResponseEntity<MessageResponse> deleteById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(userService.deleteById(id));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Get yourself data", tags = "Users")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "403", description = "When forbidden"),
+            @ApiResponse(responseCode = "404", description = "When user not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<UserDto> getYourselfData() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(userService.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User [" + username + "] not found.")));
+    }
+
+    @PatchMapping("/update")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Updates yourself birthday, firstName, lastName, aboutMe", tags = "Users")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "400", description = "When request body invalid"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "403", description = "When forbidden"),
+            @ApiResponse(responseCode = "404", description = "When user not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<UserDto> update(@Valid @RequestBody UpdateUserInfoRequest updateUserInfoRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(userService.update(username, updateUserInfoRequest));
     }
 }
