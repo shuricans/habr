@@ -6,13 +6,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import no.war.habr.exception.PostNotFoundException;
+import no.war.habr.payload.request.PostDataRequest;
 import no.war.habr.service.PostService;
 import no.war.habr.service.dto.PostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Optional;
 
 /**
@@ -22,7 +27,6 @@ import java.util.Optional;
  * @see no.war.habr.persist.model.Post
  * @see no.war.habr.service.PostService
  */
-@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
@@ -66,5 +70,21 @@ public class PostController {
     public ResponseEntity<PostDto> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(postService.findById(id)
                 .orElseThrow(() -> new PostNotFoundException("Post with id = " + id + " not found.")));
+    }
+
+    @PostMapping("/save")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Saves a new or updates an existing post", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful saved/updated"),
+            @ApiResponse(responseCode = "400", description = "When request body invalid"),
+            @ApiResponse(responseCode = "404", description = "When post or topic not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<PostDto> save(@Valid @RequestBody PostDataRequest postDataRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(postService.save(username, postDataRequest));
     }
 }

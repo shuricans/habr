@@ -1,11 +1,12 @@
 package no.war.habr.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import no.war.habr.auth.AuthCreator;
+import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.payload.response.JwtResponse;
 import no.war.habr.persist.model.*;
-import no.war.habr.persist.repository.PostRepository;
-import no.war.habr.persist.repository.RoleRepository;
-import no.war.habr.persist.repository.TopicRepository;
-import no.war.habr.persist.repository.UserRepository;
+import no.war.habr.persist.repository.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Set;
 
+import static no.war.habr.util.signin.AuthenticationUtils.signin;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,8 +39,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Integration tests for PostController")
 class PostControllerTest {
 
+    public static final String DESIGN = "Design";
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    private static Post firstPost;
 
     @BeforeAll
     static void init(@Autowired UserRepository userRepository,
@@ -63,11 +74,11 @@ class PostControllerTest {
         userRepository.save(user);
 
         // create and persist topic
-        Topic topic = Topic.builder().name("Design").build();
+        Topic topic = Topic.builder().name(DESIGN).build();
         topic = topicRepository.save(topic);
 
         // create and persist post #1
-        Post firstPost = Post.builder()
+        firstPost = Post.builder()
                 .title("First post")
                 .content("Content")
                 .description("Description")
@@ -93,9 +104,11 @@ class PostControllerTest {
     static void afterAll(@Autowired UserRepository userRepository,
                          @Autowired RoleRepository roleRepository,
                          @Autowired TopicRepository topicRepository,
-                         @Autowired PostRepository postRepository) {
+                         @Autowired PostRepository postRepository,
+                         @Autowired RefreshTokenRepository refreshTokenRepository) {
         postRepository.deleteAll();
         topicRepository.deleteAll();
+        refreshTokenRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
@@ -103,40 +116,47 @@ class PostControllerTest {
     @Test
     @DisplayName("listAll Returns List Of Posts Inside Page Object When Successful")
     void listAll_ReturnsListOfPostsInsidePageObject_WhenSuccessful() throws Exception {
+
+        int count = (int) postRepository.count();
+
         MockHttpServletRequestBuilder listAllPostsRequest = MockMvcRequestBuilders
                 .get("/posts")
                 .contentType(MediaType.APPLICATION_JSON);
 
         mvc.perform(listAllPostsRequest)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()", is(2)))
+                .andExpect(jsonPath("$.content.size()", is(count)))
                 .andExpect(jsonPath("$.pageable").exists())
-                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(count)))
                 .andExpect(jsonPath("$.totalPages", is(1)))
                 .andExpect(jsonPath("$.last").exists())
                 .andExpect(jsonPath("$.sort").exists())
                 .andExpect(jsonPath("$.first").exists())
                 .andExpect(jsonPath("$.size", is(5)))
                 .andExpect(jsonPath("$.number", is(0)))
-                .andExpect(jsonPath("$.numberOfElements", is(2)))
+                .andExpect(jsonPath("$.numberOfElements", is(count)))
                 .andExpect(jsonPath("$.empty", is(false)));
     }
 
     @Test
     @DisplayName("findById Returns Post By Id When Successful")
     void findById_ReturnsPostById_WhenSuccessful() throws Exception {
+
+        int id = 1;
+        Post post = postRepository.findById((long) id).get();
+
         MockHttpServletRequestBuilder listAllPostsRequest = MockMvcRequestBuilders
                 .get("/posts/1")
                 .contentType(MediaType.APPLICATION_JSON);
 
         mvc.perform(listAllPostsRequest)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.title", is("First post")))
-                .andExpect(jsonPath("$.content", is("Content")))
-                .andExpect(jsonPath("$.description", is("Description")))
-                .andExpect(jsonPath("$.topic", is("Design")))
-                .andExpect(jsonPath("$.owner", is(AuthCreator.USERNAME)));
+                .andExpect(jsonPath("$.id", is(id)))
+                .andExpect(jsonPath("$.title", is(post.getTitle())))
+                .andExpect(jsonPath("$.content", is(post.getContent())))
+                .andExpect(jsonPath("$.description", is(post.getDescription())))
+                .andExpect(jsonPath("$.topic", is(post.getTopic().getName())))
+                .andExpect(jsonPath("$.owner", is(post.getOwner().getUsername())));
     }
 
     @Test
@@ -148,5 +168,91 @@ class PostControllerTest {
 
         mvc.perform(listAllPostsRequest)
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("save Should Save New Post When Successful")
+    void save_ShouldSaveNewPost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        String title = "Awesome post title";
+        String content = "content";
+        String description = "description";
+        String tag_1 = "#tag_1";
+        String tag_2 = "#tag_2";
+        PostDataRequest postDataRequest = PostDataRequest.builder()
+                .title(title)
+                .content(content)
+                .description(description)
+                .tags(Set.of(tag_1, tag_2))
+                .topic(DESIGN)
+                .build();
+
+        String jsonPostDataRequest = objectMapper.writeValueAsString(postDataRequest);
+
+        MockHttpServletRequestBuilder savePostRequest = MockMvcRequestBuilders
+                .post("/posts/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .content(jsonPostDataRequest);
+
+        mvc.perform(savePostRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title", is(title)))
+                .andExpect(jsonPath("$.content", is(content)))
+                .andExpect(jsonPath("$.description", is(description)))
+                .andExpect(jsonPath("$.condition", is(EPostCondition.DRAFT.name())))
+                .andExpect(jsonPath("$.owner", is(AuthCreator.USERNAME)))
+                .andExpect(jsonPath("$.topic", is(DESIGN)))
+                .andExpect(jsonPath("$.tags[0]", is(tag_1)))
+                .andExpect(jsonPath("$.tags[1]", is(tag_2)));
+    }
+
+    @Test
+    @DisplayName("save Should Update Existent Post When Successful")
+    void save_ShouldUpdateExistentPost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        String newContent = "New content";
+        String newDescription = "New description";
+
+        PostDataRequest postDataRequest = PostDataRequest.builder()
+                .postId(firstPost.getId())
+                .title(firstPost.getTitle())
+                .content(newContent)
+                .description(newDescription)
+                .topic(firstPost.getTopic().getName())
+                .build();
+
+        String jsonPostDataRequest = objectMapper.writeValueAsString(postDataRequest);
+
+        MockHttpServletRequestBuilder updatePostRequest = MockMvcRequestBuilders
+                .post("/posts/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .content(jsonPostDataRequest);
+
+        mvc.perform(updatePostRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title", is(firstPost.getTitle())))
+                .andExpect(jsonPath("$.content", is(newContent)))
+                .andExpect(jsonPath("$.description", is(newDescription)))
+                .andExpect(jsonPath("$.condition", is(firstPost.getCondition().name())))
+                .andExpect(jsonPath("$.owner", is(firstPost.getOwner().getUsername())))
+                .andExpect(jsonPath("$.topic", is(firstPost.getTopic().getName())))
+                .andExpect(jsonPath("$.tags").exists());
+    }
+
+    @SneakyThrows
+    private String getAccessToken(String username, String password) {
+        JwtResponse jwtResponse = signin(
+                username,
+                password,
+                objectMapper,
+                mvc);
+        assert jwtResponse != null;
+        return jwtResponse.getToken();
     }
 }
