@@ -128,7 +128,7 @@ export class AuthService {
     this.storeTokens(jwtResponse);
   }
 
-  private doLogoutUser() {
+  public doLogoutUser() {
     this.removeTokens();
   }
 

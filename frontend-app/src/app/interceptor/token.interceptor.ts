@@ -4,6 +4,7 @@ import { AuthService } from '../service/auth.service';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, filter, take, switchMap } from 'rxjs/operators';
 import { TokenRefreshResponse } from '../model/token-refresh-response';
+import { Router } from '@angular/router';
 
 
 @Injectable()
@@ -12,7 +13,7 @@ export class TokenInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
-  constructor(public authService: AuthService) { }
+  constructor(public authService: AuthService, private router: Router) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -26,10 +27,8 @@ export class TokenInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(catchError(error => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
-        console.log('here');
         return this.handle401Error(request, next);
       } else {
-        console.log('here2');
         return throwError(() => error);
       }
     }));
@@ -53,8 +52,13 @@ export class TokenInterceptor implements HttpInterceptor {
           this.isRefreshing = false;
           this.refreshTokenSubject.next(response.accessToken);
           return next.handle(this.addToken(request, response.accessToken));
-        }));
-
+        }),
+        catchError(error => {
+          this.isRefreshing = false;
+          this.authService.doLogoutUser()
+          this.router.navigate(['/login']);
+          return throwError(() => error)
+        }))
     } else {
       return this.refreshTokenSubject.pipe(
         filter(token => token != null),
