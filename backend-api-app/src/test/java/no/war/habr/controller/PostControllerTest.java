@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static no.war.habr.util.signin.AuthenticationUtils.signin;
 import static org.hamcrest.Matchers.is;
@@ -77,6 +78,11 @@ class PostControllerTest {
         Topic topic = Topic.builder().name(DESIGN).build();
         topic = topicRepository.save(topic);
 
+        // create tags
+        Tag tag_1 = Tag.builder().name("tag_1").build();
+        Tag tag_2 = Tag.builder().name("tag_2").build();
+        Tag tag_3 = Tag.builder().name("tag_3").build();
+
         // create and persist post #1
         firstPost = Post.builder()
                 .title("First post")
@@ -84,6 +90,7 @@ class PostControllerTest {
                 .description("Description")
                 .topic(topic)
                 .owner(user)
+                .tags(Set.of(tag_1, tag_2, tag_3))
                 .build();
 
         postRepository.save(firstPost);
@@ -240,6 +247,10 @@ class PostControllerTest {
 
         String newContent = "New content";
         String newDescription = "New description";
+        Set<String> newTags = firstPost.getTags().stream()
+                .map(Tag::getName)
+                .collect(Collectors.toSet());
+        newTags.add("new_tag");
 
         PostDataRequest postDataRequest = PostDataRequest.builder()
                 .postId(firstPost.getId())
@@ -247,6 +258,7 @@ class PostControllerTest {
                 .content(newContent)
                 .description(newDescription)
                 .topic(firstPost.getTopic().getName())
+                .tags(newTags)
                 .build();
 
         String jsonPostDataRequest = objectMapper.writeValueAsString(postDataRequest);
@@ -266,7 +278,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.condition", is(firstPost.getCondition().name())))
                 .andExpect(jsonPath("$.owner", is(firstPost.getOwner().getUsername())))
                 .andExpect(jsonPath("$.topic", is(firstPost.getTopic().getName())))
-                .andExpect(jsonPath("$.tags").exists());
+                .andExpect(jsonPath("$.tags.length()", is(4)));
     }
 
     @Test

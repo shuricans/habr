@@ -193,7 +193,6 @@ class PostServiceImplTest {
         given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
         given(topicRepository.findByName(anyString())).willReturn(Optional.of(topic));
         given(tagRepository.findByName(anyString())).willReturn(Optional.empty());
-        given(tagRepository.save(any(Tag.class))).willReturn(any(Tag.class));
 
         // when
         underTest.save(user.getUsername(), postDataRequest);

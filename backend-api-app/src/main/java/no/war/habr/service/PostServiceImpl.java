@@ -142,7 +142,7 @@ public class PostServiceImpl implements PostService {
     private Set<Tag> getTags(Set<String> tags) {
         return tags.stream()
                 .map(tagName -> tagRepository.findByName(tagName)
-                        .orElse(tagRepository.save(Tag.builder().name(tagName).build())))
+                        .orElse(Tag.builder().name(tagName).build()))
                 .collect(Collectors.toSet());
     }
 
