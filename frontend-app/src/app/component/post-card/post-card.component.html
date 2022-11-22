@@ -1,0 +1,10 @@
+<div class="card" *ngIf="post">
+    <div class="card-body">
+        <h5 class="card-title">{{post.title}}</h5>
+        <markdown class="variable-binding" [data]="post.description"></markdown>
+        <a href="#" class="btn btn-primary">Читать далее</a>
+    </div>
+    <div class="card-footer text-muted">
+        {{post.owner}}
+    </div>
+</div>
