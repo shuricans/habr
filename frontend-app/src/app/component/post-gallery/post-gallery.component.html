@@ -1,0 +1,13 @@
+<div class="row row-cols-1 row-cols-md-1 g-4">
+    <ng-template [ngIf]="posts.length > 0" [ngIfElse]="emptyResultSet">
+        <app-post-card
+            class="col"
+            *ngFor="let post of posts"
+            [post]=post>
+        </app-post-card>
+    </ng-template>
+  
+    <ng-template #emptyResultSet>
+        <h4>No results.<br>Try another filter settings.</h4>
+    </ng-template>
+</div>

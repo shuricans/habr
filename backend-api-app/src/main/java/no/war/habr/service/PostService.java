@@ -1,5 +1,7 @@
 package no.war.habr.service;
 
+import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.persist.model.EPostCondition;
 import no.war.habr.service.dto.PostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -24,5 +26,7 @@ public interface PostService {
 
     Optional<PostDto> findById(long postId);
 
-    PostDto save(PostDto postDto);
+    PostDto save(String username, PostDataRequest postDataRequest);
+
+    Optional<PostDto> getRandomPost(EPostCondition postCondition);
 }

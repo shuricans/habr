@@ -2,8 +2,10 @@ package no.war.habr.service;
 
 import lombok.RequiredArgsConstructor;
 import no.war.habr.exception.BadRequestException;
+import no.war.habr.exception.PostNotFoundException;
 import no.war.habr.exception.TopicNotFoundException;
 import no.war.habr.exception.UserNotFoundException;
+import no.war.habr.payload.request.PostDataRequest;
 import no.war.habr.persist.model.*;
 import no.war.habr.persist.repository.PostRepository;
 import no.war.habr.persist.repository.TagRepository;
@@ -24,6 +26,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static no.war.habr.util.SpecificationUtils.combineSpec;
@@ -105,32 +108,31 @@ public class PostServiceImpl implements PostService {
 
     @Transactional
     @Override
-    public PostDto save(PostDto postDto) {
-        String username = postDto.getOwner();
+    public PostDto save(String username, PostDataRequest postDataRequest) {
         User owner = userRepository.findByUsername(username)
                 .orElseThrow(() ->
                         new UserNotFoundException("User with username = " + username + " not found."));
 
-        Topic topic = topicRepository.findByName(postDto.getTopic())
+        Topic topic = topicRepository.findByName(postDataRequest.getTopic())
                 .orElseThrow(() ->
-                        new TopicNotFoundException("Topic by name = " + postDto.getTopic() + " does not exist."));
+                        new TopicNotFoundException("Topic by name = " + postDataRequest.getTopic() + " does not exist."));
 
-        EPostCondition condition;
-        try {
-            condition = EPostCondition.valueOf(postDto.getCondition().toUpperCase());
-        } catch (IllegalArgumentException exception) {
-            throw new BadRequestException(exception.getMessage());
+        Post post;
+        Long postId = postDataRequest.getPostId();
+        if (postId == null) {
+            post = new Post();
+            post.setOwner(owner);
+        } else {
+            post = postRepository.findById(postId).orElseThrow(() ->
+                    new PostNotFoundException("Post with id = " + postId + " not found."));
         }
-
-        Post post = Post.builder()
-                .title(postDto.getTitle())
-                .content(postDto.getContent())
-                .description(postDto.getDescription())
-                .condition(condition)
-                .owner(owner)
-                .topic(topic)
-                .tags(getTags(postDto.getTags()))
-                .build();
+        post.setTitle(postDataRequest.getTitle());
+        post.setContent(postDataRequest.getContent());
+        post.setDescription(postDataRequest.getDescription());
+        post.setTopic(topic);
+        if (postDataRequest.getTags() != null) {
+            post.setTags(getTags(postDataRequest.getTags()));
+        }
 
         post = postRepository.save(post);
 
@@ -139,9 +141,20 @@ public class PostServiceImpl implements PostService {
 
     private Set<Tag> getTags(Set<String> tags) {
         return tags.stream()
-                .map(tagName ->
-                        tagRepository.findByName(tagName)
-                                .orElse(tagRepository.save(Tag.builder().name(tagName).build())))
+                .map(tagName -> tagRepository.findByName(tagName)
+                        .orElse(tagRepository.save(Tag.builder().name(tagName).build())))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Optional<PostDto> getRandomPost(EPostCondition postCondition) {
+        Specification<Post> spec = Specification.where(PostSpecification.condition(postCondition));
+        List<Post> posts = postRepository.findAll(spec);
+        if (posts.size() > 0) {
+            int randomId = ThreadLocalRandom.current().nextInt(posts.size());
+            Post randomPost = posts.get(randomId);
+            return Optional.of(postMapper.fromPost(randomPost));
+        }
+        return Optional.empty();
     }
 }
