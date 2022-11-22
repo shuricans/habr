@@ -98,6 +98,30 @@ class PostControllerTest {
                 .build();
 
         postRepository.save(secondPost);
+
+        // create and persist post #3 - PUBLISHED
+        Post thirdPost = Post.builder()
+                .title("Third post")
+                .content("Content_3")
+                .description("Description_3")
+                .condition(EPostCondition.PUBLISHED)
+                .topic(topic)
+                .owner(user)
+                .build();
+
+        postRepository.save(thirdPost);
+
+        // create and persist post #4 - PUBLISHED
+        Post fourthPost = Post.builder()
+                .title("Fourth post")
+                .content("Content_4")
+                .description("Description_4")
+                .condition(EPostCondition.PUBLISHED)
+                .topic(topic)
+                .owner(user)
+                .build();
+
+        postRepository.save(fourthPost);
     }
 
     @AfterAll
@@ -243,6 +267,19 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.owner", is(firstPost.getOwner().getUsername())))
                 .andExpect(jsonPath("$.topic", is(firstPost.getTopic().getName())))
                 .andExpect(jsonPath("$.tags").exists());
+    }
+
+    @Test
+    @DisplayName("random Should Return Random Published Post When Successful")
+    void random_ShouldReturnRandomPublishedPost_WhenSuccessful() throws Exception {
+        MockHttpServletRequestBuilder getRandomPostRequest = MockMvcRequestBuilders
+                .get("/posts/random")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(getRandomPostRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.condition", is(EPostCondition.PUBLISHED.name())));
     }
 
     @SneakyThrows

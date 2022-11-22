@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import no.war.habr.exception.PostNotFoundException;
 import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.persist.model.EPostCondition;
 import no.war.habr.service.PostService;
 import no.war.habr.service.dto.PostDto;
 import org.springframework.data.domain.Page;
@@ -70,6 +71,18 @@ public class PostController {
     public ResponseEntity<PostDto> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(postService.findById(id)
                 .orElseThrow(() -> new PostNotFoundException("Post with id = " + id + " not found.")));
+    }
+
+    @GetMapping("/random")
+    @Operation(summary = "Returns random published post", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "404", description = "When post not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<PostDto> random() {
+        return ResponseEntity.ok(postService.getRandomPost(EPostCondition.PUBLISHED)
+                .orElseThrow(() -> new PostNotFoundException("Post not found.")));
     }
 
     @PostMapping("/save")

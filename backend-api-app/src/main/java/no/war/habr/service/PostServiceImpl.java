@@ -26,6 +26,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static no.war.habr.util.SpecificationUtils.combineSpec;
@@ -143,5 +144,17 @@ public class PostServiceImpl implements PostService {
                 .map(tagName -> tagRepository.findByName(tagName)
                         .orElse(tagRepository.save(Tag.builder().name(tagName).build())))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Optional<PostDto> getRandomPost(EPostCondition postCondition) {
+        Specification<Post> spec = Specification.where(PostSpecification.condition(postCondition));
+        List<Post> posts = postRepository.findAll(spec);
+        if (posts.size() > 0) {
+            int randomId = ThreadLocalRandom.current().nextInt(posts.size());
+            Post randomPost = posts.get(randomId);
+            return Optional.of(postMapper.fromPost(randomPost));
+        }
+        return Optional.empty();
     }
 }
