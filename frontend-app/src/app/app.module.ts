@@ -21,6 +21,7 @@ import { TokenInterceptorProvider } from './interceptor/token.interceptor';
 import { LkPageComponent } from './page/lk-page/lk-page.component';
 import { SignupPageComponent } from './page/signup-page/signup-page.component';
 import { UserDataComponent } from './component/user-data/user-data.component';
+import { PostEditComponentComponent } from './component/post-edit-component/post-edit-component.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { UserDataComponent } from './component/user-data/user-data.component';
     PostPageComponent,
     LkPageComponent,
     SignupPageComponent,
-    UserDataComponent
+    UserDataComponent,
+    PostEditComponentComponent
   ],
     imports: [
         BrowserModule,
