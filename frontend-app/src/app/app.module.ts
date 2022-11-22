@@ -22,6 +22,7 @@ import { LkPageComponent } from './page/lk-page/lk-page.component';
 import { SignupPageComponent } from './page/signup-page/signup-page.component';
 import { UserDataComponent } from './component/user-data/user-data.component';
 import { PostCardComponent } from './component/post-card/post-card.component';
+import { PostGalleryComponent } from './component/post-gallery/post-gallery.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { PostCardComponent } from './component/post-card/post-card.component';
     LkPageComponent,
     SignupPageComponent,
     UserDataComponent,
-    PostCardComponent
+    PostCardComponent,
+    PostGalleryComponent
   ],
     imports: [
         BrowserModule,
