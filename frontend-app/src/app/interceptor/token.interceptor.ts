@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse, HTTP_INTERCEPTORS, HttpContextToken } from '@angular/common/http';
 import { AuthService } from '../service/auth.service';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, filter, take, switchMap } from 'rxjs/operators';
 import { TokenRefreshResponse } from '../model/token-refresh-response';
 import { Router } from '@angular/router';
+
+
+export const BYPASS_LOG = new HttpContextToken(() => false);
 
 
 @Injectable()
@@ -17,10 +20,14 @@ export class TokenInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
+    if (request.context.get(BYPASS_LOG)) {
+      return next.handle(request)
+    }
+
     if (this.isRefreshing) {
       return next.handle(request);
     }
-    
+
     if (this.authService.getJwtToken()) {
       request = this.addToken(request, this.authService.getJwtToken()!);
     }
