@@ -1,5 +1,6 @@
 package no.war.habr.service;
 
+import no.war.habr.exception.BadRequestException;
 import no.war.habr.exception.TopicNotFoundException;
 import no.war.habr.exception.UserNotFoundException;
 import no.war.habr.payload.request.PostDataRequest;
@@ -169,6 +170,40 @@ class PostServiceImplTest {
         assertThatThrownBy(() -> underTest.save(user.getUsername(), postDataRequest))
                 .isInstanceOf(TopicNotFoundException.class)
                 .hasMessageContaining("Topic by name = %s does not exist.", nonExistentTopic);
+    }
+
+    @Test
+    @DisplayName("save Should Throw BadRequestException When Wrong Owner")
+    void save_ShouldThrowBadRequestException_WhenWrongOwner() {
+        // given
+        User user = createUser();
+        Topic topic = Topic.builder().name("topic").build();
+        Set<String> tags = Set.of("tag_1", "tag_2");
+        String title = "title";
+        String content = "content";
+        String description = "description";
+        long postId = 1L;
+        PostDataRequest postDataRequest = PostDataRequest.builder()
+                .postId(postId)
+                .title(title)
+                .content(content)
+                .description(description)
+                .topic(topic.getName())
+                .tags(tags)
+                .build();
+        Post post = Post.builder()
+                .id(postId)
+                .owner(User.builder().id(42L).build())
+                .build();
+        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(topicRepository.findByName(anyString())).willReturn(Optional.of(topic));
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.save(user.getUsername(), postDataRequest))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("You are not the owner of this post!");
     }
 
     @Test

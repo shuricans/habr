@@ -125,6 +125,9 @@ public class PostServiceImpl implements PostService {
         } else {
             post = postRepository.findById(postId).orElseThrow(() ->
                     new PostNotFoundException("Post with id = " + postId + " not found."));
+            if (!owner.equals(post.getOwner())) {
+                throw new BadRequestException("You are not the owner of this post!");
+            }
         }
         post.setTitle(postDataRequest.getTitle());
         post.setContent(postDataRequest.getContent());
