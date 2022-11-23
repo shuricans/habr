@@ -103,7 +103,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Optional<PostDto> findById(long postId) {
-        return postRepository.findById(postId).map(postMapper::fromPost);
+        Specification<Post> spec = Specification
+                .where(PostSpecification.id(postId))
+                .and(PostSpecification.condition(EPostCondition.PUBLISHED));
+        return postRepository.findOne(spec).map(postMapper::fromPost);
     }
 
     @Transactional

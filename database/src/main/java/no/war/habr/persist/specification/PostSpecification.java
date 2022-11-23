@@ -12,6 +12,11 @@ import java.util.List;
 
 public class PostSpecification {
 
+    public static Specification<Post> id(long postId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("id"), postId);
+    }
+
     public static Specification<Post> topic(String topic) {
         return (root, query, builder) ->
                 builder.like(builder.lower(root.get("topic").get("name")), topic.toLowerCase());

@@ -36,14 +36,13 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    @Operation(summary = "Returns all posts with pagination", tags = "Posts")
+    @Operation(summary = "Returns all published posts with pagination", tags = "Posts")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful"),
             @ApiResponse(responseCode = "500", description = "When server error")
     })
     public ResponseEntity<Page<PostDto>> listAll(@RequestParam("topic") Optional<String> topic,
                                                  @RequestParam("tag") Optional<String> tag,
-                                                 @RequestParam("condition") Optional<String> condition,
                                                  @RequestParam("page") Optional<Integer> page,
                                                  @RequestParam("size") Optional<Integer> size,
                                                  @RequestParam("sortField") Optional<String> sortField,
@@ -53,7 +52,7 @@ public class PostController {
                 postService.findAll(
                         topic,
                         tag,
-                        condition,
+                        Optional.of(EPostCondition.PUBLISHED.name()),
                         page,
                         size,
                         sortField,
@@ -62,7 +61,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Returns post by id", tags = "Posts")
+    @Operation(summary = "Returns published post by id", tags = "Posts")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful"),
             @ApiResponse(responseCode = "404", description = "When post not found"),

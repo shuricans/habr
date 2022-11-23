@@ -7,6 +7,7 @@ import no.war.habr.payload.request.PostDataRequest;
 import no.war.habr.payload.response.JwtResponse;
 import no.war.habr.persist.model.*;
 import no.war.habr.persist.repository.*;
+import no.war.habr.persist.specification.PostSpecification;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,6 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -145,10 +149,15 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("listAll Returns List Of Posts Inside Page Object When Successful")
-    void listAll_ReturnsListOfPostsInsidePageObject_WhenSuccessful() throws Exception {
+    @DisplayName("listAll Returns List Of Published Posts Inside Page Object When Successful")
+    void listAll_ReturnsListOfPublishedPostsInsidePageObject_WhenSuccessful() throws Exception {
 
-        int count = (int) postRepository.count();
+        Specification<Post> spec = Specification
+                .where(PostSpecification.condition(EPostCondition.PUBLISHED));
+
+        List<Post> publishedPosts = postRepository.findAll(spec);
+
+        int count = publishedPosts.size();
 
         MockHttpServletRequestBuilder listAllPostsRequest = MockMvcRequestBuilders
                 .get("/posts")
@@ -170,19 +179,23 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("findById Returns Post By Id When Successful")
-    void findById_ReturnsPostById_WhenSuccessful() throws Exception {
+    @DisplayName("findById Returns Only Published Post By Id When Successful")
+    void findById_ReturnsOnlyPublishedPostById_WhenSuccessful() throws Exception {
 
-        int id = 1;
-        Post post = postRepository.findById((long) id).get();
+        Specification<Post> spec = Specification
+                .where(PostSpecification.condition(EPostCondition.PUBLISHED));
+
+        List<Post> publishedPosts = postRepository.findAll(spec);
+        Post post = publishedPosts.get(0);
+        long postId = post.getId();
 
         MockHttpServletRequestBuilder listAllPostsRequest = MockMvcRequestBuilders
-                .get("/posts/1")
+                .get("/posts/" + postId)
                 .contentType(MediaType.APPLICATION_JSON);
 
         mvc.perform(listAllPostsRequest)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(id)))
+                .andExpect(jsonPath("$.id", is((int)postId)))
                 .andExpect(jsonPath("$.title", is(post.getTitle())))
                 .andExpect(jsonPath("$.content", is(post.getContent())))
                 .andExpect(jsonPath("$.description", is(post.getDescription())))

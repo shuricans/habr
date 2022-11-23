@@ -121,22 +121,22 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("findById Returns PostDto By Id When Successful")
-    void findById_ReturnsPostDtoById_WhenSuccessful() {
+    @DisplayName("findById Returns Published PostDto By Id When Successful")
+    void findById_ReturnsPublishedPostDtoById_WhenSuccessful() {
         // given
-        long postId = 1L;
-
         // when
-        underTest.findById(postId);
+        underTest.findById(anyLong());
 
         // then
-        ArgumentCaptor<Long> postIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Specification<Post>> specificationArgumentCaptor =
+                ArgumentCaptor.forClass(Specification.class);
 
-        verify(postRepository).findById(postIdArgumentCaptor.capture());
+        verify(postRepository).findOne(specificationArgumentCaptor.capture());
 
-        Long capturedPostId = postIdArgumentCaptor.getValue();
+        Specification<Post> capturedSpecification = specificationArgumentCaptor.getValue();
 
-        assertThat(capturedPostId).isEqualTo(postId);
+        assertThat(capturedSpecification).isInstanceOf(Specification.class);
     }
 
     @Test
