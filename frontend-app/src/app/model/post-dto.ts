@@ -1,5 +1,7 @@
 export class PostDto {
     constructor(public id: number,
+                public created: string,
+                public updated: string,
                 public title: string,
                 public content: string,
                 public description: string,
@@ -8,5 +10,5 @@ export class PostDto {
                 public topic: string,
                 public tags: string[],
     ) {
-    }
   }
+}

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MarkdownService } from 'ngx-markdown';
 import { PostDto } from 'src/app/model/post-dto';
+import { DateFormatService } from 'src/app/service/date-format.service';
 import { PostService } from 'src/app/service/post.service';
 
 @Component({
@@ -15,7 +16,8 @@ export class PostPageComponent implements OnInit {
   notFound!: boolean
 
   constructor(private postService: PostService,
-              private route: ActivatedRoute,) {
+              private route: ActivatedRoute,
+              public dateFormatService: DateFormatService) {
   }
 
   ngOnInit(): void {

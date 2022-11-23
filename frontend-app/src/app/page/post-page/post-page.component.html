@@ -1,6 +1,8 @@
 <div *ngIf="post else ifPostNotFound">
     <p>Раздел: <a href="#">{{post.topic}}</a></p>
     <p>Автор: <a href="#">{{post.owner}}</a></p>
+    <p>От: {{dateFormatService.toLocaleString(post.created)}}</p>
+    <p>Обновлён: {{dateFormatService.toLocaleString(post.updated)}}</p>
     <h1>{{post.title}}</h1>
     <hr>
     <br>
