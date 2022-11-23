@@ -1,46 +1,75 @@
-<div class="card px-5 py-5" *ngIf="userDto">
-  <form (ngSubmit)="submitForm()">
-    <div class="form-row">
-      <div class="col-md-8 mb-3">
-        <label for="validationDefault01">Имя</label>
+<div class="col-md-7 col-md-offset-3">
+  <div class="card px-3 py-5 md-6" *ngIf="userDto">
+    <h5 class="text-center mb-5">{{userDto.username}}</h5>
+    <form (ngSubmit)="submitForm()" [formGroup]="form" autocomplete="off">
+
+      <div class="form-row">
+        <div class="col-md-10 mb-3">
+          <label for="firstName">Имя</label>
+          <input type="text"
+                 formControlName="firstName"
+                 class="form-control"
+                 id="firstName"
+                 placeholder="Имя"
+                 [ngClass]="{'is-invalid': form.controls['firstName'].invalid && form.controls['firstName'].touched}"
+          >
+          <div class="invalid-feedback"
+               *ngIf="form.controls['firstName'].invalid && form.controls['firstName'].touched">
+            Укажите Имя, минимальное количество символов 1, максимальное 50
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-10 mb-3">
+        <label for="lastName">Фамилия</label>
         <input type="text"
+               formControlName="lastName"
                class="form-control"
-               id="validationDefault01"
-               placeholder="Имя"
-               value="{{userDto.firstName}}"
-               required>
-      </div>
-    </div>
-
-    <div class="col-md-8 mb-3">
-      <label for="validationDefault02">Фамилия</label>
-      <input type="text"
-             class="form-control"
-             id="validationDefault02"
-             placeholder="Фамилия"
-             value="{{userDto.lastName}}"
-             required>
-    </div>
-
-    <div class="form-row">
-      <div class="col-md-6 mb-3">
-        <label for="validationDefault03">Год рождения</label>
-        <input type="date"
-               class="form-control"
-               id="validationDefault03"
-               placeholder="Год рождения"
-               value="{{userDto.birthday}}"
-               required>
+               id="lastName"
+               placeholder="Фамилия"
+               [ngClass]="{'is-invalid': form.controls['lastName'].invalid && form.controls['lastName'].touched}"
+        >
+        <div class="invalid-feedback"
+             *ngIf="form.controls['lastName'].invalid && form.controls['lastName'].touched">
+          Максимальное количество символов 50
+        </div>
       </div>
 
-      <div class="col-md-8 mb-3">
-        <label for="" class="form-label">О себе</label>
-        <textarea class="form-control" id="" rows="3">{{userDto.aboutMe}}</textarea>
-      </div>
-    </div>
+      <div class="form-row">
+        <div class="col-md-6 mb-3">
+          <label for="birthday">Дата рождения</label>
+          <input type="date"
+                 formControlName="birthday"
+                 class="form-control"
+                 id="birthday"
+                 placeholder="Дата рождения"
+                 [ngClass]="{'is-invalid': form.controls['birthday'].invalid && form.controls['birthday'].touched}"
+          >
+          <div class="invalid-feedback"
+               *ngIf="form.controls['birthday'].invalid && form.controls['birthday'].touched">
+            Выберите дату из прошлого.
+          </div>
+        </div>
 
-    <button class="btn btn-primary" type="submit">Сохранить</button>
-  </form>
+        <div class="col-md-10 mb-3">
+          <label for="aboutMe" class="form-label">О себе</label>
+          <textarea
+            formControlName="aboutMe"
+            class="form-control"
+            id="aboutMe"
+            rows="3"
+            [ngClass]="{'is-invalid': form.controls['aboutMe'].invalid && form.controls['aboutMe'].touched}">
+        </textarea>
+          <div class="invalid-feedback"
+               *ngIf="form.controls['aboutMe'].invalid && form.controls['aboutMe'].touched">
+            Максимальная длина текста 255 символов.
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Сохранить</button>
+    </form>
+
+  </div>
 </div>
-
 
