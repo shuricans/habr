@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { PostDto } from 'src/app/model/post-dto';
+import { DateFormatService } from 'src/app/service/date-format.service';
 
 @Component({
   selector: 'app-post-card',
@@ -10,7 +11,7 @@ export class PostCardComponent implements OnInit {
 
   private _post?: PostDto;
 
-  constructor() { 
+  constructor(public dateFormatService: DateFormatService) { 
   }
 
   ngOnInit(): void {

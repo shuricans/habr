@@ -1,36 +1,6 @@
-<div class="d-grid gap-3">
-  <div class="bg-light p-5 rounded">
-    <h1>Как стать никому не нужным java-разработчиком.</h1>
-    <h1>Роccия 2022!</h1>
-    <img src="https://iconshots.com/wp-content/uploads/2019/03/Java-Developer-1920x960.jpg" alt="drawing" width="70%"/>
-    <p></p>
-    <p class="lead">Всем привет! Меня зовут Саша и я 30-летний джун, лол.<br>Хорошо знакомое чувтство? Давай попробуем разобраться с этим...</p>
-    <a class="btn btn-lg btn-primary" routerLink="/habr/324" role="button">View post &raquo;</a>
-  </div>
-  <div class="bg-light p-5 rounded">
-    <h1>Разработка проекта вызывает головную боль?</h1>
-    <img src="https://adindex.ru/assets/seo/2021_04/facebook_292751.png?ts=1617971090" alt="drawing" width="70%"/>
-    <p></p>
-    <p class="lead">Привет, Хабр. Меня зовут Гарольд и я хочу поделиться рецептом простой и непринужденной...</p>
-    <a class="btn btn-lg btn-primary" routerLink="/habr/123" role="button">View post &raquo;</a>
-  </div>
-  <div class="bg-light p-5 rounded">
-    <h1>Блокчейн, Бигдэйта и другие.</h1>
-    <img src="https://news.store.rambler.ru/img/3abd20dcc0f908c9be44698e4ea43146" alt="drawing" width="70%"/>
-    <p></p>
-    <p class="lead">Наступление эры, в которой системы с криптографическим обеспечением станут нормой, требует не только монументального объема согласованных усилий, но и принципиальных академических исследований и сильного акцента на потребностях пользователей и корпораций. В этой статье мы расскажем про CCIP и DECO..</p>
-    <a class="btn btn-lg btn-primary" routerLink="/habr/564" role="button">View post &raquo;</a>
-  </div>
-</div>
-
-<div class="mt-3">
-  <nav aria-label="Page navigation example">
-    <ul class="pagination">
-      <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-      <li class="page-item"><a class="page-link" href="#">1</a></li>
-      <li class="page-item"><a class="page-link" href="#">2</a></li>
-      <li class="page-item"><a class="page-link" href="#">3</a></li>
-      <li class="page-item"><a class="page-link" href="#">Next</a></li>
-    </ul>
-  </nav>
-</div>
+<app-post-gallery *ngIf="postsLoaded else postsNotFound" [posts]="posts"></app-post-gallery>
+<ng-template #postsNotFound>
+  <h1>Хмм...</h1>
+  <p>Кажется, что статьи куда-то пропали...</p>
+  <a class="btn btn-primary" routerLink="/habr" role="button">Перезагрузить страницу</a>
+</ng-template>
