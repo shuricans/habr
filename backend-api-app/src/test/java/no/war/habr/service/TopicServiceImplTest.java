@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests for TopicServiceImpl")
 public class TopicServiceImplTest {
-    private final String string = "";
     private TopicService underTest;
 
     @Mock
@@ -33,12 +32,12 @@ public class TopicServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new TopicServiceImpl(topicRepository,topicMapper);
+        underTest = new TopicServiceImpl(topicRepository, topicMapper);
     }
 
     @Test
-    @DisplayName(string)
-    void findAll() {
+    @DisplayName("find all topics")
+    void findAllTopics() {
         // given
         // when
         underTest.findAll();
