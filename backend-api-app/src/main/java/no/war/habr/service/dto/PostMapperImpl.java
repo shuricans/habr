@@ -1,5 +1,6 @@
 package no.war.habr.service.dto;
 
+import no.war.habr.persist.model.Picture;
 import no.war.habr.persist.model.Post;
 import no.war.habr.persist.model.Tag;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,10 @@ public class PostMapperImpl implements PostMapper {
                 .condition(post.getCondition().name())
                 .owner(post.getOwner().getUsername())
                 .topic(post.getTopic().getName())
+                .mainPictureId(post.getMainPictureId())
+                .pictures(post.getPictures().stream()
+                        .map(Picture::getId)
+                        .collect(Collectors.toList()))
                 .tags(post.getTags().stream()
                         .map(Tag::getName)
                         .collect(Collectors.toSet()))

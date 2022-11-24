@@ -38,6 +38,9 @@ public class Post extends BaseEntity {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "main_picture_id")
+    private Long mainPictureId;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "condition", nullable = false, length = 20)
