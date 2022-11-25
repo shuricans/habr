@@ -290,12 +290,12 @@ class PostSpecificationTest {
 
     /**
      * Integration tests for PostSpecification
-     * Find post by user id
+     * Find posts by user id
      *
      * @author Zalyaletdinova Ilmira
      */
     @Test
-    void shouldFindPostByUserId() {
+    void shouldFindPostsByUserId() {
         // given
         // create user
         User user = User.builder()
@@ -304,7 +304,7 @@ class PostSpecificationTest {
                 .password("password")
                 .build();
 
-        user = userRepository.save(user);
+        userRepository.save(user);
 
         // create search pattern
         long userId = user.getId();
@@ -323,6 +323,55 @@ class PostSpecificationTest {
                 .description("description")
                 .topic(designTopic)
                 .tags(Collections.singleton(Tag.builder().name("tag").build()))
+                .build();
+
+        underTest.save(post);
+
+        // when
+        List<Post> posts = underTest.findAll(spec);
+
+        // then
+        assertThat(posts)
+                .hasSize(1)
+                .contains(post);
+    }
+
+
+    /**
+     * Integration tests for PostSpecification
+     * Find posts by username
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Test
+    void shouldFindPostsByUserName() {
+        // given
+
+        // create user
+        String username = "username";
+        User user = User.builder()
+                .username(username)
+                .firstName("name")
+                .password("password")
+                .build();
+
+        userRepository.save(user);
+
+        // create search pattern
+        Specification<Post> spec = Specification
+                .where(PostSpecification.username(username));
+
+        // create topic
+        Topic designTopic = Topic.builder().name("Design").build();
+        topicRepository.save(designTopic);
+
+        // create post
+        Post post = Post.builder()
+                .title("awesome title")
+                .content("savage content")
+                .owner(user)
+                .description("description")
+                .topic(designTopic)
                 .build();
 
         underTest.save(post);

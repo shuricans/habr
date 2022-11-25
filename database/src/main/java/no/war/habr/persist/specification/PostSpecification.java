@@ -52,12 +52,23 @@ public class PostSpecification {
     }
 
     /**
-     * Finds a post by user ID
+     * Finds a posts by user ID
      *
      * @author Zalyaletdinova Ilmira
      */
     public static Specification<Post> userId(long userId) {
         return (root, query, builder) ->
-                builder.equal(root.get("id"), userId);
+                builder.equal(root.get("owner").get("id"), userId);
+    }
+
+
+    /**
+     * Finds a posts by username
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    public static Specification<Post> username(String username) {
+        return (root, query, builder) ->
+                builder.equal(root.get("owner").get("username"), username);
     }
 }
