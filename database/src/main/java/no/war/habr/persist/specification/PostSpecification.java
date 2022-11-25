@@ -50,4 +50,14 @@ public class PostSpecification {
             return builder.conjunction();
         };
     }
+
+    /**
+     * Finds a post by user ID
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    public static Specification<Post> userId(long userId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("id"), userId);
+    }
 }
