@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { PostDto } from 'src/app/model/post-dto';
+import { Page } from 'src/app/model/page';
 
 @Component({
   selector: 'app-post-gallery',
@@ -8,7 +8,7 @@ import { PostDto } from 'src/app/model/post-dto';
 })
 export class PostGalleryComponent implements OnInit {
 
-  @Input() posts: PostDto[] = [];
+  @Input() page!: Page;
 
   constructor() { }
 

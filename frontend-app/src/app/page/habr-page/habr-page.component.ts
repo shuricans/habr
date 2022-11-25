@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Page } from 'src/app/model/page';
-import { PostDto } from 'src/app/model/post-dto';
+import { PageFilter } from 'src/app/model/page-filter';
 import { PostService } from 'src/app/service/post.service';
 
 @Component({
@@ -10,27 +10,59 @@ import { PostService } from 'src/app/service/post.service';
 })
 export class HabrPageComponent implements OnInit {
 
-  postsLoaded: boolean = false
-  page?: Page
-  posts: PostDto[] = []
+  private readonly LAST_PAGE = 'habr_lastPage';
+  private readonly SIZE = 'habr_size';
+
+  loading: boolean = true;
+  page!: Page;
+  pageFilter?: PageFilter;
+  size: number = 5;
+  pageNumber: number = 1;
+  error: boolean = false;
 
   constructor(private postService: PostService) {
   }
 
   ngOnInit(): void {
-    console.log('Loading published posts...')
-    this.postService.findAllPublishedPost().subscribe({
+    if (localStorage.getItem(this.LAST_PAGE)) {
+      this.pageNumber = Number(localStorage.getItem(this.LAST_PAGE));
+    }
+    if (localStorage.getItem(this.SIZE))  {
+      this.size = Number(localStorage.getItem(this.SIZE));
+    }
+    this.getPage(this.pageNumber);
+  }
+
+  changeSize(size: number) {
+    this.size = size;
+    this.getPage(1);
+    localStorage.setItem(this.SIZE, String(size));
+  }
+
+  reloadPage() {
+    location.reload();
+  }
+
+  getPage(page: number) {
+    localStorage.setItem(this.LAST_PAGE, String(page));
+    this.loading = true;
+    this.pageFilter = new PageFilter;
+    this.pageFilter.page = page;
+    this.pageFilter.size = this.size;
+
+    this.postService.findAllPublishedPost(this.pageFilter).subscribe({
       next: page => {
-        console.log('Posts successfully loaded.')
-        this.page = page
-        this.posts = page.content
+        this.page = page;
       },
       error: err => {
-        console.error(`Error loading posts ${err}`)
+        console.error(`Error loading posts ${err}`);
+        this.error = true;
+        this.loading = false;
       },
       complete: () => {
-        this.postsLoaded = true
+        this.loading = false;
+        window.scrollTo(0, 0);
       }
-    })
+    });
   }
 }

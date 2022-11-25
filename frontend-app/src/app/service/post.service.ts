@@ -22,7 +22,7 @@ export class PostService {
     })
   }
 
-  public findAllPublishedPost(postFilter?: PostFilter, pageFilter?: PageFilter): Observable<Page> {
+  public findAllPublishedPost(pageFilter?: PageFilter, postFilter?: PostFilter): Observable<Page> {
 
     let params = new HttpParams();
 
@@ -46,6 +46,9 @@ export class PostService {
       params = params.set('sortField', pageFilter.sortField)
     }
 
-    return this.http.get<Page>('api/v1/posts', { params });
+    return this.http.get<Page>('api/v1/posts', { 
+      params,
+      context: new HttpContext().set(BYPASS_LOG, true) 
+    });
   }
 }

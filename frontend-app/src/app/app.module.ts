@@ -14,7 +14,7 @@ import { SearchPageComponent } from './page/search-page/search-page.component';
 import { LoginPageComponent } from './page/login-page/login-page.component';
 import { PostPageComponent } from './page/post-page/post-page.component';
 import { MarkdownModule } from 'ngx-markdown';
-import {FormsModule} from "@angular/forms";
+import { FormsModule } from "@angular/forms";
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { TokenInterceptorProvider } from './interceptor/token.interceptor';
@@ -24,6 +24,7 @@ import { UserDataComponent } from './component/user-data/user-data.component';
 import { PostEditComponentComponent } from './component/post-edit-component/post-edit-component.component';
 import { PostCardComponent } from './component/post-card/post-card.component';
 import { PostGalleryComponent } from './component/post-gallery/post-gallery.component';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { PostGalleryComponent } from './component/post-gallery/post-gallery.comp
         FormsModule,
         ReactiveFormsModule,
         HttpClientModule,
+        NgxPaginationModule,
     ],
   providers: [TokenInterceptorProvider],
   bootstrap: [AppComponent]
