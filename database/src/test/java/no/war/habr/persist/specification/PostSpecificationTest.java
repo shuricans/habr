@@ -287,4 +287,52 @@ class PostSpecificationTest {
                 .hasSize(1)
                 .contains(tag);
     }
+
+    /**
+     * Integration tests for PostSpecification
+     * Find post by user id
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Test
+    void shouldFindPostByUserId() {
+        // given
+        // create user
+        User user = User.builder()
+                .username("username")
+                .firstName("name")
+                .password("password")
+                .build();
+
+        user = userRepository.save(user);
+
+        // create search pattern
+        long userId = user.getId();
+        Specification<Post> spec = Specification
+                .where(PostSpecification.userId(userId));
+
+        // create topic
+        Topic designTopic = Topic.builder().name("Design").build();
+        topicRepository.save(designTopic);
+
+        // create post
+        Post post = Post.builder()
+                .title("awesome title")
+                .content("savage content")
+                .owner(user)
+                .description("description")
+                .topic(designTopic)
+                .tags(Collections.singleton(Tag.builder().name("tag").build()))
+                .build();
+
+        underTest.save(post);
+
+        // when
+        List<Post> posts = underTest.findAll(spec);
+
+        // then
+        assertThat(posts)
+                .hasSize(1)
+                .contains(post);
+    }
 }
