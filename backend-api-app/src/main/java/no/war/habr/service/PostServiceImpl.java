@@ -57,9 +57,11 @@ public class PostServiceImpl implements PostService {
     private String defaultSortDirection;
 
     @Override
-    public Page<PostDto> findAll(Optional<String> topic,
+    public Page<PostDto> findAll(Optional<String> username,
+                                 Optional<String> topic,
                                  Optional<String> tag,
                                  Optional<String> condition,
+                                 Optional<String> excludeCondition,
                                  Optional<Integer> page,
                                  Optional<Integer> size,
                                  Optional<String> sortField,
@@ -71,11 +73,23 @@ public class PostServiceImpl implements PostService {
         if (tag.isPresent() && !tag.get().isBlank()) {
             spec = combineSpec(spec, PostSpecification.hasTags(List.of(tag.get())));
         }
+        if (username.isPresent() && !username.get().isBlank()) {
+            spec = combineSpec(spec, PostSpecification.username(username.get()));
+        }
         try {
             if (condition.isPresent()) {
                 spec = combineSpec(spec,
                         PostSpecification
                                 .condition(EPostCondition.valueOf(condition.get().toUpperCase())));
+            }
+        } catch (IllegalArgumentException exception) {
+            throw new BadRequestException(exception.getMessage());
+        }
+        try {
+            if (excludeCondition.isPresent()) {
+                spec = combineSpec(spec,
+                        PostSpecification
+                                .excludeCondition(EPostCondition.valueOf(excludeCondition.get().toUpperCase())));
             }
         } catch (IllegalArgumentException exception) {
             throw new BadRequestException(exception.getMessage());

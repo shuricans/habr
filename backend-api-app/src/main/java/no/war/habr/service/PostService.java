@@ -16,9 +16,11 @@ import java.util.Optional;
  */
 public interface PostService {
 
-    Page<PostDto> findAll(Optional<String> topic,
+    Page<PostDto> findAll(Optional<String> username,
+                          Optional<String> topic,
                           Optional<String> tag,
                           Optional<String> condition,
+                          Optional<String> excludeCondition,
                           Optional<Integer> page,
                           Optional<Integer> size,
                           Optional<String> sortField,

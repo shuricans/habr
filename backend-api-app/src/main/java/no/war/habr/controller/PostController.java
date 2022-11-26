@@ -41,7 +41,8 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "Successful"),
             @ApiResponse(responseCode = "500", description = "When server error")
     })
-    public ResponseEntity<Page<PostDto>> listAll(@RequestParam("topic") Optional<String> topic,
+    public ResponseEntity<Page<PostDto>> listAll(@RequestParam("username") Optional<String> username,
+                                                 @RequestParam("topic") Optional<String> topic,
                                                  @RequestParam("tag") Optional<String> tag,
                                                  @RequestParam("page") Optional<Integer> page,
                                                  @RequestParam("size") Optional<Integer> size,
@@ -50,9 +51,11 @@ public class PostController {
 
         return ResponseEntity.ok(
                 postService.findAll(
+                        username,
                         topic,
                         tag,
                         Optional.of(EPostCondition.PUBLISHED.name()),
+                        Optional.empty(),
                         page,
                         size,
                         sortField,

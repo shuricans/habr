@@ -5,7 +5,6 @@ import no.war.habr.exception.TopicNotFoundException;
 import no.war.habr.exception.UserNotFoundException;
 import no.war.habr.payload.request.PostDataRequest;
 import no.war.habr.persist.model.Post;
-import no.war.habr.persist.model.Tag;
 import no.war.habr.persist.model.Topic;
 import no.war.habr.persist.model.User;
 import no.war.habr.persist.repository.PostRepository;
@@ -83,8 +82,10 @@ class PostServiceImplTest {
     void findAll_ReturnsListOfPostDtoInsidePageObject_WhenSuccessful() {
         // given
         Optional<String> optionalTopic = Optional.of("topic");
+        Optional<String> optionalUsername = Optional.of("username");
         Optional<String> optionalTag = Optional.of("tag");
         Optional<String> optionalCondition = Optional.of("DRAFT");
+        Optional<String> excludedCondition = Optional.of("deleted");
 
         int page = 1;
         int size = 10;
@@ -99,8 +100,15 @@ class PostServiceImplTest {
         when(postRepository.findAll(ArgumentMatchers.<Specification<Post>>any(), any(PageRequest.class)))
                 .thenReturn(mockPage);
         // when
-        underTest.findAll(optionalTopic, optionalTag, optionalCondition,
-                Optional.of(page), Optional.of(size), Optional.of(sortField), Optional.of(direction));
+        underTest.findAll(optionalUsername,
+                optionalTopic,
+                optionalTag,
+                optionalCondition,
+                excludedCondition,
+                Optional.of(page),
+                Optional.of(size),
+                Optional.of(sortField),
+                Optional.of(direction));
 
         // then
         @SuppressWarnings("unchecked")
