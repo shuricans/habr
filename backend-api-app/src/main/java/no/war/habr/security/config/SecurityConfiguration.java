@@ -58,6 +58,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests((authorize) -> authorize
                         .antMatchers("/auth/logout").authenticated()
                         .antMatchers("/auth/**").permitAll()
+                        .antMatchers("/posts/own").authenticated()
                         .antMatchers("/posts", "/posts/{\\d+}").permitAll()
                         .antMatchers("/topics").permitAll()
                         .antMatchers("/swagger-ui/**").permitAll()

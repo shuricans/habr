@@ -307,6 +307,49 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.condition", is(EPostCondition.PUBLISHED.name())));
     }
 
+    @Test
+    @DisplayName("listOwnPosts Returns List Of Own Posts Except DELETED Inside Page Object When Successful")
+    void listOwnPosts_ReturnsListOfOwnPostsExceptDELETEDInsidePageObject_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        Specification<Post> spec = Specification
+                .where(PostSpecification.excludeCondition(EPostCondition.DELETED));
+
+        List<Post> postsExceptDeleted = postRepository.findAll(spec);
+
+        int size = postsExceptDeleted.size();
+
+        MockHttpServletRequestBuilder getOwnPostRequest = MockMvcRequestBuilders
+                .get("/posts/own")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(getOwnPostRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(size)))
+                .andExpect(jsonPath("$.pageable").exists())
+                .andExpect(jsonPath("$.totalElements", is(size)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.last").exists())
+                .andExpect(jsonPath("$.sort").exists())
+                .andExpect(jsonPath("$.first").exists())
+                .andExpect(jsonPath("$.size", is(5)))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.numberOfElements", is(size)))
+                .andExpect(jsonPath("$.empty", is(false)));
+    }
+
+    @Test
+    @DisplayName("listOwnPosts Returns 401 Unauthorized When Token Not Provided")
+    void listOwnPosts_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder getOwnPostRequest = MockMvcRequestBuilders
+                .get("/posts/own")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(getOwnPostRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
     @SneakyThrows
     private String getAccessToken(String username, String password) {
         JwtResponse jwtResponse = signin(

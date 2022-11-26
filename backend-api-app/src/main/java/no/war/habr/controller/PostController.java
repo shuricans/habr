@@ -94,6 +94,7 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful saved/updated"),
             @ApiResponse(responseCode = "400", description = "When request body invalid"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
             @ApiResponse(responseCode = "404", description = "When post or topic not found"),
             @ApiResponse(responseCode = "500", description = "When server error")
     })
@@ -101,5 +102,39 @@ public class PostController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return ResponseEntity.ok(postService.save(username, postDataRequest));
+    }
+
+    @GetMapping("/own")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Returns own posts with pagination, except for DELETED", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "400", description = "When bad request"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<Page<PostDto>> listOwnPosts(@RequestParam("topic") Optional<String> topic,
+                                                      @RequestParam("tag") Optional<String> tag,
+                                                      @RequestParam("condition") Optional<String> condition,
+                                                      @RequestParam("page") Optional<Integer> page,
+                                                      @RequestParam("size") Optional<Integer> size,
+                                                      @RequestParam("sortField") Optional<String> sortField,
+                                                      @RequestParam("sortDir") Optional<Direction> sortDir) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        return ResponseEntity.ok(
+                postService.findAll(
+                        Optional.of(username),
+                        topic,
+                        tag,
+                        condition,
+                        Optional.of(EPostCondition.DELETED.name()),
+                        page,
+                        size,
+                        sortField,
+                        sortDir)
+        );
     }
 }
