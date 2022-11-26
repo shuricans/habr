@@ -35,6 +35,18 @@ public class PostSpecification {
                 builder.equal(root.get("condition"), condition);
     }
 
+    /**
+     * Returns the configured {@code Specification<Post>},
+     * excluded provided {@code EPostCondition}.
+     *
+     * @param condition, {@code EPostCondition} - must be excluded
+     * @return configured {@code Specification<Post>}
+     */
+    public static Specification<Post> excludeCondition(EPostCondition condition) {
+        return (root, query, builder) ->
+                builder.notEqual(root.get("condition"), condition);
+    }
+
     public static Specification<Post> fetchTags() {
         return (root, query, builder) -> {
             query.distinct(true);

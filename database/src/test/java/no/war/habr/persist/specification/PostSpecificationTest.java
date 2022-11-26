@@ -7,6 +7,7 @@ import no.war.habr.persist.repository.TagRepository;
 import no.war.habr.persist.repository.TopicRepository;
 import no.war.habr.persist.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -383,5 +384,59 @@ class PostSpecificationTest {
         assertThat(posts)
                 .hasSize(1)
                 .contains(post);
+    }
+
+    @Test
+    @DisplayName("should Find Posts Excluded Provided Condition - DELETED")
+    void shouldFindPostsExcludedProvidedCondition_DELETED() {
+        // given
+        // create user
+        User user = User.builder()
+                .username("username")
+                .firstName("name")
+                .password("password")
+                .build();
+
+        userRepository.save(user);
+
+        // create search pattern
+        Specification<Post> spec = Specification
+                .where(PostSpecification.excludeCondition(EPostCondition.DELETED));
+
+        // create topic
+        Topic designTopic = Topic.builder().name("Design").build();
+        topicRepository.save(designTopic);
+
+        // create PUBLISHED post
+        Post publishedPost = Post.builder()
+                .title("title")
+                .content("content")
+                .owner(user)
+                .description("description")
+                .condition(EPostCondition.PUBLISHED)
+                .topic(designTopic)
+                .build();
+
+        underTest.save(publishedPost);
+
+        // create DELETED post
+        Post deletedPost = Post.builder()
+                .title("title")
+                .content("content")
+                .owner(user)
+                .description("description")
+                .condition(EPostCondition.DELETED)
+                .topic(designTopic)
+                .build();
+
+        underTest.save(deletedPost);
+
+        // when
+        List<Post> posts = underTest.findAll(spec);
+
+        // then
+        assertThat(posts)
+                .hasSize(1)
+                .contains(publishedPost);
     }
 }
