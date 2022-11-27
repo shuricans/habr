@@ -2,7 +2,7 @@
     <div class="card-body">
         <h5 class="card-title"><a [routerLink]="['/habr', post.id]">{{post.title}}</a></h5>
         <img src="https://picsum.photos/600/400/?random={{post.id}}" class="card-img mb-2"/>
-        <p>{{post.description}}</p>
+        <markdown class="variable-binding" [data]="post.description"></markdown>
         <a [routerLink]="['/habr', post.id]" class="btn btn-primary">Читать далее</a>
     </div>
     <div class="card-footer text-muted">

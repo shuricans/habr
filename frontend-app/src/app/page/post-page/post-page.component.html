@@ -8,7 +8,6 @@
     <img src="https://picsum.photos/600/400/?random={{post.id}}" class="card-img mb-2"/>
     <br>
     <markdown class="variable-binding" [data]="post.description"></markdown>
-    <br>
     <markdown class="variable-binding" [data]="post.content"></markdown>
     <hr>
     <a class="tagLink" href="#" *ngFor="let tag of post.tags">#{{tag}}</a>
