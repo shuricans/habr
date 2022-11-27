@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DataService } from 'src/app/service/data.service';
 
 @Component({
   selector: 'app-lk-page',
@@ -7,9 +8,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LkPageComponent implements OnInit {
 
-  constructor() { }
+  activeComponent: number = 1;
+
+  constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
+    this.activeComponent = this.dataService.getLkActiveComponent();
   }
 
+  showComponent(active: number) {
+    this.activeComponent = active;
+    this.dataService.setLkActiveComponent(active);
+  }
 }

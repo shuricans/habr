@@ -11,6 +11,7 @@ import { UserModel } from '../model/user-model';
 import jwtDecode from 'jwt-decode';
 import { SignupRequest } from '../model/signup-request';
 import { SignupResult } from '../model/signupResult';
+import { DataService } from './data.service';
 
 
 @Injectable({
@@ -26,7 +27,7 @@ export class AuthService {
 
   user: UserModel | null;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private dataService: DataService) {
     this.user = this.getUser(this.getJwtToken()!);
   }
 
@@ -130,6 +131,7 @@ export class AuthService {
 
   public doLogoutUser() {
     this.removeTokens();
+    this.dataService.clearAllData();
   }
 
   private getRefreshToken() {

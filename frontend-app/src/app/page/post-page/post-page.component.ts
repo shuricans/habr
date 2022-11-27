@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MarkdownService } from 'ngx-markdown';
 import { PostDto } from 'src/app/model/post-dto';
 import { DateFormatService } from 'src/app/service/date-format.service';
 import { PostService } from 'src/app/service/post.service';
@@ -24,7 +23,7 @@ export class PostPageComponent implements OnInit {
     const routeParams = this.route.snapshot.paramMap
     const postId = Number(routeParams.get('postId'))
 
-    this.postService.findById(postId).subscribe({
+    this.postService.findPublishedById(postId).subscribe({
       next: postDto => {
         console.log(`Post with id = ${postId} was successfully loaded.`)
         this.notFound = false;

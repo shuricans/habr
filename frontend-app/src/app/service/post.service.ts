@@ -6,6 +6,7 @@ import { Page } from '../model/page';
 import { PageFilter } from '../model/page-filter';
 import { PostDto } from '../model/post-dto';
 import { PostFilter } from '../model/post-filter';
+import { PostFilterOwn } from '../model/post-filter-own';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class PostService {
 
   }
 
-  public findById(postId: number): Observable<PostDto> {
+  public findPublishedById(postId: number): Observable<PostDto> {
     return this.http.get<PostDto>('api/v1/posts/' + postId, { 
       context: new HttpContext().set(BYPASS_LOG, true) 
     })
@@ -50,5 +51,35 @@ export class PostService {
       params,
       context: new HttpContext().set(BYPASS_LOG, true) 
     });
+  }
+
+  public findOwnPosts(pageFilter?: PageFilter, postFilterOwn?: PostFilterOwn): Observable<Page> {
+
+    let params = new HttpParams();
+
+    if(postFilterOwn?.topic != null) {
+      params = params.set('topic', postFilterOwn.topic)
+    }
+    if(postFilterOwn?.tag != null) {
+      params = params.set('tag', postFilterOwn.tag)
+    }
+    if(postFilterOwn?.condition != null) {
+      params = params.set('condition', postFilterOwn.condition)
+    }
+
+    if(pageFilter?.page != null) {
+      params = params.set('page', pageFilter.page)
+    }
+    if(pageFilter?.size != null) {
+      params = params.set('size', pageFilter.size)
+    }
+    if(pageFilter?.sortDir != null) {
+      params = params.set('sortDir', pageFilter.sortDir)
+    }
+    if(pageFilter?.sortField != null) {
+      params = params.set('sortField', pageFilter.sortField)
+    }
+
+    return this.http.get<Page>('api/v1/posts/own', { params });
   }
 }

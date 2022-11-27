@@ -1,33 +1,29 @@
 <div class="row">
-  <div class="col-4">
+  <div class="col-3">
     <div class="row gy-3">
       <div class="row-cols-md-1">
-        <div class="p-3 border bg-dark">
-          <a href="#" class="btn">
-            <small class="text-white fs-5">Личные данные</small>
-          </a>
-        </div>
+        <a (click)="showComponent(1)" class="btn p-3 border bg-dark">
+          <small class="text-white fs-5">Личные данные</small>
+        </a>
       </div>
 
       <div class="row-cols-md-1">
-        <div class="p-3 border bg-dark">
-          <a href="#" class="btn">
-            <small class="text-white fs-5">Мои статьи</small>
-          </a>
-        </div>
+        <a (click)="showComponent(2)" class="btn p-3 border bg-dark">
+          <small class="text-white fs-5">Мои статьи</small>
+        </a>
       </div>
 
       <div class="row-cols-md-1">
-        <div class="p-3 border bg-dark">
-          <a href="#" class="btn">
-            <small class="text-white fs-5">Обсуждения</small>
-          </a>
-        </div>
+        <a (click)="showComponent(3)" class="btn p-3 border bg-dark">
+          <small class="text-white fs-5">Обсуждения</small>
+        </a>
       </div>
     </div>
   </div>
-  <div class="col-8">
-    <app-user-data></app-user-data>
+  <div class="col-9">
+    <app-user-data *ngIf="activeComponent === 1"></app-user-data>
+    <app-user-posts-table *ngIf="activeComponent === 2"></app-user-posts-table>
+    <div *ngIf="activeComponent === 3"><h2>Здесь будут Ваши обсуждения</h2></div>
   </div>
 </div>
 

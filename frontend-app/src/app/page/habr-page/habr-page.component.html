@@ -1,28 +1,32 @@
 <app-post-gallery *ngIf="page" [page]="page"></app-post-gallery>
 
-<div class="d-flex justify-content-left mt-3" *ngIf="!error else errorTemplate">
-  <div class="d-inline-block p-2">
+<div class="d-flex mb-3">
+  <div class="p-2">
     <pagination-controls (pageChange)="getPage($event)"
       id="server"
       previousLabel="предыдущая"
       nextLabel="следующая">
     </pagination-controls>
   </div>
-  <div class="btn-group d-inline-block p-1">
-    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-      постов на странице: <b>{{size}}</b>
-    </button>
-    <ul class="dropdown-menu dropdown-menu-end">
-      <li><a class="dropdown-item" (click)="changeSize(2)">2</a></li>
-      <li><a class="dropdown-item" (click)="changeSize(5)">5</a></li>
-      <li><a class="dropdown-item" (click)="changeSize(10)">10</a></li>
-      <li><a class="dropdown-item" (click)="changeSize(15)">15</a></li>
-      <li><a class="dropdown-item" (click)="changeSize(20)">20</a></li>
-    </ul>
+  <div class="p-2">
+    <div class="d-inline-block" style="width: 10px;"></div>
+    <div class="spinner-border d-inline-block" role="status" *ngIf="loading">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
-  <div class="d-inline-block" style="width: 10px;"></div>
-  <div class="spinner-border d-inline-block mt-2" role="status" *ngIf="loading">
-    <span class="visually-hidden">Loading...</span>
+  <div class="ms-auto p-2">
+    <div class="btn-group">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        постов на странице <b>{{pageFilter.size}}</b>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" (click)="changeSize(2)">2</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(5)">5</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(10)">10</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(15)">15</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(20)">20</a></li>
+      </ul>
+    </div>
   </div>
 </div>
 

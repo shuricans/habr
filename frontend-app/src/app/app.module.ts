@@ -21,10 +21,10 @@ import { TokenInterceptorProvider } from './interceptor/token.interceptor';
 import { LkPageComponent } from './page/lk-page/lk-page.component';
 import { SignupPageComponent } from './page/signup-page/signup-page.component';
 import { UserDataComponent } from './component/user-data/user-data.component';
-import { PostEditComponentComponent } from './component/post-edit-component/post-edit-component.component';
 import { PostCardComponent } from './component/post-card/post-card.component';
 import { PostGalleryComponent } from './component/post-gallery/post-gallery.component';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { UserPostsTableComponent } from './component/user-posts-table/user-posts-table.component';
 
 @NgModule({
   declarations: [
@@ -42,9 +42,9 @@ import { NgxPaginationModule } from 'ngx-pagination';
     LkPageComponent,
     SignupPageComponent,
     UserDataComponent,
-    PostEditComponentComponent,
     PostCardComponent,
-    PostGalleryComponent
+    PostGalleryComponent,
+    UserPostsTableComponent
   ],
     imports: [
         BrowserModule,
