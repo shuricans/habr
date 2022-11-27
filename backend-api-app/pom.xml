@@ -16,7 +16,7 @@
 
     <properties>
         <app.image.name>habr-backend-api-app</app.image.name>
-        <app.image.tag>v-1.0</app.image.tag>
+        <app.image.tag>v-1.2</app.image.tag>
     </properties>
 
     <dependencies>
