@@ -12,6 +12,11 @@ import java.util.List;
 
 public class PostSpecification {
 
+    public static Specification<Post> id(long postId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("id"), postId);
+    }
+
     public static Specification<Post> topic(String topic) {
         return (root, query, builder) ->
                 builder.like(builder.lower(root.get("topic").get("name")), topic.toLowerCase());
@@ -30,6 +35,18 @@ public class PostSpecification {
                 builder.equal(root.get("condition"), condition);
     }
 
+    /**
+     * Returns the configured {@code Specification<Post>},
+     * excluded provided {@code EPostCondition}.
+     *
+     * @param condition, {@code EPostCondition} - must be excluded
+     * @return configured {@code Specification<Post>}
+     */
+    public static Specification<Post> excludeCondition(EPostCondition condition) {
+        return (root, query, builder) ->
+                builder.notEqual(root.get("condition"), condition);
+    }
+
     public static Specification<Post> fetchTags() {
         return (root, query, builder) -> {
             query.distinct(true);
@@ -44,5 +61,26 @@ public class PostSpecification {
             root.fetch("pictures", JoinType.LEFT);
             return builder.conjunction();
         };
+    }
+
+    /**
+     * Finds a posts by user ID
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    public static Specification<Post> userId(long userId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("owner").get("id"), userId);
+    }
+
+
+    /**
+     * Finds a posts by username
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    public static Specification<Post> username(String username) {
+        return (root, query, builder) ->
+                builder.equal(root.get("owner").get("username"), username);
     }
 }

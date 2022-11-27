@@ -3,12 +3,14 @@ package no.war.habr.service;
 import no.war.habr.exception.BadRequestException;
 import no.war.habr.exception.TopicNotFoundException;
 import no.war.habr.exception.UserNotFoundException;
-import no.war.habr.persist.model.*;
+import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.persist.model.Post;
+import no.war.habr.persist.model.Topic;
+import no.war.habr.persist.model.User;
 import no.war.habr.persist.repository.PostRepository;
 import no.war.habr.persist.repository.TagRepository;
 import no.war.habr.persist.repository.TopicRepository;
 import no.war.habr.persist.repository.UserRepository;
-import no.war.habr.service.dto.PostDto;
 import no.war.habr.service.dto.PostMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -80,8 +82,10 @@ class PostServiceImplTest {
     void findAll_ReturnsListOfPostDtoInsidePageObject_WhenSuccessful() {
         // given
         Optional<String> optionalTopic = Optional.of("topic");
+        Optional<String> optionalUsername = Optional.of("username");
         Optional<String> optionalTag = Optional.of("tag");
         Optional<String> optionalCondition = Optional.of("DRAFT");
+        Optional<String> excludedCondition = Optional.of("deleted");
 
         int page = 1;
         int size = 10;
@@ -96,8 +100,15 @@ class PostServiceImplTest {
         when(postRepository.findAll(ArgumentMatchers.<Specification<Post>>any(), any(PageRequest.class)))
                 .thenReturn(mockPage);
         // when
-        underTest.findAll(optionalTopic, optionalTag, optionalCondition,
-                Optional.of(page), Optional.of(size), Optional.of(sortField), Optional.of(direction));
+        underTest.findAll(optionalUsername,
+                optionalTopic,
+                optionalTag,
+                optionalCondition,
+                excludedCondition,
+                Optional.of(page),
+                Optional.of(size),
+                Optional.of(sortField),
+                Optional.of(direction));
 
         // then
         @SuppressWarnings("unchecked")
@@ -118,22 +129,22 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("findById Returns PostDto By Id When Successful")
-    void findById_ReturnsPostDtoById_WhenSuccessful() {
+    @DisplayName("findById Returns Published PostDto By Id When Successful")
+    void findById_ReturnsPublishedPostDtoById_WhenSuccessful() {
         // given
-        long postId = 1L;
-
         // when
-        underTest.findById(postId);
+        underTest.findById(anyLong());
 
         // then
-        ArgumentCaptor<Long> postIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Specification<Post>> specificationArgumentCaptor =
+                ArgumentCaptor.forClass(Specification.class);
 
-        verify(postRepository).findById(postIdArgumentCaptor.capture());
+        verify(postRepository).findOne(specificationArgumentCaptor.capture());
 
-        Long capturedPostId = postIdArgumentCaptor.getValue();
+        Specification<Post> capturedSpecification = specificationArgumentCaptor.getValue();
 
-        assertThat(capturedPostId).isEqualTo(postId);
+        assertThat(capturedSpecification).isInstanceOf(Specification.class);
     }
 
     @Test
@@ -141,13 +152,11 @@ class PostServiceImplTest {
     void save_ShouldThrowUserNotFoundException_WhenUserDoesNotExist() {
         // given
         String nonExistentUsername = "username";
-        PostDto postDto = PostDto.builder()
-                .owner(nonExistentUsername)
-                .build();
+        PostDataRequest postDataRequest = PostDataRequest.builder().build();
         given(userRepository.findByUsername(nonExistentUsername)).willReturn(Optional.empty());
         // when
         // then
-        assertThatThrownBy(() -> underTest.save(postDto))
+        assertThatThrownBy(() -> underTest.save(nonExistentUsername, postDataRequest))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User with username = %s not found.", nonExistentUsername);
     }
@@ -158,8 +167,7 @@ class PostServiceImplTest {
         // given
         User user = createUser();
         String nonExistentTopic = "nonExistentTopic";
-        PostDto postDto = PostDto.builder()
-                .owner(user.getUsername())
+        PostDataRequest postDataRequest = PostDataRequest.builder()
                 .topic(nonExistentTopic)
                 .build();
         given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
@@ -167,33 +175,43 @@ class PostServiceImplTest {
 
         // when
         // then
-        assertThatThrownBy(() -> underTest.save(postDto))
+        assertThatThrownBy(() -> underTest.save(user.getUsername(), postDataRequest))
                 .isInstanceOf(TopicNotFoundException.class)
                 .hasMessageContaining("Topic by name = %s does not exist.", nonExistentTopic);
     }
 
     @Test
-    @DisplayName("save Should Throw BadRequestException When Post Condition Invalid")
-    void save_ShouldThrowBadRequestException_WhenPostConditionInvalid() {
+    @DisplayName("save Should Throw BadRequestException When Wrong Owner")
+    void save_ShouldThrowBadRequestException_WhenWrongOwner() {
         // given
         User user = createUser();
         Topic topic = Topic.builder().name("topic").build();
-        String wrongCondition = "WRONG_CONDITION";
-        PostDto postDto = PostDto.builder()
-                .owner(user.getUsername())
+        Set<String> tags = Set.of("tag_1", "tag_2");
+        String title = "title";
+        String content = "content";
+        String description = "description";
+        long postId = 1L;
+        PostDataRequest postDataRequest = PostDataRequest.builder()
+                .postId(postId)
+                .title(title)
+                .content(content)
+                .description(description)
                 .topic(topic.getName())
-                .condition(wrongCondition)
+                .tags(tags)
+                .build();
+        Post post = Post.builder()
+                .id(postId)
+                .owner(User.builder().id(42L).build())
                 .build();
         given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
         given(topicRepository.findByName(anyString())).willReturn(Optional.of(topic));
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
 
         // when
         // then
-        assertThatThrownBy(() -> underTest.save(postDto))
+        assertThatThrownBy(() -> underTest.save(user.getUsername(), postDataRequest))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining(
-                        "No enum constant no.war.habr.persist.model.EPostCondition.%s",
-                        wrongCondition);
+                .hasMessageContaining("You are not the owner of this post!");
     }
 
     @Test
@@ -206,25 +224,21 @@ class PostServiceImplTest {
         String title = "title";
         String content = "content";
         String description = "description";
-        EPostCondition condition = EPostCondition.DRAFT;
 
-        PostDto postDto = PostDto.builder()
+        PostDataRequest postDataRequest = PostDataRequest.builder()
                 .title(title)
                 .content(content)
                 .description(description)
-                .owner(user.getUsername())
                 .topic(topic.getName())
-                .condition(condition.name())
                 .tags(tags)
                 .build();
 
         given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
         given(topicRepository.findByName(anyString())).willReturn(Optional.of(topic));
         given(tagRepository.findByName(anyString())).willReturn(Optional.empty());
-        given(tagRepository.save(any(Tag.class))).willReturn(any(Tag.class));
 
         // when
-        underTest.save(postDto);
+        underTest.save(user.getUsername(), postDataRequest);
 
         // then
         ArgumentCaptor<Post> postArgumentCaptor = ArgumentCaptor.forClass(Post.class);
@@ -235,7 +249,6 @@ class PostServiceImplTest {
         assertThat(capturedPost.getTitle()).isEqualTo(title);
         assertThat(capturedPost.getContent()).isEqualTo(content);
         assertThat(capturedPost.getDescription()).isEqualTo(description);
-        assertThat(capturedPost.getCondition()).isEqualTo(condition);
         assertThat(capturedPost.getTopic().getName()).isEqualTo(topic.getName());
         assertThat(capturedPost.getOwner()).isEqualTo(user);
     }

@@ -14,13 +14,17 @@ import { SearchPageComponent } from './page/search-page/search-page.component';
 import { LoginPageComponent } from './page/login-page/login-page.component';
 import { PostPageComponent } from './page/post-page/post-page.component';
 import { MarkdownModule } from 'ngx-markdown';
-import {FormsModule} from "@angular/forms";
+import { FormsModule } from "@angular/forms";
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { TokenInterceptorProvider } from './interceptor/token.interceptor';
 import { LkPageComponent } from './page/lk-page/lk-page.component';
 import { SignupPageComponent } from './page/signup-page/signup-page.component';
 import { UserDataComponent } from './component/user-data/user-data.component';
+import { PostCardComponent } from './component/post-card/post-card.component';
+import { PostGalleryComponent } from './component/post-gallery/post-gallery.component';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { UserPostsTableComponent } from './component/user-posts-table/user-posts-table.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +41,10 @@ import { UserDataComponent } from './component/user-data/user-data.component';
     PostPageComponent,
     LkPageComponent,
     SignupPageComponent,
-    UserDataComponent
+    UserDataComponent,
+    PostCardComponent,
+    PostGalleryComponent,
+    UserPostsTableComponent
   ],
     imports: [
         BrowserModule,
@@ -46,6 +53,7 @@ import { UserDataComponent } from './component/user-data/user-data.component';
         FormsModule,
         ReactiveFormsModule,
         HttpClientModule,
+        NgxPaginationModule,
     ],
   providers: [TokenInterceptorProvider],
   bootstrap: [AppComponent]

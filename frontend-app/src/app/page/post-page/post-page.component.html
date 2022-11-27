@@ -1,6 +1,20 @@
-<h6>
-ngx-markdown@{{ ngxMarkdownVersion }}
-</h6>
-<br>
-<!-- <textarea class="variable-textarea" [(ngModel)]="markdown"></textarea> -->
-<markdown class="variable-binding" [data]="markdown"></markdown>
+<div *ngIf="post else ifPostNotFound">
+    <p>Раздел: <a href="#">{{post.topic}}</a></p>
+    <p>Автор: <a href="#">{{post.owner}}</a></p>
+    <p>От: {{dateFormatService.toLocaleString(post.created)}}</p>
+    <p>Обновлён: {{dateFormatService.toLocaleString(post.updated)}}</p>
+    <h1>{{post.title}}</h1>
+    <hr>
+    <img src="https://picsum.photos/600/400/?random={{post.id}}" class="card-img mb-2"/>
+    <br>
+    <markdown class="variable-binding" [data]="post.description"></markdown>
+    <markdown class="variable-binding" [data]="post.content"></markdown>
+    <hr>
+    <a class="tagLink" href="#" *ngFor="let tag of post.tags">#{{tag}}</a>
+</div>
+
+<ng-template #ifPostNotFound>
+    <h1>Страница не найдена.</h1>
+    <p>Страница устарела, была удалена или не существовала вовсе.</p>
+    <a class="btn btn-primary" routerLink="/habr" role="button">Вернуться на главную</a>
+</ng-template>

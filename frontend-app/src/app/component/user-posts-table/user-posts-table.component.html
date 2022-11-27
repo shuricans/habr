@@ -1,0 +1,80 @@
+<div class="d-flex mb-3 justify-content-between mb-2">
+    <a class="btn btn-primary " href="#" role="button">Написать статью</a>
+
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{conditionsInDropDown[postFilter.condition]}}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" (click)="changeCondition()">Все</a></li>
+            <li><a class="dropdown-item" (click)="changeCondition('DRAFT')">Черновики</a></li>
+            <li><a class="dropdown-item" (click)="changeCondition('PUBLISHED')">Опубликованные</a></li>
+            <li><a class="dropdown-item" (click)="changeCondition('HIDDEN')">Скрытые</a></li>
+            <li><a class="dropdown-item" (click)="changeCondition('BANNED')">Заблокированные</a></li>
+        </ul>
+    </div>
+</div>
+
+<table class="table table-bordered table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">№</th>
+            <th scope="col">Статья</th>
+            <th scope="col">Топик</th>
+            <th scope="col">Статус</th>
+            <th scope="col">Дата создания</th>
+            <th scope="col">Действие</th>
+        </tr>
+    </thead>
+
+    <tbody *ngIf="page">
+        <tr *ngFor="let post of page.content | 
+          paginate: { 
+            id: 'server', 
+            itemsPerPage: page.size, 
+            currentPage: page.number + 1, 
+            totalItems: page.totalElements 
+          }; 
+          index as i">
+        <th scope="row">{{i + 1 + (page.number * page.size)}}</th>
+        <td><a [routerLink]="['/habr', post.id]">{{post.title}}</a></td>
+        <td>{{post.topic}}</td>
+        <td>{{conditions[post.condition]}}</td>
+        <td>{{dateFormatService.toLocaleString(post.created)}}</td>
+        <td>
+            <a class="btn" href="#"><i class="fa fa-pencil-alt" aria-hidden="true"></i></a>
+            <a class="btn" href="#"><i class="fa fa-trash" aria-hidden="true"></i></a>
+        </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="d-flex mb-3">
+  <div class="p-2">
+    <pagination-controls (pageChange)="getPage($event)"
+      id="server"
+      previousLabel=""
+      nextLabel="">
+    </pagination-controls>
+  </div>
+  <div class="p-2">
+    <div class="d-inline-block" style="width: 10px;"></div>
+    <div class="spinner-border d-inline-block" role="status" *ngIf="loading">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  <div class="ms-auto p-2">
+    <div class="btn-group">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        отображать по <b>{{pageFilter.size}}</b>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" (click)="changeSize(2)">2</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(5)">5</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(10)">10</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(15)">15</a></li>
+        <li><a class="dropdown-item" (click)="changeSize(20)">20</a></li>
+      </ul>
+    </div>
+  </div>
+</div>

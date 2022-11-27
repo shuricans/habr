@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 
@@ -20,26 +23,27 @@ import java.util.Set;
 @Getter
 public class PostDto {
 
-    @NotNull()
-    @Min(value = 1)
     private Long id;
 
-    @NotBlank
+    private LocalDateTime created;
+
+    private LocalDateTime updated;
+
     private String title;
 
-    @NotBlank
     private String content;
 
     private String description;
 
-    @NotBlank
     private String condition;
 
-    @NotBlank
     private String owner;
 
-    @NotBlank
     private String topic;
+
+    private Long mainPictureId;
+
+    private List<Long> pictures;
 
     private Set<String> tags;
 }
