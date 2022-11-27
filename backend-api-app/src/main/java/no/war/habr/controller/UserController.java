@@ -10,6 +10,8 @@ import no.war.habr.payload.request.ConditionRequest;
 import no.war.habr.payload.request.PromoteRequest;
 import no.war.habr.payload.request.UpdateUserInfoRequest;
 import no.war.habr.payload.response.MessageResponse;
+import no.war.habr.persist.model.EUserCondition;
+import no.war.habr.persist.model.User;
 import no.war.habr.service.UserService;
 import no.war.habr.service.dto.UserDto;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @SecurityRequirement(name="bearerAuth")
@@ -167,5 +170,20 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return ResponseEntity.ok(userService.update(username, updateUserInfoRequest));
+    }
+
+    @GetMapping("/find")
+    @Operation(summary = "Returns user by username", tags = "Users")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "403", description = "When forbidden"),
+            @ApiResponse(responseCode = "404", description = "When user not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<Page<User>> findByFilter(@PathVariable("username") String username,
+                                                   @PathVariable("birthday") LocalDate birthday,
+                                                   @PathVariable("condition") EUserCondition condition) {
+        return ResponseEntity.ok(userService.findByFilter(username, birthday, condition));
     }
 }

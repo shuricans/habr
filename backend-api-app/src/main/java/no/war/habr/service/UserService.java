@@ -3,10 +3,12 @@ package no.war.habr.service;
 import no.war.habr.payload.request.UpdateUserInfoRequest;
 import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.EUserCondition;
+import no.war.habr.persist.model.User;
 import no.war.habr.service.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort.Direction;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,6 +26,8 @@ public interface UserService {
     Optional<UserDto> findById(long userId);
 
     Optional<UserDto> findByUsername(String username);
+
+    Page<User> findByFilter (String username, LocalDate birthday, EUserCondition condition);
 
     MessageResponse deleteById(Long userId);
 

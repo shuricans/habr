@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -232,5 +233,12 @@ public class UserServiceImpl implements UserService {
             }
         }
         return user;
+    }
+
+    @Transactional
+    @Override
+    public Page<User> findByFilter(String username, LocalDate birthday, EUserCondition condition) {
+        username = username == null || username.isBlank() ? null : "%" + username.trim() + "%";
+        return userRepository.findByFilter(username, birthday, condition);
     }
 }
