@@ -1,5 +1,5 @@
 <div class="d-flex mb-3 justify-content-between mb-2">
-    <a class="btn btn-primary " href="#" role="button">Написать статью</a>
+    <a class="btn btn-primary" role="button" data-bs-toggle="modal" data-bs-target="#staticModal">Написать статью</a>
 
     <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -28,13 +28,13 @@
     </thead>
 
     <tbody *ngIf="page">
-        <tr *ngFor="let post of page.content | 
-          paginate: { 
-            id: 'server', 
-            itemsPerPage: page.size, 
-            currentPage: page.number + 1, 
-            totalItems: page.totalElements 
-          }; 
+        <tr *ngFor="let post of page.content |
+          paginate: {
+            id: 'server',
+            itemsPerPage: page.size,
+            currentPage: page.number + 1,
+            totalItems: page.totalElements
+          };
           index as i">
         <th scope="row">{{i + 1 + (page.number * page.size)}}</th>
         <td><a [routerLink]="['/habr', post.id]">{{post.title}}</a></td>
@@ -78,3 +78,5 @@
     </div>
   </div>
 </div>
+
+<app-post-edit></app-post-edit>
