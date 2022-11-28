@@ -25,6 +25,8 @@ import { PostCardComponent } from './component/post-card/post-card.component';
 import { PostGalleryComponent } from './component/post-gallery/post-gallery.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { UserPostsTableComponent } from './component/user-posts-table/user-posts-table.component';
+import { PostEditComponent } from './component/post-edit/post-edit.component';
+
 
 @NgModule({
   declarations: [
@@ -44,7 +46,9 @@ import { UserPostsTableComponent } from './component/user-posts-table/user-posts
     UserDataComponent,
     PostCardComponent,
     PostGalleryComponent,
-    UserPostsTableComponent
+    UserPostsTableComponent,
+    PostEditComponent
+
   ],
     imports: [
         BrowserModule,
