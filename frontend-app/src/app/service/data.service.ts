@@ -12,12 +12,14 @@ export class DataService {
   private readonly LK_ACTIVE_COMPONENT = 'lk_active_component';
   private readonly LK_POST_FILTER = 'lk_posts_filter';
   private readonly DESIGN_PAGE_FILTER = 'design_page_filter';
+  private readonly WEB_PAGE_FILTER = 'web_page_filter';
 
   private habrPageFilter!: PageFilter;
   private lkPostPageFilter!: PageFilter;
   private lkActiveComponent!: number;
   private lkPostFilter!: PostFilterOwn;
   private designPageFilter!: PageFilter;
+  private webPageFilter!: PageFilter;
 
   public setHabrPageFilter(pagefilter: PageFilter) {
     this.habrPageFilter = pagefilter;
@@ -95,5 +97,19 @@ export class DataService {
   setDesignPageFilter(pageFilter: PageFilter) {
     this.designPageFilter = pageFilter;
     localStorage.setItem(this.DESIGN_PAGE_FILTER, JSON.stringify(this.designPageFilter));
+  }
+
+  getWebPageFilter(): PageFilter {
+    if (localStorage.getItem(this.WEB_PAGE_FILTER)) {
+      this.webPageFilter = JSON.parse(localStorage.getItem(this.WEB_PAGE_FILTER)!);
+    } else {
+      this.webPageFilter = new PageFilter();
+    }
+    return this.webPageFilter;
+  }
+
+  setWebPageFilter(pageFilter: PageFilter) {
+    this.webPageFilter = pageFilter;
+    localStorage.setItem(this.WEB_PAGE_FILTER, JSON.stringify(this.webPageFilter));
   }
 }
