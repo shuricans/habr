@@ -11,11 +11,13 @@ export class DataService {
   private readonly LK_POST_PAGE_FILTER = 'lk_posts_page_filter';
   private readonly LK_ACTIVE_COMPONENT = 'lk_active_component';
   private readonly LK_POST_FILTER = 'lk_posts_filter';
+  private readonly DESIGN_PAGE_FILTER = 'design_page_filter';
 
   private habrPageFilter!: PageFilter;
   private lkPostPageFilter!: PageFilter;
   private lkActiveComponent!: number;
   private lkPostFilter!: PostFilterOwn;
+  private designPageFilter!: PageFilter;
 
   public setHabrPageFilter(pagefilter: PageFilter) {
     this.habrPageFilter = pagefilter;
@@ -58,7 +60,7 @@ export class DataService {
     }
     return this.lkActiveComponent;
   }
-  
+
   public setLkPostFilter(postFilter: PostFilterOwn) {
     this.lkPostFilter = postFilter;
     localStorage.setItem(this.LK_POST_FILTER, JSON.stringify(this.lkPostFilter));
@@ -78,5 +80,20 @@ export class DataService {
     localStorage.removeItem(this.LK_POST_PAGE_FILTER);
     localStorage.removeItem(this.LK_ACTIVE_COMPONENT);
     localStorage.removeItem(this.LK_POST_FILTER);
+    localStorage.removeItem(this.DESIGN_PAGE_FILTER);
+  }
+
+  getDesignPageFilter(): PageFilter {
+    if (localStorage.getItem(this.DESIGN_PAGE_FILTER)) {
+      this.designPageFilter = JSON.parse(localStorage.getItem(this.DESIGN_PAGE_FILTER)!);
+    } else {
+      this.designPageFilter = new PageFilter();
+    }
+    return this.designPageFilter;
+  }
+
+  setDesignPageFilter(pageFilter: PageFilter) {
+    this.designPageFilter = pageFilter;
+    localStorage.setItem(this.DESIGN_PAGE_FILTER, JSON.stringify(this.designPageFilter));
   }
 }
