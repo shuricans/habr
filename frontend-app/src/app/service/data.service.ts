@@ -14,6 +14,7 @@ export class DataService {
   private readonly DESIGN_PAGE_FILTER = 'design_page_filter';
   private readonly WEB_PAGE_FILTER = 'web_page_filter';
   private readonly MOBILE_PAGE_FILTER = 'mobile_page_filter';
+  private readonly MARKETING_PAGE_FILTER = 'marketing_page_filter';
 
   private habrPageFilter!: PageFilter;
   private lkPostPageFilter!: PageFilter;
@@ -22,6 +23,7 @@ export class DataService {
   private designPageFilter!: PageFilter;
   private webPageFilter!: PageFilter;
   private mobilePageFilter!: PageFilter;
+  private marketingPageFilter!: PageFilter;
 
   public setHabrPageFilter(pagefilter: PageFilter) {
     this.habrPageFilter = pagefilter;
@@ -87,6 +89,7 @@ export class DataService {
     localStorage.removeItem(this.DESIGN_PAGE_FILTER);
     localStorage.removeItem(this.WEB_PAGE_FILTER);
     localStorage.removeItem(this.MOBILE_PAGE_FILTER);
+    localStorage.removeItem(this.MARKETING_PAGE_FILTER);
   }
 
   getDesignPageFilter(): PageFilter {
@@ -117,7 +120,7 @@ export class DataService {
     localStorage.setItem(this.WEB_PAGE_FILTER, JSON.stringify(this.webPageFilter));
   }
 
-  getMobilePageFilter() {
+  getMobilePageFilter(): PageFilter {
     if (localStorage.getItem(this.MOBILE_PAGE_FILTER)) {
       this.mobilePageFilter = JSON.parse(localStorage.getItem(this.MOBILE_PAGE_FILTER)!);
     } else {
@@ -129,5 +132,19 @@ export class DataService {
   setMobilePageFilter(pageFilter: PageFilter) {
     this.mobilePageFilter = pageFilter;
     localStorage.setItem(this.MOBILE_PAGE_FILTER, JSON.stringify(this.mobilePageFilter));
+  }
+
+  getMarketingPageFilter(): PageFilter {
+    if (localStorage.getItem(this.MARKETING_PAGE_FILTER)) {
+      this.marketingPageFilter = JSON.parse(localStorage.getItem(this.MARKETING_PAGE_FILTER)!);
+    } else {
+      this.marketingPageFilter = new PageFilter();
+    }
+    return this.marketingPageFilter;
+  }
+
+  setMarketingPageFilter(pageFilter: PageFilter) {
+    this.marketingPageFilter = pageFilter;
+    localStorage.setItem(this.MARKETING_PAGE_FILTER, JSON.stringify(this.marketingPageFilter));
   }
 }
