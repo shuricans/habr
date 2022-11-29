@@ -13,6 +13,7 @@ export class DataService {
   private readonly LK_POST_FILTER = 'lk_posts_filter';
   private readonly DESIGN_PAGE_FILTER = 'design_page_filter';
   private readonly WEB_PAGE_FILTER = 'web_page_filter';
+  private readonly MOBILE_PAGE_FILTER = 'mobile_page_filter';
 
   private habrPageFilter!: PageFilter;
   private lkPostPageFilter!: PageFilter;
@@ -20,6 +21,7 @@ export class DataService {
   private lkPostFilter!: PostFilterOwn;
   private designPageFilter!: PageFilter;
   private webPageFilter!: PageFilter;
+  private mobilePageFilter!: PageFilter;
 
   public setHabrPageFilter(pagefilter: PageFilter) {
     this.habrPageFilter = pagefilter;
@@ -83,6 +85,8 @@ export class DataService {
     localStorage.removeItem(this.LK_ACTIVE_COMPONENT);
     localStorage.removeItem(this.LK_POST_FILTER);
     localStorage.removeItem(this.DESIGN_PAGE_FILTER);
+    localStorage.removeItem(this.WEB_PAGE_FILTER);
+    localStorage.removeItem(this.MOBILE_PAGE_FILTER);
   }
 
   getDesignPageFilter(): PageFilter {
@@ -111,5 +115,19 @@ export class DataService {
   setWebPageFilter(pageFilter: PageFilter) {
     this.webPageFilter = pageFilter;
     localStorage.setItem(this.WEB_PAGE_FILTER, JSON.stringify(this.webPageFilter));
+  }
+
+  getMobilePageFilter() {
+    if (localStorage.getItem(this.MOBILE_PAGE_FILTER)) {
+      this.mobilePageFilter = JSON.parse(localStorage.getItem(this.MOBILE_PAGE_FILTER)!);
+    } else {
+      this.mobilePageFilter = new PageFilter();
+    }
+    return this.mobilePageFilter;
+  }
+
+  setMobilePageFilter(pageFilter: PageFilter) {
+    this.mobilePageFilter = pageFilter;
+    localStorage.setItem(this.MOBILE_PAGE_FILTER, JSON.stringify(this.mobilePageFilter));
   }
 }
