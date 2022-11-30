@@ -35,7 +35,7 @@ public class Post extends BaseEntity {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
     @Column(name = "main_picture_id")
