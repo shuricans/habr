@@ -215,6 +215,16 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("save Returns 401 Unauthorized When Token Not Provided")
+    void save_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder savePostRequest = MockMvcRequestBuilders
+                .post("/posts/save")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(savePostRequest).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("save Should Save New Post When Successful")
     void save_ShouldSaveNewPost_WhenSuccessful() throws Exception {
         String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
