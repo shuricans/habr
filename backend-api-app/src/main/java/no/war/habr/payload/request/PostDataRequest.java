@@ -5,7 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 /**
@@ -19,18 +21,23 @@ import java.util.Set;
 @Getter
 public class PostDataRequest {
 
+    @Min(1)
     private Long postId;
 
     @NotBlank
+    @Size(min = 5, message = "{validation.name.size.too_short}")
+    @Size(max = 255, message = "{validation.name.size.too_long}")
     private String title;
 
     @NotBlank
     private String content;
 
     @NotBlank
+    @Size(max = 2000, message = "{validation.name.size.too_long}")
     private String description;
 
     @NotBlank
+    @Size(max = 255, message = "{validation.name.size.too_long}")
     private String topic;
 
     private Set<String> tags;
