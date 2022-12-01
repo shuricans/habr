@@ -1,17 +1,16 @@
 package no.war.habr.service;
 
 import lombok.RequiredArgsConstructor;
-import no.war.habr.exception.BadRequestException;
-import no.war.habr.exception.PostNotFoundException;
-import no.war.habr.exception.TopicNotFoundException;
-import no.war.habr.exception.UserNotFoundException;
+import no.war.habr.exception.*;
 import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.*;
 import no.war.habr.persist.repository.PostRepository;
 import no.war.habr.persist.repository.TagRepository;
 import no.war.habr.persist.repository.TopicRepository;
 import no.war.habr.persist.repository.UserRepository;
 import no.war.habr.persist.specification.PostSpecification;
+import no.war.habr.persist.specification.UserSpecification;
 import no.war.habr.service.dto.PostDto;
 import no.war.habr.service.dto.PostMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -177,4 +177,57 @@ public class PostServiceImpl implements PostService {
         }
         return Optional.empty();
     }
+
+    /**
+     * Delete post by id
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Transactional
+    @Override
+    public MessageResponse deleteById(Long postId) {
+
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new PostNotFoundException(String.format("Post by id [%d] not found.", postId)));
+
+        post.setCondition(EPostCondition.DELETED);
+        postRepository.save(post);
+
+        return new MessageResponse(String.format("Post with id [%d] deleted successfully", postId));
+    }
+
+
+    /**
+     * The delete method with a check on the condition of the user and the post
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Override
+    public MessageResponse delete(String username, long postId) {
+
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UserNotFoundException(String.format("User with username [%s] not found.", username)));
+
+        if (!owner.getCondition().equals(EUserCondition.ACTIVE)) {
+            throw new PreconditionFailedException(String.format("User [%s] is not ACTIVE", username));
+        }
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() ->
+                        new PostNotFoundException(String.format("Post by id [%d] not found.", postId)));
+
+        if (!owner.equals(post.getOwner())) {
+            throw new PreconditionFailedException("You are not the owner of this post!");
+        }
+
+        if (post.getCondition().equals(EPostCondition.DELETED)) {
+            throw new PreconditionFailedException(String.format("Post by id [%d] deleted already", postId));
+        }
+
+        return deleteById(postId);
+    }
 }
+
+
+

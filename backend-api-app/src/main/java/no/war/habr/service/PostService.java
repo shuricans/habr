@@ -1,6 +1,7 @@
 package no.war.habr.service;
 
 import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.EPostCondition;
 import no.war.habr.service.dto.PostDto;
 import org.springframework.data.domain.Page;
@@ -31,4 +32,7 @@ public interface PostService {
     PostDto save(String username, PostDataRequest postDataRequest);
 
     Optional<PostDto> getRandomPost(EPostCondition postCondition);
+
+    MessageResponse deleteById(Long postId);
+    MessageResponse delete(String username, long postId);
 }

@@ -75,6 +75,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 .createExceptionDetails(ex, HttpStatus.BAD_REQUEST, "Bad Credentials");
     }
 
+    @ExceptionHandler(PreconditionFailedException.class)
+    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    public ExceptionDetails handlePreconditionFailedException(PreconditionFailedException ex) {
+        return ExceptionDetails
+                .createExceptionDetails(ex, HttpStatus.PRECONDITION_FAILED, "Precondition Failed");
+    }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
