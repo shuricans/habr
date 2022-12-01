@@ -42,7 +42,7 @@ This is a bad version of a great project with the name - [https://habr.com/](htt
     * maven 3.8.3
     * [node](https://nodejs.org/en/) v16.17.0
     * npm 8.15.0
-    * [Angular CLI](https://angular.io/cli): 14.2.3
+    * [Angular CLI](https://angular.io/cli): 15.0.2
 * Clone project from github
 * First, in parent module **habr** run `mvn clean install`
 * All tests must pass successfully. I hope :)
