@@ -25,7 +25,7 @@ import { PostCardComponent } from './component/post-card/post-card.component';
 import { PostGalleryComponent } from './component/post-gallery/post-gallery.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { UserPostsTableComponent } from './component/user-posts-table/user-posts-table.component';
-import { PostEditComponent } from './component/post-edit/post-edit.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 @NgModule({
@@ -47,8 +47,6 @@ import { PostEditComponent } from './component/post-edit/post-edit.component';
     PostCardComponent,
     PostGalleryComponent,
     UserPostsTableComponent,
-    PostEditComponent
-
   ],
     imports: [
         BrowserModule,
@@ -58,6 +56,7 @@ import { PostEditComponent } from './component/post-edit/post-edit.component';
         ReactiveFormsModule,
         HttpClientModule,
         NgxPaginationModule,
+        NgbModule,
     ],
   providers: [TokenInterceptorProvider],
   bootstrap: [AppComponent]

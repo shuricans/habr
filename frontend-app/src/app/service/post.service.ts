@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { BYPASS_LOG } from '../interceptor/token.interceptor';
 import { Page } from '../model/page';
 import { PageFilter } from '../model/page-filter';
+import { PostDataRequest } from '../model/post-data-request';
 import { PostDto } from '../model/post-dto';
 import { PostFilter } from '../model/post-filter';
 import { PostFilterOwn } from '../model/post-filter-own';
@@ -81,5 +82,9 @@ export class PostService {
     }
 
     return this.http.get<Page>('api/v1/posts/own', { params });
+  }
+
+  public save(postDataRequest: PostDataRequest): Observable<PostDto> {
+    return this.http.post<PostDto>('api/v1/posts/save', postDataRequest);
   }
 }
