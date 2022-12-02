@@ -18,6 +18,11 @@ public class UserSpecification {
                 builder.like(builder.lower(root.get("username")), "%" + username.toLowerCase() + "%");
     }
 
+    public static Specification<User> username(String username) {
+        return (root, query, builder) ->
+                builder.equal(root.get("username"), username.strip());
+    }
+
     public static Specification<User> firstNameLike(String firstName) {
         return (root, query, builder) ->
                 builder.like(builder.lower(root.get("firstName")), "%" + firstName.toLowerCase() + "%");
