@@ -227,6 +227,30 @@ public class PostServiceImpl implements PostService {
 
         return deleteById(postId);
     }
+
+    @Override
+    public MessageResponse hide(String username, long postId) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UserNotFoundException("Username not found with username" + username));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() ->
+                        new PostNotFoundException("Post cannot be found"));
+
+        if(user.getCondition().equals(EUserCondition.ACTIVE)
+                && post.getCondition().equals(EPostCondition.PUBLISHED)
+                && post.getOwner().equals(user)) {
+
+            post.setCondition(EPostCondition.HIDDEN);
+            postRepository.save(post);
+            return new MessageResponse("Post successfully hidden");
+        } else {
+            return new MessageResponse("The post could not be hidden. " +
+                    "Check: the statuses of the user and the post, whether you are the author of the post");
+        }
+
+    }
 }
 
 
