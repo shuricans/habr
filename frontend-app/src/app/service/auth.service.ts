@@ -61,7 +61,7 @@ export class AuthService {
           let authResult = new AuthResult();
           authResult.success = true;
           authResult.jwtResponse = jwtResponse;
-          authResult.redirectUrl = '/habr';
+          authResult.redirectUrl = this.redirectUrl ?? '/lk';
           return authResult;
         }),
         catchError((error: HttpErrorResponse) => {
