@@ -26,6 +26,7 @@ import { PostGalleryComponent } from './component/post-gallery/post-gallery.comp
 import { NgxPaginationModule } from 'ngx-pagination';
 import { UserPostsTableComponent } from './component/user-posts-table/user-posts-table.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NotFoundPageComponent } from './page/not-found-page/not-found-page.component';
 
 
 @NgModule({
@@ -47,6 +48,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     PostCardComponent,
     PostGalleryComponent,
     UserPostsTableComponent,
+    NotFoundPageComponent,
   ],
     imports: [
         BrowserModule,
