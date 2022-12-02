@@ -111,6 +111,16 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username).map(userMapper::fromUser);
     }
 
+    @Override
+    public Optional<UserDto> findByUsername(String username, EUserCondition condition) {
+        Specification<User> spec = Specification
+                .where(UserSpecification.username(username))
+                .and(UserSpecification.condition(condition))
+                .and(UserSpecification.fetchRoles());
+
+        return userRepository.findOne(spec).map(userMapper::fromUser);
+    }
+
     @Transactional
     @Override
     public MessageResponse deleteById(Long userId) {

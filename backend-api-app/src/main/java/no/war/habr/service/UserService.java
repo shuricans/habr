@@ -25,6 +25,8 @@ public interface UserService {
 
     Optional<UserDto> findByUsername(String username);
 
+    Optional<UserDto> findByUsername(String username, EUserCondition condition);
+
     MessageResponse deleteById(Long userId);
 
     UserDto update(String username, UpdateUserInfoRequest updateUserInfoRequest);

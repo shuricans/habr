@@ -10,6 +10,7 @@ import no.war.habr.payload.request.ConditionRequest;
 import no.war.habr.payload.request.PromoteRequest;
 import no.war.habr.payload.request.UpdateUserInfoRequest;
 import no.war.habr.payload.response.MessageResponse;
+import no.war.habr.persist.model.EUserCondition;
 import no.war.habr.service.UserService;
 import no.war.habr.service.dto.UserDto;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Optional;
 
-@SecurityRequirement(name="bearerAuth")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -32,6 +32,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Returns all users with pagination", tags = "Users")
     @ApiResponses({
@@ -62,6 +63,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Returns user by id", tags = "Users")
     @ApiResponses({
@@ -77,6 +79,7 @@ public class UserController {
     }
 
     @GetMapping("/username/{username}")
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Returns user by username", tags = "Users")
     @ApiResponses({
@@ -91,7 +94,20 @@ public class UserController {
                 .orElseThrow(() -> new UserNotFoundException("User [" + username + "] not found.")));
     }
 
+    @GetMapping("/username-active/{username}")
+    @Operation(summary = "Returns only active user by username", tags = "Users")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "404", description = "When user not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<UserDto> findActiveByUsername(@PathVariable("username") String username) {
+        return ResponseEntity.ok(userService.findByUsername(username, EUserCondition.ACTIVE)
+                .orElseThrow(() -> new UserNotFoundException("User [" + username + "] not found.")));
+    }
+
     @PatchMapping("/promote")
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Promote user to others roles", tags = "Users")
     @ApiResponses({
@@ -107,6 +123,7 @@ public class UserController {
     }
 
     @PatchMapping("/condition")
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Changes user condition, to set \"DELETED\" use the delete endpoint", tags = "Users")
     @ApiResponses({
@@ -122,6 +139,7 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Set user condition to DELETED", tags = "Users")
     @ApiResponses({
@@ -136,6 +154,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Get yourself data", tags = "Users")
     @ApiResponses({
@@ -153,6 +172,7 @@ public class UserController {
     }
 
     @PatchMapping("/update")
+    @SecurityRequirement(name="bearerAuth")
     @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
     @Operation(summary = "Updates yourself birthday, firstName, lastName, aboutMe", tags = "Users")
     @ApiResponses({

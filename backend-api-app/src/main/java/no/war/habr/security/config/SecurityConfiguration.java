@@ -62,6 +62,7 @@ public class SecurityConfiguration {
                         .antMatchers("/posts/save").authenticated()
                         .antMatchers("/posts", "/posts/{\\d+}").permitAll()
                         .antMatchers("/topics").permitAll()
+                        .antMatchers("/users/username-active/**").permitAll()
                         .antMatchers("/swagger-ui/**").permitAll()
                         .antMatchers("/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
