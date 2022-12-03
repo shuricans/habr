@@ -1,12 +1,12 @@
 package no.war.habr.service;
 
 import no.war.habr.exception.BadRequestException;
+import no.war.habr.exception.PostNotFoundException;
 import no.war.habr.exception.TopicNotFoundException;
 import no.war.habr.exception.UserNotFoundException;
 import no.war.habr.payload.request.PostDataRequest;
-import no.war.habr.persist.model.Post;
-import no.war.habr.persist.model.Topic;
-import no.war.habr.persist.model.User;
+import no.war.habr.payload.response.MessageResponse;
+import no.war.habr.persist.model.*;
 import no.war.habr.persist.repository.PostRepository;
 import no.war.habr.persist.repository.TagRepository;
 import no.war.habr.persist.repository.TopicRepository;
@@ -75,6 +75,148 @@ class PostServiceImplTest {
                 postMapper);
 
         ReflectionTestUtils.setField(underTest, "defaultSortDirection", "ASC");
+    }
+
+    @Test
+    @DisplayName("find UserNotFoundException When user not found")
+    public void  publish_itShouldUserNotFoundExceptionIfUserNotFound() {
+        //given
+        String username = "username";
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.empty());
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, anyLong()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User with username: %s not found.", username);
+    }
+
+    @Test
+    @DisplayName("find UserNotFoundException When user has no active conditions")
+    public void publish_itShouldUserNotFoundExceptionIfUserNoActive() {
+        //given
+        User user = createUser();
+        user.setCondition(EUserCondition.NOT_ACTIVE);
+        String username = user.getUsername();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, anyLong()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User with username: %s with EUserCondition.NOT_ACTIVE not found.", username);
+    }
+
+    @Test
+    @DisplayName("find PostNotFoundException When post not found")
+    public void publish_itShouldPostNotFoundExceptionWhenPostNotFound() {
+        //given
+        User user = createUser();
+        user.setCondition(EUserCondition.ACTIVE);
+        String username = user.getUsername();
+        Post post = Post.builder()
+                .id(11L)
+                .build();
+
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(anyLong())).willReturn(Optional.empty());
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(PostNotFoundException.class)
+                .hasMessageContaining("Post with id: %d not found.", postId);
+    }
+
+    @Test
+    @DisplayName("find PostNotFoundException When post not found")
+    public void publish_itShouldPostNotFoundExceptionWhenPostHasEPostConditionDeleted() {
+        //given
+        User user = createUser();
+        user.setCondition(EUserCondition.ACTIVE);
+        String username = "user.getUsername()";
+        Post post = Post.builder()
+                .id(11L)
+                .condition(EPostCondition.DELETED)
+                .build();
+
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(PostNotFoundException.class)
+                .hasMessageContaining("Post with postId: %d with EPostCondition: %s not found.", postId, post.getCondition());
+    }
+
+    @Test
+    @DisplayName("find UserNotFoundException When user not have owner this post")
+    public void publish_itShouldUserNotFoundExceptionWhenUserNotHavePostThisOwner() {
+        //given
+        User user = createUser();
+        User owner = User.builder()
+                .id(2L)
+                .username("user")
+                .condition(EUserCondition.ACTIVE)
+                .build();
+
+        user.setCondition(EUserCondition.ACTIVE);
+        String username = user.getUsername();
+
+        Post post = Post.builder()
+                .id(11L)
+                .condition(EPostCondition.HIDDEN)
+                .owner(owner)
+                .build();
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User is not the owner of this post.");
+    }
+
+    @Test
+    @DisplayName("find MessageResponse Цhen user and post passed all checks and didn't throw exceptions")
+    public void publish_itShouldMessageResponse() {
+        //given
+        User user = createUser();
+        User owner = createUser();
+
+        user.setCondition(EUserCondition.ACTIVE);
+        String username = user.getUsername();
+        Post post = Post.builder()
+                .id(11L)
+                .condition(EPostCondition.HIDDEN)
+                .owner(owner)
+                .build();
+
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        String expectedMessageResponse = String.format("Post with id = %d published successfully", postId);
+
+        //when
+        MessageResponse messageResponse = underTest.publish(username, postId);
+
+        //then
+        ArgumentCaptor<Post> postArgumentCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(postArgumentCaptor.capture());
+        Post capturedPost = postArgumentCaptor.getValue();
+
+        assertThat(capturedPost).isEqualTo(post);
+        assertThat(capturedPost.getCondition()).isEqualTo(post.getCondition());
+        assertThat(capturedPost.getOwner()).isEqualTo(post.getOwner());
+
+        assertThat(messageResponse.getMessage()).isEqualTo(expectedMessageResponse);
+
     }
 
     @Test

@@ -6,6 +6,7 @@ import no.war.habr.exception.PostNotFoundException;
 import no.war.habr.exception.TopicNotFoundException;
 import no.war.habr.exception.UserNotFoundException;
 import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.*;
 import no.war.habr.persist.repository.PostRepository;
 import no.war.habr.persist.repository.TagRepository;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import static no.war.habr.persist.model.EUserCondition.*;
 import static no.war.habr.util.SpecificationUtils.combineSpec;
 
 /**
@@ -55,6 +57,36 @@ public class PostServiceImpl implements PostService {
 
     @Value("${app.defaultSortDirection.posts}")
     private String defaultSortDirection;
+
+    @Override
+    @Transactional
+    public MessageResponse publish(String username, long postId) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UserNotFoundException(String.format("User with username: %s not found.", username)));
+
+        if (!user.getCondition().equals(ACTIVE)) {
+            throw new UserNotFoundException(String.format("User with username: %s with EUserCondition.NOT_ACTIVE not found.", username));
+        }
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() ->
+                        new PostNotFoundException(String.format("Post with id: %d not found.", postId)));
+
+        if (post.getCondition().equals(EPostCondition.DELETED)) {
+            throw new PostNotFoundException(String.format("Post with postId: %d with EPostCondition: %s not found.", postId, post.getCondition()));
+        }
+
+        if (!user.equals(post.getOwner())) {
+            throw new UserNotFoundException("User is not the owner of this post.");
+        }
+
+        post.setCondition(EPostCondition.PUBLISHED);
+        postRepository.save(post);
+
+        return new MessageResponse(String.format("Post with id = %d published successfully", postId));
+    }
 
     @Override
     public Page<PostDto> findAll(Optional<String> username,

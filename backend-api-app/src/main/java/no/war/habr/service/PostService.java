@@ -1,6 +1,7 @@
 package no.war.habr.service;
 
 import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.EPostCondition;
 import no.war.habr.service.dto.PostDto;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ import java.util.Optional;
  * @author Karachev Sasha
  */
 public interface PostService {
+
+    MessageResponse publish(String username, long postId);
 
     Page<PostDto> findAll(Optional<String> username,
                           Optional<String> topic,
