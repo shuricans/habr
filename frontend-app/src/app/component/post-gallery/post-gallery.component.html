@@ -1,20 +1,19 @@
-<div class="row row-cols-1 row-cols-md-1 g-4">
-    <ng-template [ngIf]="page" [ngIfElse]="emptyResultSet">
-        <app-post-card
-            class="col"
+<ng-template [ngIf]="page.totalElements > 0" [ngIfElse]="emptyResultSet">
+    <div class="row row-cols-1 row-cols-md-1 g-4">
+        <app-post-card class="col"
             *ngFor="let post of page.content |
                 paginate: { 
                     id: 'server', 
                     itemsPerPage: page.size, 
                     currentPage: page.number + 1, 
-                    totalItems: page.totalElements
-                }"
+                    totalItems: page.totalElements }"
             [post]=post>
         </app-post-card>
-    </ng-template>
-
-    <ng-template #emptyResultSet>
-        <h2>Статьи не найдены.</h2>
-        <a class="btn btn-primary" routerLink="/habr" role="button">Перезагрузить страницу</a>
-    </ng-template>
-</div>
+    </div>
+</ng-template>
+<ng-template #emptyResultSet>
+    <div>
+        <br>
+        <h5>Кажется, что таких публикаций ещё нет.</h5>
+    </div>
+</ng-template>

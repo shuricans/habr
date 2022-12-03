@@ -1,0 +1,33 @@
+<div class="d-flex mb-3">
+    <div class="p-2">
+        <pagination-controls
+            id="server"
+            previousLabel="предыдущая"
+            nextLabel="следующая"
+            [autoHide]=true
+            [responsive]=true
+            (pageChange)="pageEvent($event)">
+        </pagination-controls>
+    </div>
+    <div class="p-2">
+        <div class="d-inline-block" style="width: 10px;"></div>
+        <div class="spinner-border d-inline-block" role="status" *ngIf="loading">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div class="ms-auto p-2">
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                постов на странице <b>{{size}}</b>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" (click)="sizeEvent(2)">2</a></li>
+                <li><a class="dropdown-item" (click)="sizeEvent(5)">5</a></li>
+                <li><a class="dropdown-item" (click)="sizeEvent(10)">10</a></li>
+                <li><a class="dropdown-item" (click)="sizeEvent(15)">15</a></li>
+                <li><a class="dropdown-item" (click)="sizeEvent(20)">20</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

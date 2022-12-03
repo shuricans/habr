@@ -58,4 +58,8 @@ export class NavBarComponent implements OnInit {
     this.isLoginPage = url === '/login';
     this.isLkPage = url === '/lk';
   }
+
+  getUsername() {
+    return this.authService.user?.username;
+  }
 }
