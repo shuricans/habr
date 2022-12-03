@@ -160,4 +160,21 @@ public class PostController {
         String username = authentication.getName();
         return ResponseEntity.ok(postService.delete(username, id));
     }
+
+    @PatchMapping("/hide/{id}")
+    @SecurityRequirement(name="bearerAuth")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Hides own post. Set post condition to HIDDEN", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "403", description = "When forbidden"),
+            @ApiResponse(responseCode = "404", description = "When user or post not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<MessageResponse> hide(@PathVariable("id") Long postId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(postService.hide(username, postId));
+    }
 }
