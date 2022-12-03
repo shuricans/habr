@@ -24,7 +24,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -369,5 +368,53 @@ class PostControllerTest {
                 mvc);
         assert jwtResponse != null;
         return jwtResponse.getToken();
+    }
+
+    /**
+     * Integration tests for PostController
+     * delete returns 401 unauthorized when token not provided
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Test
+    @DisplayName("delete Returns 401 Unauthorized When Token Not Provided")
+    void delete_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder deleteRequest = MockMvcRequestBuilders
+                .patch("/posts/delete/2345")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(deleteRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    /**
+     * Integration tests for PostController
+     * delete should delete post when successful
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Test
+    @DisplayName("delete Should Delete Post When Successful")
+    void delete_ShouldDeletePost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        Specification<Post> spec = Specification
+                .where(PostSpecification.excludeCondition(EPostCondition.DELETED));
+
+        List<Post> posts = postRepository.findAll(spec);
+        Post post = posts.get(0);
+        long postId = post.getId();
+
+        String expectedMessage = String.format("Post with id [%d] deleted successfully", postId);
+
+        MockHttpServletRequestBuilder deleteRequest = MockMvcRequestBuilders
+                .patch("/posts/delete/" + postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token);
+
+        mvc.perform(deleteRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", is(expectedMessage)));
     }
 }
