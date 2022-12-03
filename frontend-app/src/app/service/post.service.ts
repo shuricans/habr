@@ -28,6 +28,9 @@ export class PostService {
 
     let params = new HttpParams();
 
+    if(postFilter?.username != null) {
+      params = params.set('username', postFilter.username)
+    }
     if(postFilter?.topic != null) {
       params = params.set('topic', postFilter.topic)
     }
