@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<table class="table table-bordered table table-hover">
+<table class="table table-bordered table table-hover" *ngIf="page">
     <thead>
         <tr>
             <th scope="col">№</th>
@@ -27,7 +27,8 @@
         </tr>
     </thead>
 
-    <tbody *ngIf="page">
+    <tbody>
+      <ng-template [ngIf]="page.totalElements > 0" [ngIfElse]="emptyResultSet">
         <tr *ngFor="let post of page.content |
           paginate: {
             id: 'server',
@@ -56,38 +57,31 @@
             <a class="btn" href="#"><i class="fa fa-trash" aria-hidden="true"></i></a>
         </td>
         </tr>
+      </ng-template>
+      <ng-template #emptyResultSet>
+        <tr>
+          <td colspan="6">не найдено ни одного поста</td>
+        </tr>
+      </ng-template>
     </tbody>
 </table>
 
-<div class="d-flex mb-3">
-  <div class="p-2">
-    <pagination-controls (pageChange)="getPage($event)"
-      id="server"
-      previousLabel=""
-      nextLabel="">
-    </pagination-controls>
-  </div>
-  <div class="p-2">
-    <div class="d-inline-block" style="width: 10px;"></div>
-    <div class="spinner-border d-inline-block" role="status" *ngIf="loading">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-  <div class="ms-auto p-2">
-    <div class="btn-group">
-      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        отображать по <b>{{pageFilter.size}}</b>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" (click)="changeSize(2)">2</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(5)">5</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(10)">10</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(15)">15</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(20)">20</a></li>
-      </ul>
-    </div>
-  </div>
+<div *ngIf="error">
+  <br>
+  <h5>Произошла ошибка...</h5>
+  <hr />
+  <h6>Не удалось загрузить посты.</h6>
+  <h6>Попробуйте перезагрузить страницу.</h6>
+  <br>
+  <a class="btn btn-primary" (click)="reloadPage()" role="button">Перезагрузить страницу</a>
 </div>
+
+<app-post-pagination *ngIf="page && page.totalElements > 0"
+  [loading]="loading"
+  [size]="pageFilter.size"
+  (changePageEvent)="getPage($event)"
+  (changeSizeEvent)="changeSize($event)">
+</app-post-pagination>
 
 <ng-template #content let-modal>
   <div class="modal-header" 
@@ -213,12 +207,6 @@
       <div class="col test-div">
         <markdown class="variable-binding" [data]="description.value"></markdown>
         <markdown class="variable-binding" [data]="content.value"></markdown>
-        <!-- <div class="preview-description">
-          <markdown class="variable-binding" [data]="description.value"></markdown>
-        </div>
-        <div class="preview-content">
-          <markdown class="variable-binding" [data]="content.value"></markdown>
-        </div> -->
       </div>
     </div>
   </div>

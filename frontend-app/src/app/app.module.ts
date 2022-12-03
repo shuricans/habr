@@ -27,6 +27,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { UserPostsTableComponent } from './component/user-posts-table/user-posts-table.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NotFoundPageComponent } from './page/not-found-page/not-found-page.component';
+import { PostPaginationComponent } from './component/post-pagination/post-pagination.component';
 
 
 @NgModule({
@@ -49,6 +50,7 @@ import { NotFoundPageComponent } from './page/not-found-page/not-found-page.comp
     PostGalleryComponent,
     UserPostsTableComponent,
     NotFoundPageComponent,
+    PostPaginationComponent,
   ],
     imports: [
         BrowserModule,

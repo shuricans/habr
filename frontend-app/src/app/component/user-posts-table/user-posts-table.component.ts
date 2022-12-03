@@ -206,4 +206,8 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
       },
     });
   }
+  
+  reloadPage() {
+    location.reload();
+  }
 }
