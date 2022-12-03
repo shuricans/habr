@@ -36,5 +36,6 @@ public interface PostService {
     MessageResponse deleteById(Long postId);
     MessageResponse delete(String username, long postId);
 
+    MessageResponse hideById(Long postId);
     MessageResponse hide(String username, long postId);
 }

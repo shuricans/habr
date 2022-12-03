@@ -44,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PostControllerTest {
 
     public static final String DESIGN = "Design";
+    private static Post fourthPost;
     @Autowired
     private MockMvc mvc;
 
@@ -122,7 +123,7 @@ class PostControllerTest {
         postRepository.save(thirdPost);
 
         // create and persist post #4 - PUBLISHED
-        Post fourthPost = Post.builder()
+        fourthPost = Post.builder()
                 .title("Fourth post")
                 .content("Content_4")
                 .description("Description_4")
@@ -357,6 +358,35 @@ class PostControllerTest {
 
         mvc.perform(getOwnPostRequest)
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("hide Returns 401 Unauthorized When Token Not Provided")
+    void hide_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder hidePostRequest = MockMvcRequestBuilders
+                .patch("/posts/hide/123")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(hidePostRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("hide Should Hide Own Post When Successful")
+    void hide_ShouldHideOwnPost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        Long publishedPostId = fourthPost.getId();
+        String expectedMessage = String.format("Post with id [%d] hidden successfully", publishedPostId);
+
+        MockHttpServletRequestBuilder hidePostRequest = MockMvcRequestBuilders
+                .patch("/posts/hide/" + publishedPostId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(hidePostRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", is(expectedMessage)));
     }
 
     @SneakyThrows

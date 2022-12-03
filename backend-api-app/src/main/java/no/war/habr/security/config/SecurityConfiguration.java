@@ -61,6 +61,7 @@ public class SecurityConfiguration {
                         .antMatchers("/posts/own").authenticated()
                         .antMatchers("/posts/save").authenticated()
                         .antMatchers("/posts/delete/{\\d+}").authenticated()
+                        .antMatchers("/posts/hide/{\\d+}").authenticated()
                         .antMatchers("/posts", "/posts/{\\d+}").permitAll()
                         .antMatchers("/topics").permitAll()
                         .antMatchers("/users/username-active/**").permitAll()

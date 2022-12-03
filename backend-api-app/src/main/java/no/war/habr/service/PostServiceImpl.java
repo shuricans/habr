@@ -41,6 +41,10 @@ import static no.war.habr.util.SpecificationUtils.combineSpec;
 @Service
 public class PostServiceImpl implements PostService {
 
+    public static final String POST_NOT_FOUND_TEMPLATE = "Post with id [%d] not found.";
+    public static final String USER_NOT_FOUND_TEMPLATE = "User [%s] not found.";
+    public static final String USER_NOT_ACTIVE_TEMPLATE = "User [%s] is not active.";
+    public static final String NOT_OWNER_TEMPLATE = "You are not the owner of this post!";
     private final PostRepository postRepository;
     private final TopicRepository topicRepository;
     private final TagRepository tagRepository;
@@ -228,28 +232,83 @@ public class PostServiceImpl implements PostService {
         return deleteById(postId);
     }
 
+    @Transactional
+    @Override
+    public MessageResponse hideById(Long postId) {
+        Post post = getPostById(postId);
+
+        post.setCondition(EPostCondition.HIDDEN);
+        postRepository.save(post);
+
+        return new MessageResponse(String.format("Post with id [%d] hidden successfully", postId));
+    }
+
     @Override
     public MessageResponse hide(String username, long postId) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new UserNotFoundException("Username not found with username" + username));
+        User user = getUserByUsername(username);
+        isActiveUser(user);
+        Post post = getPostById(postId);
+        isTheOwnerOfPost(user, post);
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() ->
-                        new PostNotFoundException("Post cannot be found"));
-
-        if(user.getCondition().equals(EUserCondition.ACTIVE)
-                && post.getCondition().equals(EPostCondition.PUBLISHED)
-                && post.getOwner().equals(user)) {
-
-            post.setCondition(EPostCondition.HIDDEN);
-            postRepository.save(post);
-            return new MessageResponse("Post successfully hidden");
-        } else {
-            return new MessageResponse("The post could not be hidden. " +
-                    "Check: the statuses of the user and the post, whether you are the author of the post");
+        if(!post.getCondition().equals(EPostCondition.PUBLISHED)) {
+            throw new ForbiddenException("You cannot hide an unpublished post");
         }
 
+        return hideById(postId);
+    }
+
+    /**
+     * Checks that the {@code User} is owner of {@code Post}.
+     *
+     * @param     user {@code User} entity
+     * @param     post {@code Post} entity
+     * @exception ForbiddenException when {@code User} is not owner of this {@code Post}
+     */
+    private void isTheOwnerOfPost(User user, Post post) {
+        if (!user.equals(post.getOwner())) {
+            throw new ForbiddenException(NOT_OWNER_TEMPLATE);
+        }
+    }
+
+    /**
+     * Returns the {@code Post} by {@code long postId}
+     *
+     * @param     postId {@code Post} id
+     * @return    the {@code Post}
+     * @exception PostNotFoundException if the {@code Post}
+     *            with provided {@code postId} does not exist.
+     */
+    private Post getPostById(long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() ->
+                        new PostNotFoundException(String.format(POST_NOT_FOUND_TEMPLATE, postId)));
+    }
+
+    /**
+     * Returns the {@code User} by {@code String username}
+     *
+     * @param     username User "nickname"
+     * @return    the {@code User}
+     * @exception UserNotFoundException if the {@code User}
+     *            with provided username does not exist.
+     */
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UserNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, username)));
+    }
+
+    /**
+     * Checks that the {@code User} has a status - {@code EUserCondition.ACTIVE}.
+     *
+     * @param     user {@code User} entity
+     * @exception ForbiddenException if the {@code User}
+     *            "condition" is not {@code EUserCondition.ACTIVE}
+     */
+    private void isActiveUser(User user) {
+        if (!user.getCondition().equals(EUserCondition.ACTIVE)) {
+            throw new ForbiddenException(String.format(USER_NOT_ACTIVE_TEMPLATE, user.getUsername()));
+        }
     }
 }
 
