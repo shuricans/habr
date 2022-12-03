@@ -7,7 +7,7 @@
     </div>
     <div class="card-footer text-muted">
         Топик: <a href="#">{{post.topic}}</a>
-        Автор: <a href="#">{{post.owner}}</a>
+        Автор: <a [routerLink]="['/user/', post.owner]">{{post.owner}}</a>
         От: {{dateFormatService.toLocaleString(post.created)}}
     </div>
 </div>
