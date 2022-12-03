@@ -28,6 +28,7 @@ import { UserPostsTableComponent } from './component/user-posts-table/user-posts
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NotFoundPageComponent } from './page/not-found-page/not-found-page.component';
 import { PostPaginationComponent } from './component/post-pagination/post-pagination.component';
+import { UserPageComponent } from './page/user-page/user-page.component';
 
 
 @NgModule({
@@ -51,6 +52,7 @@ import { PostPaginationComponent } from './component/post-pagination/post-pagina
     UserPostsTableComponent,
     NotFoundPageComponent,
     PostPaginationComponent,
+    UserPageComponent,
   ],
     imports: [
         BrowserModule,
