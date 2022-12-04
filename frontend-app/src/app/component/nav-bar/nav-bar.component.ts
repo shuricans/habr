@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router} from "@angular/router";
+import {NavigationEnd, Router} from "@angular/router";
 import {filter, map} from "rxjs";
 import { AuthService } from 'src/app/service/auth.service';
 
@@ -54,7 +54,7 @@ export class NavBarComponent implements OnInit {
     this.isMobileDevPage = url === '/mobile';
     this.isMarketingPage = url === '/marketing';
     this.isHelpPage = url === '/help';
-    this.isSearchPage = url === '/search';
+    this.isSearchPage = url.startsWith('/search');
     this.isLoginPage = url === '/login';
     this.isLkPage = url === '/lk';
   }

@@ -9,6 +9,13 @@ import {TopicDto} from "../model/topic-dto";
 })
 export class TopicService {
 
+  readonly topicLink: Record<string, string> = {
+    'Мобильная разработка': '/mobile',
+    'Веб-разработка': '/web',
+    'Дизайн': '/design',
+    'Маркетинг': '/marketing',
+  }
+
   constructor(private http: HttpClient) {
   }
 

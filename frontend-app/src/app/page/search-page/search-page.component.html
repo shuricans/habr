@@ -1,1 +1,106 @@
-<p>search-page works!</p>
+<div class="d-flex justify-content-end mb-2">
+  <div class="pe-2">
+    <button *ngIf="tag" type="button" class="btn btn-secondary text-nowrap" (click)="removeTag()">
+      #{{tag}}<i class="fa-solid fa-xmark ps-2"></i>
+    </button>
+  </div>
+  <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{topicInDropDown}}
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" (click)="changeTopic()">Все разделы</a></li>
+          <li *ngFor="let t of topics | async">
+            <a class="dropdown-item" (click)="changeTopic(t.name)">{{t.name}}</a>
+          </li>
+      </ul>
+  </div>
+</div>
+
+<table class="table table-bordered table table-hover" *ngIf="page">
+    <thead>
+        <tr>
+            <th scope="col">№</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('title')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'title'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Пост</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('topic')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'topic'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Топик</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('owner')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'owner'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Автор</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('created')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'created'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Создан</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('updated')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'updated'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Обновлён</th>
+        </tr>
+    </thead>
+
+    <tbody>
+      <ng-template [ngIf]="page.totalElements > 0" [ngIfElse]="emptyResultSet">
+        <tr *ngFor="let post of page.content |
+          paginate: {
+            id: 'server',
+            itemsPerPage: page.size,
+            currentPage: page.number + 1,
+            totalItems: page.totalElements
+          };
+          index as i">
+        <th scope="row">{{i + 1 + (page.number * page.size)}}</th>
+        <td>
+          <a [routerLink]="['/habr', post.id]">{{post.title}}</a>
+        </td>
+        <td>
+            <ng-template #tipTopic>раздел - <b>{{post.topic}}</b></ng-template>
+            <a [routerLink]="getTopicLink(post.topic)" placement="bottom" [ngbTooltip]="tipTopic">{{post.topic}}</a>
+        </td>
+        <td>
+          <ng-template #tipUser>профиль - <b>{{post.owner}}</b></ng-template>
+          <a [routerLink]="['/user', post.owner]" placement="bottom" [ngbTooltip]="tipUser">{{post.owner}}</a>
+        </td>
+        <td>{{dateFormatService.toLocaleString(post.created)}}</td>
+        <td>{{dateFormatService.toLocaleString(post.updated)}}</td>
+        </tr>
+      </ng-template>
+      <ng-template #emptyResultSet>
+        <tr>
+          <td colspan="6">не найдено ни одного поста</td>
+        </tr>
+      </ng-template>
+    </tbody>
+</table>
+
+<app-post-pagination *ngIf="page && page.totalElements > 0"
+    [loading]="loading"
+    [size]="pageFilter.size"
+    (changePageEvent)="changePage($event)"
+    (changeSizeEvent)="changeSize($event)">
+</app-post-pagination>
