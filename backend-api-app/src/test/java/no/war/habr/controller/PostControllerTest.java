@@ -298,7 +298,6 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.title", is(firstPost.getTitle())))
                 .andExpect(jsonPath("$.content", is(newContent)))
                 .andExpect(jsonPath("$.description", is(newDescription)))
-                .andExpect(jsonPath("$.condition", is(firstPost.getCondition().name())))
                 .andExpect(jsonPath("$.owner", is(firstPost.getOwner().getUsername())))
                 .andExpect(jsonPath("$.topic", is(firstPost.getTopic().getName())))
                 .andExpect(jsonPath("$.tags.length()", is(4)));
@@ -444,6 +443,42 @@ class PostControllerTest {
                 .header("Authorization", "Bearer " + token);
 
         mvc.perform(deleteRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", is(expectedMessage)));
+    }
+
+    @Test
+    @DisplayName("publish Returns 401 Unauthorized When Token Not Provided")
+    void publish_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder publishRequest = MockMvcRequestBuilders
+                .patch("/posts/publish/123")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(publishRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @DisplayName("publish Should Publish Post When Successful")
+    void publish_ShouldPublishPost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        Specification<Post> spec = Specification
+                .where(PostSpecification.condition(EPostCondition.DRAFT));
+
+        List<Post> posts = postRepository.findAll(spec);
+        Post post = posts.get(0);
+        long postId = post.getId();
+
+        String expectedMessage = String.format("Post with id [%d] published successfully", postId);
+
+        MockHttpServletRequestBuilder publishRequest = MockMvcRequestBuilders
+                .patch("/posts/publish/" + postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token);
+
+        mvc.perform(publishRequest)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", is(expectedMessage)));
     }
