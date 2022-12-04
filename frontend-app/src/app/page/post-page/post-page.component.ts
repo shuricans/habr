@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { PostDto } from 'src/app/model/post-dto';
 import { DateFormatService } from 'src/app/service/date-format.service';
 import { PostService } from 'src/app/service/post.service';
+import { TopicService } from 'src/app/service/topic.service';
 
 @Component({
   selector: 'app-post-page',
@@ -15,6 +16,7 @@ export class PostPageComponent implements OnInit {
   notFound!: boolean
 
   constructor(private postService: PostService,
+              private topicService: TopicService,
               private route: ActivatedRoute,
               public dateFormatService: DateFormatService) {
   }
@@ -34,5 +36,9 @@ export class PostPageComponent implements OnInit {
         this.notFound = true;
       }
     })
+  }
+
+  getTopicLink(topic: string): string {
+    return this.topicService.topicLink[topic];
   }
 }

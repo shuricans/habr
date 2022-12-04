@@ -1,6 +1,8 @@
 <div *ngIf="post else ifPostNotFound">
-    <p>Раздел: <a href="#">{{post.topic}}</a></p>
-    <p>Автор: <a href="#">{{post.owner}}</a></p>
+    <ng-template #tipTopic>раздел - <b>{{post.topic}}</b></ng-template>
+    <ng-template #tipUser>профиль - <b>{{post.owner}}</b></ng-template>
+    <p>Раздел: <a [routerLink]="[getTopicLink(post.topic)]" placement="bottom" [ngbTooltip]="tipTopic">{{post.topic}}</a></p>
+    <p>Автор: <a [routerLink]="['/user/', post.owner]" placement="bottom" [ngbTooltip]="tipUser">{{post.owner}}</a></p>
     <p>От: {{dateFormatService.toLocaleString(post.created)}}</p>
     <p>Обновлён: {{dateFormatService.toLocaleString(post.updated)}}</p>
     <h1>{{post.title}}</h1>
