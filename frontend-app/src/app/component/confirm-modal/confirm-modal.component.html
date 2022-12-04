@@ -1,0 +1,11 @@
+<div class="modal-header">
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')"></button>
+</div>
+<div class="modal-body">
+    <p>{{message}}</p>
+    <p>{{message_2}}</p>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Cross click')">Нет</button>
+    <button type="button" class="btn btn-primary" (click)="closeModal('yes')">Да</button>
+</div>

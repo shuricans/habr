@@ -2,6 +2,7 @@ import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BYPASS_LOG } from '../interceptor/token.interceptor';
+import { MessageResponse } from '../model/message-response';
 import { Page } from '../model/page';
 import { PageFilter } from '../model/page-filter';
 import { PostDataRequest } from '../model/post-data-request';
@@ -89,5 +90,9 @@ export class PostService {
 
   public save(postDataRequest: PostDataRequest): Observable<PostDto> {
     return this.http.post<PostDto>('api/v1/posts/save', postDataRequest);
+  }
+
+  public hide(postId: number): Observable<MessageResponse> {
+    return this.http.patch<MessageResponse>('api/v1/posts/hide/' + postId, {});
   }
 }

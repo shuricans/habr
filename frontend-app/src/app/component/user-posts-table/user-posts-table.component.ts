@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Observable, of } from 'rxjs';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { first, Observable, of } from 'rxjs';
 import { Page } from 'src/app/model/page';
 import { PageFilter } from 'src/app/model/page-filter';
 import { PostDataRequest } from 'src/app/model/post-data-request';
@@ -12,6 +12,7 @@ import { DataService } from 'src/app/service/data.service';
 import { DateFormatService } from 'src/app/service/date-format.service';
 import { PostService } from 'src/app/service/post.service';
 import { TopicService } from 'src/app/service/topic.service';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-user-posts-table',
@@ -29,8 +30,10 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   postFilter!: PostFilterOwn;
   loading: boolean = true;
   error: boolean = false;
-  private postId: number = -1;
+  postId: number = -1;
   topics!: Observable<TopicDto[]>;
+  private modalEditPostReference!: NgbModalRef;
+  otherChanges: boolean = false;
 
   conditions : Record<string, string> = {
     DRAFT: 'черновик',
@@ -77,7 +80,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     this.postFilter = this.dataService.getLkPostFilter();
     this.getPage(this.pageFilter.page);
 
-    this.topicService.findAllTopics().subscribe({
+    this.topicService.findAllTopics().pipe(first()).subscribe({
       next: topics => {
         this.topics = of(topics);
       },
@@ -103,7 +106,32 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   }
 
   openPostEditModal(content: TemplateRef<any>, post: PostDto | null) {
-    this.modalService.open(content, { fullscreen: true });
+    this.modalEditPostReference = this.modalService.open(content, { 
+      fullscreen: true,
+      beforeDismiss: () => {
+        if (!(this.form.dirty || this.otherChanges)) { // there were no changes 
+          return true; // closing modal
+        }
+        const modalRef = this.modalService.open(ConfirmModalComponent);
+        modalRef.componentInstance.message = 'Вы точно хотите закрыть форму?';
+        modalRef.componentInstance.message_2 = 'Все несохранённые изменения будут потеряны.';
+
+        modalRef.result.then(
+          () => { // yes event
+            this.modalEditPostReference.close();
+          }, 
+          () => { // catch all close events here
+          }
+        );
+        return false;
+      }
+    });
+
+    // after closing the modal editing
+    this.modalEditPostReference.result.finally(
+      () => {
+      }
+    );
 
     if (post != null) {
       this.postId = post.id;
@@ -120,7 +148,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     this.dataService.setLkPostPageFilter(this.pageFilter);
     this.dataService.setLkPostFilter(this.postFilter);
 
-    this.postService.findOwnPosts(this.pageFilter, this.postFilter).subscribe({
+    this.postService.findOwnPosts(this.pageFilter, this.postFilter).pipe(first()).subscribe({
       next: page => {
         this.page = page;
         this.pageFilter.size = page.size;
@@ -138,9 +166,12 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   }
 
   initForm(post: PostDto | null) {
+    this.otherChanges = false; // reset changes flag
+    this.tagFormControl.reset(); // reset input for tags
+    this.form.reset(); // reset main form
+    // post == null, means we want empty form
     if (post == null) {
       this.condition = this.conditions['DRAFT'];
-      this.form.reset();
       this.tagFormControl.reset();
       this.tags.splice(0);
     } else {
@@ -162,6 +193,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
       return;
     }
     this.tags.push(newTag);
+    this.otherChanges = true;
   }
 
   removeTag(tag: string) {
@@ -170,11 +202,13 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
 
     if (startIndex !== -1) {
       this.tags.splice(startIndex, deleteCount);
+      this.otherChanges = true;
     }
   }
 
   selectTopic(name: string) {
     this.form.controls.topic.setValue(name);
+    this.otherChanges = true;
   }
 
   submitForm() {
@@ -195,10 +229,10 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     postDataRequest.topic = (this.form.get('topic')?.value)!;
     postDataRequest.tags = this.tags;
 
-    this.postService.save(postDataRequest).subscribe({
-      next: postDto => {
-        alert(`Post with id = ${postDto.id} was saved successfully!`);
+    this.postService.save(postDataRequest).pipe(first()).subscribe({
+      next: () => {
         this.getPage(this.pageFilter.page);
+        this.modalEditPostReference.close();
       },
       error: error => {
         alert('Error...');
@@ -207,6 +241,29 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     });
   }
   
+  hide(postId: number) {
+    const modalRef = this.modalService.open(ConfirmModalComponent);
+    modalRef.componentInstance.message = 'Вы действительно хотите скрыть пост?';
+
+    modalRef.result.then(
+      (result) => {
+        // yes event
+        this.postService.hide(postId).pipe(first()).subscribe({
+          next: () => {
+            this.condition = this.conditions['HIDDEN'];
+            this.getPage(this.pageFilter.page);
+          },
+          error: error => {
+            alert('Error, when hide');
+            console.log(error);
+          }
+        });
+      }, 
+      () => { // catch all close events here
+      }
+    );
+  }
+
   reloadPage() {
     location.reload();
   }
