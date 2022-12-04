@@ -10,7 +10,6 @@ import no.war.habr.persist.repository.TagRepository;
 import no.war.habr.persist.repository.TopicRepository;
 import no.war.habr.persist.repository.UserRepository;
 import no.war.habr.persist.specification.PostSpecification;
-import no.war.habr.persist.specification.UserSpecification;
 import no.war.habr.service.dto.PostDto;
 import no.war.habr.service.dto.PostMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -255,6 +253,26 @@ public class PostServiceImpl implements PostService {
         }
 
         return hideById(postId);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse publish(String username, long postId) {
+        User user = getUserByUsername(username);
+        isActiveUser(user);
+        Post post = getPostById(postId);
+        isTheOwnerOfPost(user, post);
+
+        if (!(post.getCondition().equals(EPostCondition.HIDDEN) ||
+                post.getCondition().equals(EPostCondition.DRAFT))) {
+            throw new BadRequestException(
+                    String.format("Post with id [%d] must be DRAFT or HIDDEN", postId));
+        }
+
+        post.setCondition(EPostCondition.PUBLISHED);
+        postRepository.save(post);
+
+        return new MessageResponse(String.format("Post with id [%d] published successfully", postId));
     }
 
     /**

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -415,6 +413,135 @@ class PostServiceImplTest {
         assertThat(capturedPost).isEqualTo(post);
         assertThat(capturedPost.getCondition()).isEqualTo(EPostCondition.DELETED);
         assertThat(messageResponse.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw UserNotFoundException When User Not Exist")
+    public void  publish_ShouldThrowUserNotFoundException_WhenUserNotExist() {
+        //given
+        String username = "username";
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, anyLong()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User [%s] not found.", username);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw ForbiddenException When User Not Active")
+    public void publish_ShouldThrowForbiddenException_WhenUserNotActive() {
+        //given
+        User user = createUser();
+        user.setCondition(EUserCondition.NOT_ACTIVE);
+        String username = user.getUsername();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, anyLong()))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("User [%s] is not active.", username);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw PostNotFoundException When Post Not Found")
+    public void publish_ShouldThrowPostNotFoundException_WhenPostNotFound() {
+        //given
+        User user = createUser();
+        String username = user.getUsername();
+        long postId = 1123L;
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.empty());
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(PostNotFoundException.class)
+                .hasMessageContaining("Post with id [%d] not found.", postId);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw ForbiddenException When User Not Owner Of Post")
+    public void publish_ShouldThrowForbiddenException_WhenUserNotOwnerOfPost() {
+        //given
+        User user = createUser();
+        User owner = User.builder()
+                .id(2L)
+                .build();
+
+        String username = user.getUsername();
+
+        Post post = Post.builder()
+                .id(11L)
+                .owner(owner)
+                .build();
+
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("You are not the owner of this post!");
+    }
+
+    @Test
+    @DisplayName("publish Should Throw BadRequestException When Post Has Invalid Condition")
+    public void publish_ShouldThrowBadRequestException_WhenPostHasInvalidCondition() {
+        //given
+        User user = createUser();
+        String username = user.getUsername();
+        Post post = Post.builder()
+                .id(11L)
+                .owner(user)
+                .condition(EPostCondition.DELETED)
+                .build();
+
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Post with id [%d] must be DRAFT or HIDDEN", postId);
+    }
+
+    @Test
+    @DisplayName("publish Should Change Post Condition To PUBLISHED When Successful")
+    public void publish_ShouldChangePostConditionToPUBLISHED_WhenSuccessful() {
+        //given
+        User user = createUser();
+        Post post = Post.builder()
+                .id(11L)
+                .condition(EPostCondition.DRAFT)
+                .owner(user)
+                .build();
+
+        String username = user.getUsername();
+        long postId = post.getId();
+        String expectedMessageResponse = String.format("Post with id [%d] published successfully", postId);
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+
+        //when
+        MessageResponse messageResponse = underTest.publish(username, postId);
+
+        //then
+        ArgumentCaptor<Post> postArgumentCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(postArgumentCaptor.capture());
+        Post capturedPost = postArgumentCaptor.getValue();
+
+        assertThat(capturedPost).isEqualTo(post);
+        assertThat(capturedPost.getCondition()).isEqualTo(EPostCondition.PUBLISHED);
+        assertThat(messageResponse.getMessage()).isEqualTo(expectedMessageResponse);
     }
 }
 
