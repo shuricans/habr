@@ -34,7 +34,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
 
   conditions : Record<string, string> = {
     DRAFT: 'черновик',
-    PUBLISHED: 'обупликован',
+    PUBLISHED: 'опубликован',
     HIDDEN: 'скрыт',
     BANNED: 'заблокирован'
   }
@@ -42,7 +42,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   conditionsInDropDown : Record<string, string> = {
     undefined: 'Статус: все',
     DRAFT: 'черновики',
-    PUBLISHED: 'обупликованные',
+    PUBLISHED: 'опубликованные',
     HIDDEN: 'скрытые',
     BANNED: 'заблокированные'
   }
