@@ -38,4 +38,6 @@ public interface PostService {
 
     MessageResponse hideById(Long postId);
     MessageResponse hide(String username, long postId);
+
+    MessageResponse publish(String username, long postId);
 }
