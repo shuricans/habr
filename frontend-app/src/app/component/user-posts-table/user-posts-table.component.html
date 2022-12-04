@@ -50,11 +50,11 @@
         <td>{{post.topic}}</td>
         <td>{{conditions[post.condition]}}</td>
         <td>{{dateFormatService.toLocaleString(post.created)}}</td>
-        <td>
-            <a class="btn" (click)="openPostEditModal(content, post)">
-              <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+        <td nowrap="nowrap">
+            <a class="btn edit-pencil" (click)="openPostEditModal(content, post)">
+              <i class="fa-solid fa-pencil fa-lg"></i>
             </a>
-            <a class="btn" href="#"><i class="fa fa-trash" aria-hidden="true"></i></a>
+            <a class="btn delete-trash" href="#"><i class="fa-solid fa-trash fa-lg"></i></a>
         </td>
         </tr>
       </ng-template>
@@ -211,14 +211,10 @@
     </div>
   </div>
   <div class="modal-footer">
-    <div class="d-flex">
-      <div class="flex-grow-1"></div>
-      <div>
-        <button (click)="modal.close('Close click')" type="button" class="btn btn-secondary">Закрыть</button>
-      </div>
-      <div class="ps-2">
-        <button type="submit" form="postEditForm" class="btn btn-primary">Сохранить</button>
-      </div>
-    </div>
+      <ng-container *ngIf="condition === 'опубликован'">
+        <button type="button" class="btn btn-secondary me-auto" (click)="hide(postId)">Скрыть</button>
+      </ng-container>
+      <button (click)="modal.dismiss('Cross click')" type="button" class="btn btn-secondary">Закрыть</button>
+      <button *ngIf="form.dirty || otherChanges" type="submit" form="postEditForm" class="btn btn-primary">Сохранить</button>
   </div>
 </ng-template>

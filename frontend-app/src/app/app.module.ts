@@ -29,6 +29,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NotFoundPageComponent } from './page/not-found-page/not-found-page.component';
 import { PostPaginationComponent } from './component/post-pagination/post-pagination.component';
 import { UserPageComponent } from './page/user-page/user-page.component';
+import { ConfirmModalComponent } from './component/confirm-modal/confirm-modal.component';
 
 
 @NgModule({
@@ -53,6 +54,7 @@ import { UserPageComponent } from './page/user-page/user-page.component';
     NotFoundPageComponent,
     PostPaginationComponent,
     UserPageComponent,
+    ConfirmModalComponent,
   ],
     imports: [
         BrowserModule,
