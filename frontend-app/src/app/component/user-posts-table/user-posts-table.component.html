@@ -54,7 +54,9 @@
             <a class="btn edit-pencil" (click)="openPostEditModal(content, post)">
               <i class="fa-solid fa-pencil fa-lg"></i>
             </a>
-            <a class="btn delete-trash" href="#"><i class="fa-solid fa-trash fa-lg"></i></a>
+            <a class="btn delete-trash" (click)="deletePostById(post.id, post.title)">
+              <i class="fa-solid fa-trash fa-lg"></i>
+            </a>
         </td>
         </tr>
       </ng-template>
@@ -213,6 +215,9 @@
   <div class="modal-footer">
       <ng-container *ngIf="condition === 'опубликован'">
         <button type="button" class="btn btn-secondary me-auto" (click)="hide(postId)">Скрыть</button>
+      </ng-container>
+      <ng-container *ngIf="condition === 'черновик' || condition === 'скрыт'">
+        <button type="button" class="btn btn-success me-auto" (click)="publish(postId)">Опубликовать</button>
       </ng-container>
       <button (click)="modal.dismiss('Cross click')" type="button" class="btn btn-secondary">Закрыть</button>
       <button *ngIf="form.dirty || otherChanges" type="submit" form="postEditForm" class="btn btn-primary">Сохранить</button>
