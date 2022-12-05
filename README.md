@@ -1,6 +1,6 @@
 # Habr, but worse. Anyway...
 See current deployed version 
-[habr v-1.2](http://80.78.240.245:8080/)  
+[habr v-1.4](http://80.78.240.245:8080/)  
 See [backend-api (swagger)](http://80.78.240.245:8080/api/v1/swagger-ui/index.html#)  
 Deployed on [reg.ru](https://www.reg.ru/), cheapest config (15 GB SSD, 1 GB RAM, 1 vCPU)
 
@@ -20,7 +20,16 @@ This is a bad version of a great project with the name - [https://habr.com/](htt
 - user can edit own data in his personal account on the site
 - user can view their publications in his personal account
 - added several endpoints, see current [backend-api (swagger)](http://80.78.240.245:8080/api/v1/swagger-ui/index.html#)
-
+> since v-1.4
+- all pages on topics work, articles of the corresponding category are displayed, new ones first
+- user can create a draft article
+- user can edit all owns articles
+- user can publish, hide and delete own articles
+- added a public user profile page, (displays user information and articles) [see admin page](http://80.78.240.245:8080/user/admin).
+- added a [search page](http://80.78.240.245:8080/search/) with sortable table (*for now with limited functionality)
+- see example search by [**#tag_test** ](http://80.78.240.245:8080/search?tag=tag_test)
+- added several endpoints, see current [backend-api (swagger)](http://80.78.240.245:8080/api/v1/swagger-ui/index.html#)
+- *main images in the article card are still fake*
 ### How run this project?
 ##### 1. First way - docker compose:
 * Be sure you have [docker](https://docs.docker.com/engine/install/) installed.
@@ -46,8 +55,8 @@ This is a bad version of a great project with the name - [https://habr.com/](htt
 * Clone project from github
 * First, in parent module **habr** run `mvn clean install`
 * All tests must pass successfully. I hope :)
-* Database. I recommend using this [docker image **v-1.2**](https://hub.docker.com/r/shuricans/habr-db/tags)
-* docker compose help us (take this [docker-compose.yml](https://gist.github.com/shuricans/f69c74390f3d49c26613816fc498c07b))
+* Database. I recommend using this [docker image **v-1.4**](https://hub.docker.com/r/shuricans/habr-db/tags)
+* docker compose help us (take this [docker-compose.yml](https://gist.github.com/shuricans/5419a9aa32ac702973033f2faea911ef))
 * Use `docker compose up -d` command for it.
 > You can stop and remove this container by `docker compose down`
 * Navigate to the backend app package `cd backend-api-app/`
