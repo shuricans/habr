@@ -13,6 +13,7 @@ import { DateFormatService } from 'src/app/service/date-format.service';
 import { PostService } from 'src/app/service/post.service';
 import { TopicService } from 'src/app/service/topic.service';
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { InfoModalComponent } from '../info-modal/info-modal.component';
 
 @Component({
   selector: 'app-user-posts-table',
@@ -166,13 +167,10 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   }
 
   initForm(post: PostDto | null) {
-    this.otherChanges = false; // reset changes flag
-    this.tagFormControl.reset(); // reset input for tags
-    this.form.reset(); // reset main form
+    this.resetForms();
     // post == null, means we want empty form
     if (post == null) {
       this.condition = this.conditions['DRAFT'];
-      this.tagFormControl.reset();
       this.tags.splice(0);
     } else {
       this.form.controls.title.setValue(post.title);
@@ -182,6 +180,12 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
       this.tags = post.tags;
       this.condition = this.conditions[post.condition];
     }
+  }
+
+  resetForms() {
+    this.otherChanges = false; // reset changes flag
+    this.tagFormControl.reset(); // reset input for tags
+    this.form.reset(); // reset main form
   }
 
   addTag(newTag: string) {
@@ -230,9 +234,12 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     postDataRequest.tags = this.tags;
 
     this.postService.save(postDataRequest).pipe(first()).subscribe({
-      next: () => {
+      next: (postDto) => {
         this.getPage(this.pageFilter.page);
-        this.modalEditPostReference.close();
+        const modalRef = this.modalService.open(InfoModalComponent);
+        this.initForm(postDto);
+        this.postId = postDto.id;
+        modalRef.componentInstance.message = 'Статья успешно сохранена!';
       },
       error: error => {
         alert('Error...');
@@ -252,6 +259,68 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
           next: () => {
             this.condition = this.conditions['HIDDEN'];
             this.getPage(this.pageFilter.page);
+          },
+          error: error => {
+            alert('Error, when hide');
+            console.log(error);
+          }
+        });
+      }, 
+      () => { // catch all close events here
+      }
+    );
+  }
+
+  publish(postId: number) {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.form.dirty || this.otherChanges) { // there are unsaved changes
+      const modalRef = this.modalService.open(InfoModalComponent);
+      modalRef.componentInstance.message = 'Кажется у Вас есть не сохранённые изменения.';
+      modalRef.componentInstance.message_2 = 'Сначала необходимо сохранить.';
+      return;
+    }
+
+    const modalRef = this.modalService.open(ConfirmModalComponent);
+    modalRef.componentInstance.message = 'Вы действительно хотите опубликовать пост?';
+
+    modalRef.result.then(
+      (result) => {
+        // yes event
+        this.postService.publish(postId).pipe(first()).subscribe({
+          next: () => {
+            this.condition = this.conditions['PUBLISHED'];
+            this.getPage(this.pageFilter.page);
+            const modalRef = this.modalService.open(InfoModalComponent);
+            modalRef.componentInstance.message = 'Статья успешно опубликована!';
+          },
+          error: error => {
+            alert('Error, when hide');
+            console.log(error);
+          }
+        });
+      }, 
+      () => { // catch all close events here
+      }
+    );
+  }
+
+  deletePostById(postId: number, postTitle: string) {
+    const modalRef = this.modalService.open(ConfirmModalComponent);
+    modalRef.componentInstance.message = 'Вы действительно хотите удалить пост?';
+    modalRef.componentInstance.message_2 = '\"' + postTitle + '\"';
+
+    modalRef.result.then(
+      (result) => {
+        // yes event
+        this.postService.delete(postId).pipe(first()).subscribe({
+          next: () => {
+            this.getPage(this.pageFilter.page);
+            const modalRef = this.modalService.open(InfoModalComponent);
+            modalRef.componentInstance.message = 'Статья успешно удалена!';
           },
           error: error => {
             alert('Error, when hide');

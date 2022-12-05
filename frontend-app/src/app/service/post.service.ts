@@ -95,4 +95,12 @@ export class PostService {
   public hide(postId: number): Observable<MessageResponse> {
     return this.http.patch<MessageResponse>('api/v1/posts/hide/' + postId, {});
   }
+
+  public publish(postId: number): Observable<MessageResponse> {
+    return this.http.patch<MessageResponse>('api/v1/posts/publish/' + postId, {});
+  }
+
+  public delete(postId: number): Observable<MessageResponse> {
+    return this.http.patch<MessageResponse>('api/v1/posts/delete/' + postId, {});
+  }
 }
