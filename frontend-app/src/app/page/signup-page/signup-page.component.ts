@@ -39,6 +39,7 @@ export class SignupPageComponent {
 
   submitForm() {
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 

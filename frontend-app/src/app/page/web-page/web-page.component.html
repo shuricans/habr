@@ -1,1 +1,24 @@
-<p>web-page works!</p>
+<app-post-gallery *ngIf="page" [page]="page"></app-post-gallery>
+
+<app-post-pagination *ngIf="page && page.totalElements > 0"
+    [loading]="loading"
+    [size]="pageFilter.size"
+    (changePageEvent)="getPage($event)"
+    (changeSizeEvent)="changeSize($event)">
+</app-post-pagination>
+
+<div class="d-flex justify-content-center m-5" *ngIf="!page && loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="error">
+    <br>
+    <h5>Произошла ошибка...</h5>
+    <hr />
+    <h6>Не удалось загрузить посты.</h6>
+    <h6>Попробуйте перезагрузить страницу.</h6>
+    <br>
+    <a class="btn btn-primary" (click)="reloadPage()" role="button">Перезагрузить страницу</a>
+</div>

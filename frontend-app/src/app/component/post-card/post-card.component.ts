@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { PostDto } from 'src/app/model/post-dto';
 import { DateFormatService } from 'src/app/service/date-format.service';
+import { TopicService } from 'src/app/service/topic.service';
 
 @Component({
   selector: 'app-post-card',
@@ -11,7 +12,8 @@ export class PostCardComponent implements OnInit {
 
   private _post?: PostDto;
 
-  constructor(public dateFormatService: DateFormatService) { 
+  constructor(public dateFormatService: DateFormatService,
+              private topicService: TopicService) { 
   }
 
   ngOnInit(): void {
@@ -24,5 +26,9 @@ export class PostCardComponent implements OnInit {
 
   get post(): PostDto | undefined {
     return this._post;
+  }
+
+  getTopicLink(topic: string): string {
+    return this.topicService.topicLink[topic];
   }
 }

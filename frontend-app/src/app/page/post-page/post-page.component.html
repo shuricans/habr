@@ -1,6 +1,8 @@
-<div *ngIf="post else ifPostNotFound">
-    <p>Раздел: <a href="#">{{post.topic}}</a></p>
-    <p>Автор: <a href="#">{{post.owner}}</a></p>
+<div *ngIf="post">
+    <ng-template #tipTopic>раздел - <b>{{post.topic}}</b></ng-template>
+    <ng-template #tipUser>профиль - <b>{{post.owner}}</b></ng-template>
+    <p>Раздел: <a [routerLink]="[getTopicLink(post.topic)]" placement="bottom" [ngbTooltip]="tipTopic">{{post.topic}}</a></p>
+    <p>Автор: <a [routerLink]="['/user/', post.owner]" placement="bottom" [ngbTooltip]="tipUser">{{post.owner}}</a></p>
     <p>От: {{dateFormatService.toLocaleString(post.created)}}</p>
     <p>Обновлён: {{dateFormatService.toLocaleString(post.updated)}}</p>
     <h1>{{post.title}}</h1>
@@ -10,11 +12,28 @@
     <markdown class="variable-binding" [data]="post.description"></markdown>
     <markdown class="variable-binding" [data]="post.content"></markdown>
     <hr>
-    <a class="tagLink" href="#" *ngFor="let tag of post.tags">#{{tag}}</a>
+    <ng-container *ngFor="let tag of post.tags">
+        <ng-template #tipTag>посты с тегом - <b>{{tag}}</b></ng-template>
+        <a class="tagLink" 
+           [routerLink]="['/search']" [queryParams]="{tag: tag}"
+           placement="right" [ngbTooltip]="tipTag">
+           #{{tag}}
+        </a>
+    </ng-container>
+    <br />
+    <br />
+    <br />
 </div>
 
-<ng-template #ifPostNotFound>
-    <h1>Страница не найдена.</h1>
-    <p>Страница устарела, была удалена или не существовала вовсе.</p>
-    <a class="btn btn-primary" routerLink="/habr" role="button">Вернуться на главную</a>
-</ng-template>
+<app-not-found-page *ngIf="notFound"></app-not-found-page>
+
+<div *ngIf="otherError">
+    <br>
+    <h3>{{httpErrorResponse.status}} {{httpErrorResponse.statusText}}</h3>
+    <hr>
+    <h5>Произошла ошибка...</h5>
+    <h6>Не удалось загрузить пост.</h6>
+    <h6>Попробуйте перезагрузить страницу.</h6>
+    <br>
+    <a class="btn btn-primary" (click)="reloadPage()" role="button">Перезагрузить страницу</a>
+</div>

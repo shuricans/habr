@@ -24,7 +24,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PostControllerTest {
 
     public static final String DESIGN = "Design";
+    private static Post fourthPost;
     @Autowired
     private MockMvc mvc;
 
@@ -123,7 +123,7 @@ class PostControllerTest {
         postRepository.save(thirdPost);
 
         // create and persist post #4 - PUBLISHED
-        Post fourthPost = Post.builder()
+        fourthPost = Post.builder()
                 .title("Fourth post")
                 .content("Content_4")
                 .description("Description_4")
@@ -215,6 +215,16 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("save Returns 401 Unauthorized When Token Not Provided")
+    void save_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder savePostRequest = MockMvcRequestBuilders
+                .post("/posts/save")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(savePostRequest).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("save Should Save New Post When Successful")
     void save_ShouldSaveNewPost_WhenSuccessful() throws Exception {
         String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
@@ -288,7 +298,6 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.title", is(firstPost.getTitle())))
                 .andExpect(jsonPath("$.content", is(newContent)))
                 .andExpect(jsonPath("$.description", is(newDescription)))
-                .andExpect(jsonPath("$.condition", is(firstPost.getCondition().name())))
                 .andExpect(jsonPath("$.owner", is(firstPost.getOwner().getUsername())))
                 .andExpect(jsonPath("$.topic", is(firstPost.getTopic().getName())))
                 .andExpect(jsonPath("$.tags.length()", is(4)));
@@ -350,6 +359,35 @@ class PostControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    @DisplayName("hide Returns 401 Unauthorized When Token Not Provided")
+    void hide_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder hidePostRequest = MockMvcRequestBuilders
+                .patch("/posts/hide/123")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(hidePostRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("hide Should Hide Own Post When Successful")
+    void hide_ShouldHideOwnPost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        Long publishedPostId = fourthPost.getId();
+        String expectedMessage = String.format("Post with id [%d] hidden successfully", publishedPostId);
+
+        MockHttpServletRequestBuilder hidePostRequest = MockMvcRequestBuilders
+                .patch("/posts/hide/" + publishedPostId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(hidePostRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", is(expectedMessage)));
+    }
+
     @SneakyThrows
     private String getAccessToken(String username, String password) {
         JwtResponse jwtResponse = signin(
@@ -359,5 +397,89 @@ class PostControllerTest {
                 mvc);
         assert jwtResponse != null;
         return jwtResponse.getToken();
+    }
+
+    /**
+     * Integration tests for PostController
+     * delete returns 401 unauthorized when token not provided
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Test
+    @DisplayName("delete Returns 401 Unauthorized When Token Not Provided")
+    void delete_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder deleteRequest = MockMvcRequestBuilders
+                .patch("/posts/delete/2345")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(deleteRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    /**
+     * Integration tests for PostController
+     * delete should delete post when successful
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @Test
+    @DisplayName("delete Should Delete Post When Successful")
+    void delete_ShouldDeletePost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        Specification<Post> spec = Specification
+                .where(PostSpecification.excludeCondition(EPostCondition.DELETED));
+
+        List<Post> posts = postRepository.findAll(spec);
+        Post post = posts.get(0);
+        long postId = post.getId();
+
+        String expectedMessage = String.format("Post with id [%d] deleted successfully", postId);
+
+        MockHttpServletRequestBuilder deleteRequest = MockMvcRequestBuilders
+                .patch("/posts/delete/" + postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token);
+
+        mvc.perform(deleteRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", is(expectedMessage)));
+    }
+
+    @Test
+    @DisplayName("publish Returns 401 Unauthorized When Token Not Provided")
+    void publish_Returns401Unauthorized_WhenTokenNotProvided() throws Exception {
+        MockHttpServletRequestBuilder publishRequest = MockMvcRequestBuilders
+                .patch("/posts/publish/123")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(publishRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @DisplayName("publish Should Publish Post When Successful")
+    void publish_ShouldPublishPost_WhenSuccessful() throws Exception {
+        String token = getAccessToken(AuthCreator.USERNAME, AuthCreator.PASSWORD);
+
+        Specification<Post> spec = Specification
+                .where(PostSpecification.condition(EPostCondition.DRAFT));
+
+        List<Post> posts = postRepository.findAll(spec);
+        Post post = posts.get(0);
+        long postId = post.getId();
+
+        String expectedMessage = String.format("Post with id [%d] published successfully", postId);
+
+        MockHttpServletRequestBuilder publishRequest = MockMvcRequestBuilders
+                .patch("/posts/publish/" + postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token);
+
+        mvc.perform(publishRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", is(expectedMessage)));
     }
 }

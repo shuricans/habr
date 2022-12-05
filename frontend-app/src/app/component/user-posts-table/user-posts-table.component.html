@@ -1,5 +1,5 @@
 <div class="d-flex mb-3 justify-content-between mb-2">
-    <a class="btn btn-primary " href="#" role="button">Написать статью</a>
+    <a class="btn btn-primary" role="button" (click)="openPostEditModal(content, null)">Написать статью</a>
 
     <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<table class="table table-bordered table table-hover">
+<table class="table table-bordered table table-hover" *ngIf="page">
     <thead>
         <tr>
             <th scope="col">№</th>
@@ -27,54 +27,199 @@
         </tr>
     </thead>
 
-    <tbody *ngIf="page">
-        <tr *ngFor="let post of page.content | 
-          paginate: { 
-            id: 'server', 
-            itemsPerPage: page.size, 
-            currentPage: page.number + 1, 
-            totalItems: page.totalElements 
-          }; 
-          index as i">
+    <tbody>
+      <ng-template [ngIf]="page.totalElements > 0" [ngIfElse]="emptyResultSet">
+        <tr *ngFor="let post of page.content |
+          paginate: {
+            id: 'server',
+            itemsPerPage: page.size,
+            currentPage: page.number + 1,
+            totalItems: page.totalElements
+          };
+          index as i"
+          [ngClass]="{
+            'table-info': post.condition === 'DRAFT',
+            'table-success': post.condition === 'PUBLISHED',
+            'table-secondary': post.condition === 'HIDDEN',
+            'table-danger': post.condition === 'BANNED'}">
         <th scope="row">{{i + 1 + (page.number * page.size)}}</th>
-        <td><a [routerLink]="['/habr', post.id]">{{post.title}}</a></td>
+        <td>
+          <a *ngIf="post.condition === 'PUBLISHED' else simpleTitle" [routerLink]="['/habr', post.id]">{{post.title}}</a>
+          <ng-template #simpleTitle>{{post.title}}</ng-template>
+        </td>
         <td>{{post.topic}}</td>
         <td>{{conditions[post.condition]}}</td>
         <td>{{dateFormatService.toLocaleString(post.created)}}</td>
-        <td>
-            <a class="btn" href="#"><i class="fa fa-pencil-alt" aria-hidden="true"></i></a>
-            <a class="btn" href="#"><i class="fa fa-trash" aria-hidden="true"></i></a>
+        <td nowrap="nowrap">
+            <a class="btn edit-pencil" (click)="openPostEditModal(content, post)">
+              <i class="fa-solid fa-pencil fa-lg"></i>
+            </a>
+            <a class="btn delete-trash" (click)="deletePostById(post.id, post.title)">
+              <i class="fa-solid fa-trash fa-lg"></i>
+            </a>
         </td>
         </tr>
+      </ng-template>
+      <ng-template #emptyResultSet>
+        <tr>
+          <td colspan="6">не найдено ни одного поста</td>
+        </tr>
+      </ng-template>
     </tbody>
 </table>
 
-<div class="d-flex mb-3">
-  <div class="p-2">
-    <pagination-controls (pageChange)="getPage($event)"
-      id="server"
-      previousLabel=""
-      nextLabel="">
-    </pagination-controls>
-  </div>
-  <div class="p-2">
-    <div class="d-inline-block" style="width: 10px;"></div>
-    <div class="spinner-border d-inline-block" role="status" *ngIf="loading">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-  <div class="ms-auto p-2">
-    <div class="btn-group">
-      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        отображать по <b>{{pageFilter.size}}</b>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" (click)="changeSize(2)">2</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(5)">5</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(10)">10</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(15)">15</a></li>
-        <li><a class="dropdown-item" (click)="changeSize(20)">20</a></li>
-      </ul>
-    </div>
-  </div>
+<div *ngIf="error">
+  <br>
+  <h5>Произошла ошибка...</h5>
+  <hr />
+  <h6>Не удалось загрузить посты.</h6>
+  <h6>Попробуйте перезагрузить страницу.</h6>
+  <br>
+  <a class="btn btn-primary" (click)="reloadPage()" role="button">Перезагрузить страницу</a>
 </div>
+
+<app-post-pagination *ngIf="page && page.totalElements > 0"
+  [loading]="loading"
+  [size]="pageFilter.size"
+  (changePageEvent)="getPage($event)"
+  (changeSizeEvent)="changeSize($event)">
+</app-post-pagination>
+
+<ng-template #content let-modal>
+  <div class="modal-header" 
+       [ngClass]="{
+         'text-bg-info': condition === 'черновик',
+         'text-bg-success': condition === 'опубликован',
+         'text-bg-secondary': condition === 'скрыт',
+         'text-bg-danger': condition === 'заблокирован'}">
+    <h4 class="modal-title">{{condition}}</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <div class="row full-modal-height">
+      <div class="col">
+        <form id="postEditForm" (ngSubmit)="submitForm()" [formGroup]="form" autocomplete="off">
+          <div class="input-group mb-3">
+            <button class="btn btn-outline-secondary dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">Выбрать тему
+            </button>
+            <ul class="dropdown-menu">
+              <li *ngFor="let topic of topics | async">
+                <a class="dropdown-item" (click)="selectTopic(topic.name)">{{topic.name}}</a>
+              </li>
+            </ul>
+            <input type="text"
+                   formControlName="topic"
+                   class="form-control"
+                   aria-label="Text input with dropdown button"
+                   [ngClass]="{'is-invalid': form.controls['topic'].invalid && form.controls['topic'].touched}"
+                   readonly>
+            <div class="invalid-feedback"
+                   *ngIf="form.controls['topic'].invalid && form.controls['topic'].touched">
+                Укажите топик
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="Article title" class="col-form-label">Заголовок статьи</label>
+            <input type="text"
+                   formControlName="title"
+                   class="form-control"
+                   [ngClass]="{'is-invalid': form.controls['title'].invalid && form.controls['title'].touched}"
+                   id="Article title"
+                   #articleTitle>
+            <div class="invalid-feedback"
+                   *ngIf="form.controls['title'].invalid && form.controls['title'].touched">
+                Укажите заголовок статьи
+            </div>
+          </div>
+    
+          <div class="mb-3">
+            <label for="description" class="col-form-label">Описание</label>
+            <textarea class="form-control"
+                      formControlName="description"
+                      [ngClass]="{'is-invalid': form.controls['description'].invalid && form.controls['description'].touched}"
+                      id="description"
+                      #description>
+            </textarea>
+            <div class="invalid-feedback"
+                   *ngIf="form.controls['description'].invalid && form.controls['description'].touched">
+                Заполните описание статьи
+            </div>
+          </div>
+    
+          <div class="mb-3">
+            <label for="text" class="col-form-label">Текст</label>
+            <textarea class="form-control"
+                      formControlName="content"
+                      [ngClass]="{'is-invalid': form.controls['content'].invalid && form.controls['content'].touched}"
+                      id="text"
+                      #content>
+            </textarea>
+            <div class="invalid-feedback"
+                   *ngIf="form.controls['content'].invalid && form.controls['content'].touched">
+                Содержание статьи не может быть пустым
+            </div>
+          </div>
+    
+          <div class="input-group mb-3">
+            <input type="text"
+                   class="form-control"
+                   placeholder="Напишите тег"
+                   aria-label="tag"
+                   aria-describedby="buttonAddTag"
+                   [formControl]="tagFormControl"
+                   [ngClass]="{'is-invalid': (tagFormControl.invalid && tagFormControl.touched) || tags.length === maxAmountTags}"
+                   #newTag>
+            <button class="btn btn-primary"
+                    type="button"
+                    id="buttonAddTag"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    (click)="addTag(newTag.value)"
+                    title="Добавить тег">
+              <i class="fas fa-check-circle"></i>
+            </button>
+            <div class="invalid-feedback"
+                   *ngIf="tagFormControl.invalid && tagFormControl.touched">
+                кол-во символов: min 2 max 20, первый и последний символы - буква/цифра, также доступны: ["пробел", "_", "-"]
+            </div>
+            <div class="invalid-feedback"
+                   *ngIf="tags.length === maxAmountTags">
+                Максимальное кол-во тегов: {{maxAmountTags}}
+            </div>
+          </div>
+    
+          <div class="d-flex flex-wrap">
+            <div class="pe-2 pt-2" *ngFor="let tag of tags">
+              <button type="button" class="btn btn-secondary text-nowrap" (click)="removeTag(tag)">
+                #{{tag}}<i class="fa-solid fa-xmark ps-2"></i>
+              </button>
+            </div>
+          </div>
+          
+        </form>
+      </div>
+      <div class="col test-div">
+        <markdown class="variable-binding" [data]="description.value"></markdown>
+        <markdown class="variable-binding" [data]="content.value"></markdown>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+      <ng-container *ngIf="condition === 'опубликован'">
+        <button type="button" class="btn btn-secondary me-auto" (click)="hide(postId)">Скрыть</button>
+      </ng-container>
+      <ng-container *ngIf="condition === 'черновик' || condition === 'скрыт'">
+        <button type="button" class="btn btn-success me-auto" (click)="publish(postId)">Опубликовать</button>
+      </ng-container>
+      <button (click)="modal.dismiss('Cross click')" type="button" class="btn btn-secondary">Закрыть</button>
+      <button *ngIf="form.dirty || otherChanges" type="submit" form="postEditForm" class="btn btn-primary">Сохранить</button>
+  </div>
+</ng-template>

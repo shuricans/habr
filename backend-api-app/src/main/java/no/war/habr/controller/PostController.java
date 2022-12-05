@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import no.war.habr.exception.PostNotFoundException;
 import no.war.habr.payload.request.PostDataRequest;
+import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.EPostCondition;
 import no.war.habr.service.PostService;
 import no.war.habr.service.dto.PostDto;
@@ -136,5 +137,61 @@ public class PostController {
                         sortField,
                         sortDir)
         );
+    }
+
+    /**
+     * endpoint for deleting a post
+     *
+     * @author Zalyaletdinova Ilmira
+     */
+    @PatchMapping("/delete/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Delete own post. Set post condition to DELETED", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful deleted"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "412", description = "When preconditionFailed"),
+            @ApiResponse(responseCode = "404", description = "When post not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<MessageResponse> delete(@PathVariable("id") Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(postService.delete(username, id));
+    }
+
+    @PatchMapping("/hide/{id}")
+    @SecurityRequirement(name="bearerAuth")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Hides own post. Set post condition to HIDDEN", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "403", description = "When forbidden"),
+            @ApiResponse(responseCode = "404", description = "When post not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<MessageResponse> hide(@PathVariable("id") Long postId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(postService.hide(username, postId));
+    }
+
+    @PatchMapping("/publish/{id}")
+    @SecurityRequirement(name="bearerAuth")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_USER', 'SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Publishes own post. Set post condition to PUBLISHED", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "403", description = "When forbidden"),
+            @ApiResponse(responseCode = "404", description = "When post not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<MessageResponse> publish(@PathVariable("id") Long postId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(postService.publish(username, postId));
     }
 }

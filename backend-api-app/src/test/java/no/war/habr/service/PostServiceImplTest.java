@@ -1,12 +1,9 @@
 package no.war.habr.service;
 
-import no.war.habr.exception.BadRequestException;
-import no.war.habr.exception.TopicNotFoundException;
-import no.war.habr.exception.UserNotFoundException;
+import no.war.habr.exception.*;
 import no.war.habr.payload.request.PostDataRequest;
-import no.war.habr.persist.model.Post;
-import no.war.habr.persist.model.Topic;
-import no.war.habr.persist.model.User;
+import no.war.habr.payload.response.MessageResponse;
+import no.war.habr.persist.model.*;
 import no.war.habr.persist.repository.PostRepository;
 import no.war.habr.persist.repository.TagRepository;
 import no.war.habr.persist.repository.TopicRepository;
@@ -64,6 +61,7 @@ class PostServiceImplTest {
 
     @Mock
     private PostMapper postMapper;
+
 
     @BeforeEach
     void setUp() {
@@ -252,4 +250,299 @@ class PostServiceImplTest {
         assertThat(capturedPost.getTopic().getName()).isEqualTo(topic.getName());
         assertThat(capturedPost.getOwner()).isEqualTo(user);
     }
+
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * delete should throw user not found Exception when user not existent
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("delete Should Throw User Not Found Exception When User Not Existent")
+    void delete_ShouldThrowUserNotFoundException_WhenUserNotExistent() {
+        // given
+        String username = "username";
+        given(userRepository.findByUsername(username)).willReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.delete(username, anyLong()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining(String.format("User with username [%s] not found.", username));
+    }
+
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * delete should Throw Precondition Failed Exception when user not active
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("delete Should Throw Precondition Failed Exception When User Not Active")
+    void delete_ShouldThrowPreconditionFailedException_WhenUserNotActive() {
+        // given
+        User owner = createUser();
+        owner.setCondition(EUserCondition.NOT_ACTIVE);
+        String username = owner.getUsername();
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(owner));
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.delete(username, anyLong()))
+                .isInstanceOf(PreconditionFailedException.class)
+                .hasMessageContaining(String.format("User [%s] is not ACTIVE", username));
+    }
+
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * delete should throw post not found Exception when post not found
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("delete Should Throw Post Not Found Exception When Post Not Found")
+    void delete_ShouldThrowPostNotFoundException_WhenPostNotFound() {
+        // given
+        User owner = createUser();
+        long postId = 1;
+        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(owner));
+        given(postRepository.findById(postId)).willReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.delete(anyString(), postId))
+                .isInstanceOf(PostNotFoundException.class)
+                .hasMessageContaining(String.format("Post by id [%d] not found.", postId));
+    }
+
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * delete should Throw Precondition Failed Exception when user not ownerPost
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("delete Should Throw Precondition Failed Exception When User Not OwnerPost")
+    void delete_ShouldThrowPreconditionFailedException_WhenUserNotOwnerPost() {
+        // given
+        User user = createUser();
+        User owner = createUser();
+        owner.setId(2L);
+        Post post = Post.builder()
+                .owner(owner)
+                .build();
+
+        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.delete(user.getUsername(), anyLong()))
+                .isInstanceOf(PreconditionFailedException.class)
+                .hasMessageContaining("You are not the owner of this post!");
+    }
+
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * delete should Throw Precondition Failed Exception when post not delete
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("delete Should Throw Precondition Failed Exception When Post Delete")
+    void delete_ShouldThrowPreconditionFailedException_WhenPostDelete() {
+        // given
+
+        User owner = createUser();
+        long postId = 2L;
+        Post post = Post.builder()
+                .id(postId)
+                .owner(owner)
+                .condition(EPostCondition.DELETED)
+                .build();
+        String username = owner.getUsername();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(owner));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.delete(username, postId))
+                .isInstanceOf(PreconditionFailedException.class)
+                .hasMessageContaining(String.format("Post by id [%d] deleted already", postId));
+
+    }
+
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * delete by id should change post condition to deleted when successful
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("deleteById_ShouldChangePostConditionToDeleted_WhenSuccessful")
+    void deleteById_ShouldChangePostConditionToDeleted_WhenSuccessful() {
+        // given
+        long postId = 1L;
+        Post post = Post.builder()
+                .id(postId)
+                .build();
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        String expectedMessage = String.format("Post with id [%d] deleted successfully", postId);
+
+        // when
+        MessageResponse messageResponse = underTest.deleteById(postId);
+
+        // then
+        ArgumentCaptor<Post> postArgumentCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(postArgumentCaptor.capture());
+        Post capturedPost = postArgumentCaptor.getValue();
+
+        assertThat(capturedPost).isEqualTo(post);
+        assertThat(capturedPost.getCondition()).isEqualTo(EPostCondition.DELETED);
+        assertThat(messageResponse.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw UserNotFoundException When User Not Exist")
+    public void  publish_ShouldThrowUserNotFoundException_WhenUserNotExist() {
+        //given
+        String username = "username";
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, anyLong()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User [%s] not found.", username);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw ForbiddenException When User Not Active")
+    public void publish_ShouldThrowForbiddenException_WhenUserNotActive() {
+        //given
+        User user = createUser();
+        user.setCondition(EUserCondition.NOT_ACTIVE);
+        String username = user.getUsername();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, anyLong()))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("User [%s] is not active.", username);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw PostNotFoundException When Post Not Found")
+    public void publish_ShouldThrowPostNotFoundException_WhenPostNotFound() {
+        //given
+        User user = createUser();
+        String username = user.getUsername();
+        long postId = 1123L;
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.empty());
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(PostNotFoundException.class)
+                .hasMessageContaining("Post with id [%d] not found.", postId);
+    }
+
+    @Test
+    @DisplayName("publish Should Throw ForbiddenException When User Not Owner Of Post")
+    public void publish_ShouldThrowForbiddenException_WhenUserNotOwnerOfPost() {
+        //given
+        User user = createUser();
+        User owner = User.builder()
+                .id(2L)
+                .build();
+
+        String username = user.getUsername();
+
+        Post post = Post.builder()
+                .id(11L)
+                .owner(owner)
+                .build();
+
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("You are not the owner of this post!");
+    }
+
+    @Test
+    @DisplayName("publish Should Throw BadRequestException When Post Has Invalid Condition")
+    public void publish_ShouldThrowBadRequestException_WhenPostHasInvalidCondition() {
+        //given
+        User user = createUser();
+        String username = user.getUsername();
+        Post post = Post.builder()
+                .id(11L)
+                .owner(user)
+                .condition(EPostCondition.DELETED)
+                .build();
+
+        long postId = post.getId();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.publish(username, postId))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Post with id [%d] must be DRAFT or HIDDEN", postId);
+    }
+
+    @Test
+    @DisplayName("publish Should Change Post Condition To PUBLISHED When Successful")
+    public void publish_ShouldChangePostConditionToPUBLISHED_WhenSuccessful() {
+        //given
+        User user = createUser();
+        Post post = Post.builder()
+                .id(11L)
+                .condition(EPostCondition.DRAFT)
+                .owner(user)
+                .build();
+
+        String username = user.getUsername();
+        long postId = post.getId();
+        String expectedMessageResponse = String.format("Post with id [%d] published successfully", postId);
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+
+        //when
+        MessageResponse messageResponse = underTest.publish(username, postId);
+
+        //then
+        ArgumentCaptor<Post> postArgumentCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(postArgumentCaptor.capture());
+        Post capturedPost = postArgumentCaptor.getValue();
+
+        assertThat(capturedPost).isEqualTo(post);
+        assertThat(capturedPost.getCondition()).isEqualTo(EPostCondition.PUBLISHED);
+        assertThat(messageResponse.getMessage()).isEqualTo(expectedMessageResponse);
+    }
 }
+
+

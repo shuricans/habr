@@ -6,8 +6,10 @@
         <a [routerLink]="['/habr', post.id]" class="btn btn-primary">Читать далее</a>
     </div>
     <div class="card-footer text-muted">
-        Топик: <a href="#">{{post.topic}}</a>
-        Автор: <a href="#">{{post.owner}}</a>
+        <ng-template #tipTopic>раздел - <b>{{post.topic}}</b></ng-template>
+        <ng-template #tipUser>профиль - <b>{{post.owner}}</b></ng-template>
+        Топик: <a [routerLink]="[getTopicLink(post.topic)]" placement="bottom" [ngbTooltip]="tipTopic">{{post.topic}}</a>
+        Автор: <a [routerLink]="['/user/', post.owner]" placement="bottom" [ngbTooltip]="tipUser">{{post.owner}}</a>
         От: {{dateFormatService.toLocaleString(post.created)}}
     </div>
 </div>

@@ -25,6 +25,13 @@ import { PostCardComponent } from './component/post-card/post-card.component';
 import { PostGalleryComponent } from './component/post-gallery/post-gallery.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { UserPostsTableComponent } from './component/user-posts-table/user-posts-table.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NotFoundPageComponent } from './page/not-found-page/not-found-page.component';
+import { PostPaginationComponent } from './component/post-pagination/post-pagination.component';
+import { UserPageComponent } from './page/user-page/user-page.component';
+import { ConfirmModalComponent } from './component/confirm-modal/confirm-modal.component';
+import { InfoModalComponent } from './component/info-modal/info-modal.component';
+
 
 @NgModule({
   declarations: [
@@ -44,7 +51,12 @@ import { UserPostsTableComponent } from './component/user-posts-table/user-posts
     UserDataComponent,
     PostCardComponent,
     PostGalleryComponent,
-    UserPostsTableComponent
+    UserPostsTableComponent,
+    NotFoundPageComponent,
+    PostPaginationComponent,
+    UserPageComponent,
+    ConfirmModalComponent,
+    InfoModalComponent,
   ],
     imports: [
         BrowserModule,
@@ -54,6 +66,7 @@ import { UserPostsTableComponent } from './component/user-posts-table/user-posts
         ReactiveFormsModule,
         HttpClientModule,
         NgxPaginationModule,
+        NgbModule,
     ],
   providers: [TokenInterceptorProvider],
   bootstrap: [AppComponent]
