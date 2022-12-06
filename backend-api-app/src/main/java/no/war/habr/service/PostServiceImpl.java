@@ -21,12 +21,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import static no.war.habr.persist.model.ERole.*;
 import static no.war.habr.util.SpecificationUtils.combineSpec;
 
 /**
@@ -274,6 +273,30 @@ public class PostServiceImpl implements PostService {
 
         return new MessageResponse(String.format("Post with id [%d] published successfully", postId));
     }
+
+    @Override
+    @Transactional
+    public MessageResponse ban(String username, long postId) {
+        User user = getUserByUsername(username);
+        isActiveUser(user);
+        Post post = getPostById(postId);
+
+        Set<Role> roles = new HashSet<>(user.getRoles());
+        for (Role role : roles) {
+            if (!(role.getName().equals(ROLE_ADMIN) || role.getName().equals(ROLE_MODERATOR))) {
+                throw new ForbiddenException(String.format("User with username: [%s] must have rights" +
+                        " ADMIN or MODERATOR", username));
+            }
+        }
+        if(!post.getCondition().equals(EPostCondition.PUBLISHED)) {
+            throw new ForbiddenException(String.format("Post with id: [%d] is not PUBLISHED", postId));
+        }
+        post.setCondition(EPostCondition.BANNED);
+        postRepository.save(post);
+
+        return new MessageResponse(String.format("Post with id [%d] baned successfully", postId));
+    }
+
 
     /**
      * Checks that the {@code User} is owner of {@code Post}.

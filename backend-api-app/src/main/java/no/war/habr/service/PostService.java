@@ -40,4 +40,6 @@ public interface PostService {
     MessageResponse hide(String username, long postId);
 
     MessageResponse publish(String username, long postId);
+
+    MessageResponse ban(String username, long postId);
 }
