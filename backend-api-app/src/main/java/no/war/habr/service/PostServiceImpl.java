@@ -279,15 +279,14 @@ public class PostServiceImpl implements PostService {
     public MessageResponse ban(String username, long postId) {
         User user = getUserByUsername(username);
         isActiveUser(user);
-        Post post = getPostById(postId);
-
-        Set<Role> roles = new HashSet<>(user.getRoles());
+        Set<Role> roles = user.getRoles();
         for (Role role : roles) {
             if (!(role.getName().equals(ROLE_ADMIN) || role.getName().equals(ROLE_MODERATOR))) {
                 throw new ForbiddenException(String.format("User with username: [%s] must have rights" +
                         " ADMIN or MODERATOR", username));
             }
         }
+        Post post = getPostById(postId);
         if(!post.getCondition().equals(EPostCondition.PUBLISHED)) {
             throw new ForbiddenException(String.format("Post with id: [%d] is not PUBLISHED", postId));
         }

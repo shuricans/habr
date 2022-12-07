@@ -576,10 +576,32 @@ class PostServiceImplTest {
     }
 
     @Test
+    @DisplayName("ban Should Throw PostNotFoundException When User Not have rights ADMIN or MODERATOR")
+    public void ban_ShouldThrowForbiddenException_WhenUserNotHaveRightsADMINorMODERATOR() {
+        //given
+        User user = createUser();
+        user.setCondition(EUserCondition.ACTIVE);
+        Set<Role> roleAdmin = Set.of(Role.builder().name(ERole.ROLE_USER).build());
+        user.setRoles(roleAdmin);
+        String username = user.getUsername();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.ban(username, anyLong()))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("User with username: [%s] must have rights" +
+                        " ADMIN or MODERATOR", username);
+    }
+
+    @Test
     @DisplayName("ban Should Throw PostNotFoundException When Post Not Found")
     public void ban_ShouldThrowPostNotFoundException_WhenPostNotFound() {
         //given
         User user = createUser();
+        user.setCondition(EUserCondition.ACTIVE);
+        Set<Role> roleAdmin = Set.of(Role.builder().name(ERole.ROLE_MODERATOR).build());
+        user.setRoles(roleAdmin);
         String username = user.getUsername();
         long postId = 1123L;
 
@@ -593,37 +615,17 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("ban Should Throw PostNotFoundException When User Not have rights ADMIN or MODERATOR")
-    public void ban_ShouldThrowForbiddenException_WhenUserNothaveRightsADMINorMODERATOR() {
-        //given
-        User user = createUser();
-        String username = user.getUsername();
-        Post post = Post.builder()
-                .id(1111L)
-                .build();
-
-        long postId = post.getId();
-
-        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
-        given(postRepository.findById(postId)).willReturn(Optional.of(post));
-        //when
-        //then
-        assertThatThrownBy(() -> underTest.ban(username, postId))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("User with username: [%s] must have rights" +
-                        " ADMIN or MODERATOR", username);
-    }
-
-    @Test
     @DisplayName("ban Should Throw BadRequestException When Post Not Has Condition Published")
     public void ban_ShouldThrowForbiddenException_WhenPostNotHasConditionPublished() {
         //given
         User user = createUser();
-        Set<Role> roleAdmin = Set.of(Role.builder().name(ERole.ROLE_ADMIN).build());
+        user.setCondition(EUserCondition.ACTIVE);
+        Set<Role> roleAdmin = Set.of(Role.builder().name(ERole.ROLE_MODERATOR).build());
         user.setRoles(roleAdmin);
         String username = user.getUsername();
         Post post = Post.builder()
                 .id(1111L)
+                .condition(EPostCondition.DRAFT)
                 .build();
 
         long postId = post.getId();
