@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import static no.war.habr.persist.model.ERole.*;
 import static no.war.habr.util.SpecificationUtils.combineSpec;
 
 /**
@@ -273,6 +274,28 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
 
         return new MessageResponse(String.format("Post with id [%d] published successfully", postId));
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse ban(String username, long postId) {
+        User user = getUserByUsername(username);
+        isActiveUser(user);
+        Set<Role> roles = user.getRoles();
+        for (Role role : roles) {
+            if (!(role.getName().equals(ROLE_ADMIN) || role.getName().equals(ROLE_MODERATOR))) {
+                throw new ForbiddenException(String.format("User with username: [%s] must have rights" +
+                        " ADMIN or MODERATOR", username));
+            }
+        }
+        Post post = getPostById(postId);
+        if(!post.getCondition().equals(EPostCondition.PUBLISHED)) {
+            throw new ForbiddenException(String.format("Post with id: [%d] is not PUBLISHED", postId));
+        }
+        post.setCondition(EPostCondition.BANNED);
+        postRepository.save(post);
+
+        return new MessageResponse(String.format("Post with id [%d] baned successfully", postId));
     }
 
     /**
