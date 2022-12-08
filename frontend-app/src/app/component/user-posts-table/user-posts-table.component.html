@@ -277,6 +277,6 @@
         <button type="button" class="btn btn-success me-auto" (click)="publish()">Опубликовать</button>
       </ng-container>
       <button (click)="modal.dismiss('Cross click')" type="button" class="btn btn-secondary">Закрыть</button>
-      <button *ngIf="form.dirty || otherChanges" type="submit" form="postEditForm" class="btn btn-primary">Сохранить</button>
+      <button *ngIf="dataChanged" type="submit" form="postEditForm" class="btn btn-primary">Сохранить</button>
   </div>
 </ng-template>

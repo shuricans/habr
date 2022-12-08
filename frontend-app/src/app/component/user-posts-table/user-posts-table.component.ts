@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { first, Observable, of } from 'rxjs';
+import { first, Observable, Subscription } from 'rxjs';
 import { Page } from 'src/app/model/page';
 import { PageFilter } from 'src/app/model/page-filter';
 import { PictureData } from 'src/app/model/picture-data';
@@ -24,6 +24,9 @@ import { InfoModalComponent } from '../info-modal/info-modal.component';
 })
 export class UserPostsTableComponent implements OnInit, OnDestroy {
 
+  @Input() allowRedirect: boolean = true;
+  @Output() allowRedirectChange = new EventEmitter<boolean>();
+
   // variables for table of posts
   page!: Page;
   pageFilter!: PageFilter;
@@ -38,10 +41,12 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   condition: string = ''; // for displaing state in header
   private postId: number = -1; // post id ([-1] means it's a draft)
   topics!: Observable<TopicDto[]>; // topics
-  otherChanges: boolean = false; // flag for handling changes outside form-control
+  dataChanged: boolean = false; // flag for handling changes outside form-control
   private images:string [] = []; // image files after choose-dialog
   pictures: PictureData[] = []; // pictures dto
   mainPicId: number = -1; // id header picture of Post
+  private subscriptionOnFormChanges?: Subscription;
+  private modalEditPostRef?: NgbModalRef;
 
   conditions : Record<string, string> = {
     DRAFT: 'черновик',
@@ -103,6 +108,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.dataService.setLkPostPageFilter(this.pageFilter);
     this.dataService.setLkPostFilter(this.postFilter);
+    this.modalEditPostRef?.close();
   }
 
   changeSize(size: number) {
@@ -116,10 +122,10 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   }
 
   openPostEditModal(content: TemplateRef<any>, post: PostDto | null) {
-    const modalEditPostRef = this.modalService.open(content, {
+    this.modalEditPostRef = this.modalService.open(content, {
       fullscreen: true,
       beforeDismiss: () => {
-        if (!(this.form.dirty || this.otherChanges)) { // there were no changes
+        if (!this.dataChanged) { // there were no changes
           return true; // means closing main fullscreen modal
         }
         // opening a confirm dialog
@@ -129,17 +135,40 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
 
         modalRef.result.then(
           () => { // yes event
-            modalEditPostRef.close(); // manually closing main fullscreen modal
+            this.modalEditPostRef!.close(); // manually closing main fullscreen modal
           },
           () => {} // catch all close events here
         );
-        return false;
+        return false; // prevent close
       }
     });
 
     // set postId ([-1] means it's a draft)
     this.postId = post != null ? post.id : -1;
+
     this.initForm(post);
+    this.subscribeTo_FormChanges();
+
+    // when modal is completely closed
+    this.modalEditPostRef.result.finally(() => {
+      this.unsubscribeFrom_FormChanges();
+      this.resetForm();
+      this.resetChangeFlag();
+    });
+  }
+
+  private handleChangeEvent() {
+    if (this.dataChanged === false) {
+      this.allowRedirect = false;
+      this.allowRedirectChange.emit(this.allowRedirect);
+      this.dataChanged = true;
+    }
+  }
+
+  private resetChangeFlag() {
+    this.dataChanged = false; // reset changes flag
+    this.allowRedirect = true;
+    this.allowRedirectChange.emit(this.allowRedirect);
   }
 
   getPage(page: number) {
@@ -166,7 +195,6 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
   }
 
   private initForm(post: PostDto | null) {
-    this.resetForm();
     // post == null, means we want empty form
     if (post == null) {
       this.condition = this.conditions['DRAFT'];
@@ -182,8 +210,20 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     }
   }
 
+  private subscribeTo_FormChanges() {
+    // subscribing to first change event in form
+    this.subscriptionOnFormChanges = this.form.valueChanges.pipe(first()).subscribe({
+      next: () => {
+        this.handleChangeEvent();
+      }
+    });
+  }
+
+  private unsubscribeFrom_FormChanges() {
+    this.subscriptionOnFormChanges?.unsubscribe();
+  }
+
   private resetForm() {
-    this.otherChanges = false; // reset changes flag
     this.tagFormControl.reset(); // reset input FormControl for tags
     this.inputImageControl.reset(); // reset input FormControl for images files
     this.form.reset(); // reset main FormGroup
@@ -200,7 +240,8 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
       return;
     }
     this.tags.push(newTag);
-    this.otherChanges = true;
+    this.tagFormControl.reset(); // reset input FormControl for tags
+    this.handleChangeEvent();
   }
 
   removeTag(tag: string) {
@@ -209,13 +250,13 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
 
     if (startIndex !== -1) {
       this.tags.splice(startIndex, deleteCount);
-      this.otherChanges = true;
+      this.handleChangeEvent();
     }
   }
 
   selectTopic(name: string) {
     this.form.controls.topic.setValue(name);
-    this.otherChanges = true;
+    this.handleChangeEvent();
   }
 
   submitForm() {
@@ -247,8 +288,10 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     this.postService.save(postDataRequest).pipe(first()).subscribe({
       next: (postDto) => {
         this.getPage(this.pageFilter.page); // background refresh table of posts
-        this.initForm(postDto); // refresh form
         this.postId = postDto.id; // needed when post didn't exist yet
+        this.resetChangeFlag();
+        this.unsubscribeFrom_FormChanges();
+        this.subscribeTo_FormChanges();
         const modalRef = this.modalService.open(InfoModalComponent);
         modalRef.componentInstance.message = 'Статья успешно сохранена!';
       },
@@ -288,7 +331,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.form.dirty || this.otherChanges) { // there are unsaved changes
+    if (this.dataChanged) { // there are unsaved changes
       const modalRef = this.modalService.open(InfoModalComponent);
       modalRef.componentInstance.message = 'Кажется у Вас есть не сохранённые изменения.';
       modalRef.componentInstance.message_2 = 'Сначала необходимо сохранить.';
@@ -365,7 +408,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
     this.pictureService.uploadPictures(formData).pipe(first()).subscribe({
       next: pics => {
         this.pictures.push(...pics);
-        this.otherChanges = true;
+        this.handleChangeEvent();
         this.inputImageControl.reset();
       },
       error: () => {
@@ -376,12 +419,12 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
 
   setMainPicture(picId: number) {
     this.mainPicId = picId;
-    this.otherChanges = true;
+    this.handleChangeEvent();
   }
 
   removeMainPicture() {
     this.mainPicId = -1;
-    this.otherChanges = true;
+    this.handleChangeEvent();
   }
 
   deletePicture(picture: PictureData) {
@@ -404,7 +447,7 @@ export class UserPostsTableComponent implements OnInit, OnDestroy {
 
         if (startIndex !== -1) {
           this.pictures.splice(startIndex, deleteCount);
-          this.otherChanges = true;
+          this.handleChangeEvent();
         }
 
         if (picture.id === this.mainPicId) {
