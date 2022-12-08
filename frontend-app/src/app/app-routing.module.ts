@@ -15,6 +15,7 @@ import { AuthGuard } from './guard/auth-guard';
 import { SignupPageComponent } from './page/signup-page/signup-page.component';
 import { NotFoundPageComponent } from './page/not-found-page/not-found-page.component';
 import { UserPageComponent } from './page/user-page/user-page.component';
+import { CanDeactivateGuard } from './guard/can-deactivate.guard';
 
 const routes: Routes = [
   {path: "", pathMatch: "full", redirectTo: "habr"},
@@ -27,7 +28,7 @@ const routes: Routes = [
   {path: "help", component: HelpPageComponent},
   {path: "search", component: SearchPageComponent},
   {path: "login", component: LoginPageComponent, canActivate: [SigninSignupGuard]},
-  {path: "lk", component: LkPageComponent, canActivate: [AuthGuard]},
+  {path: "lk", component: LkPageComponent, canActivate: [AuthGuard], canDeactivate: [CanDeactivateGuard]},
   {path: "signup", component: SignupPageComponent, canActivate: [SigninSignupGuard]},
   {path: "user/:username", component: UserPageComponent},
   {path: '**', component: NotFoundPageComponent},  // Wildcard route for a 404 page

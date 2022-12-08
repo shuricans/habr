@@ -34,7 +34,6 @@ export class UserDataComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getUserData().subscribe({
       next: userDto => {
-        console.log(userDto)
         this.userDto = userDto;
         this.form.controls.firstName.setValue(userDto.firstName)
         this.form.controls.lastName.setValue(userDto.lastName)
