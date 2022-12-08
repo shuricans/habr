@@ -35,7 +35,9 @@ export class PostPageComponent implements OnInit {
     this.postService.findPublishedById(postId).subscribe({
       next: postDto => {
         this.post = postDto;
-        this.getImageFromService();
+        if (this.post.mainPictureId != null) {
+          this.getImageFromService();
+        }
       },
       error: (httpErrorResponse: HttpErrorResponse) => {
         let exceptionDetails = httpErrorResponse.error as ExceptionDetails;

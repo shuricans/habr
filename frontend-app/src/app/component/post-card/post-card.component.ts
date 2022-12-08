@@ -21,7 +21,6 @@ export class PostCardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.post.mainPictureId != null)
     if (this.post.mainPictureId != null) {
       this.getImageFromService();
     }
