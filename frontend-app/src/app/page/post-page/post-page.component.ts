@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ExceptionDetails } from 'src/app/model/exception-details';
 import { PostDto } from 'src/app/model/post-dto';
 import { DateFormatService } from 'src/app/service/date-format.service';
+import { PictureService } from 'src/app/service/picture.service';
 import { PostService } from 'src/app/service/post.service';
 import { TopicService } from 'src/app/service/topic.service';
 
@@ -17,8 +18,11 @@ export class PostPageComponent implements OnInit {
   notFound: boolean = false;
   otherError: boolean = false;
   httpErrorResponse!: HttpErrorResponse;
+  imageToShow: any;
+  isImageLoading!: boolean;
 
   constructor(private postService: PostService,
+              private pictureService: PictureService,
               private topicService: TopicService,
               private route: ActivatedRoute,
               public dateFormatService: DateFormatService) {
@@ -31,6 +35,7 @@ export class PostPageComponent implements OnInit {
     this.postService.findPublishedById(postId).subscribe({
       next: postDto => {
         this.post = postDto;
+        this.getImageFromService();
       },
       error: (httpErrorResponse: HttpErrorResponse) => {
         let exceptionDetails = httpErrorResponse.error as ExceptionDetails;
@@ -50,5 +55,32 @@ export class PostPageComponent implements OnInit {
 
   reloadPage() {
     location.reload();
-  } 
+  }
+
+  private createImageFromBlob(image: Blob) {
+    let reader = new FileReader();
+    reader.addEventListener("load", () => {
+      this.imageToShow = reader.result;
+    }, false);
+
+    if (image) {
+      reader.readAsDataURL(image);
+    }
+  }
+
+  private getImageFromService() {
+    this.isImageLoading = true;
+
+    this.pictureService.getPicture(this.post.mainPictureId)
+      .subscribe({
+        next: (data) => {
+          this.createImageFromBlob(data);
+          this.isImageLoading = false;
+        },
+        error: err => {
+          this.isImageLoading = false;
+          console.error(err);
+        }
+      });
+  }
 }

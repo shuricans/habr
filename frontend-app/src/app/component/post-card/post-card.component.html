@@ -1,7 +1,12 @@
 <div class="card" *ngIf="post">
     <div class="card-body">
         <h5 class="card-title"><a [routerLink]="['/habr', post.id]">{{post.title}}</a></h5>
-        <img src="https://picsum.photos/600/400/?random={{post.id}}" class="card-img mb-2"/>
+        <ng-container *ngIf="post.mainPictureId">
+            <img class="card-img mb-2" 
+                [src]="imageToShow"
+                [alt]="post.title"
+                *ngIf="!isImageLoading; else loading" />
+        </ng-container>
         <markdown class="variable-binding" [data]="post.description"></markdown>
         <a [routerLink]="['/habr', post.id]" class="btn btn-primary">Читать далее</a>
     </div>
@@ -13,3 +18,13 @@
         От: {{dateFormatService.toLocaleString(post.created)}}
     </div>
 </div>
+
+<ng-template #loading>
+    <div class="card-img-top">
+        <div class="d-flex justify-content-center">
+            <div class="spinner-grow m-5" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</ng-template>
