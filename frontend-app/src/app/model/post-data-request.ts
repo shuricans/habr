@@ -5,4 +5,6 @@ export class PostDataRequest {
   public description?: string;
   public topic?: string;
   public tags?: string[];
+  public mainPictureId?: number;
+  public picturesIds?: number[];
 }

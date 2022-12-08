@@ -86,7 +86,7 @@
 </app-post-pagination>
 
 <ng-template #content let-modal>
-  <div class="modal-header" 
+  <div class="modal-header"
        [ngClass]="{
          'text-bg-info': condition === 'черновик',
          'text-bg-success': condition === 'опубликован',
@@ -104,120 +104,177 @@
     <div class="row full-modal-height">
       <div class="col">
         <form id="postEditForm" (ngSubmit)="submitForm()" [formGroup]="form" autocomplete="off">
-          <div class="input-group mb-3">
-            <button class="btn btn-outline-secondary dropdown-toggle"
-                    type="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false">Выбрать тему
-            </button>
-            <ul class="dropdown-menu">
-              <li *ngFor="let topic of topics | async">
-                <a class="dropdown-item" (click)="selectTopic(topic.name)">{{topic.name}}</a>
-              </li>
-            </ul>
-            <input type="text"
-                   formControlName="topic"
-                   class="form-control"
-                   aria-label="Text input with dropdown button"
-                   [ngClass]="{'is-invalid': form.controls['topic'].invalid && form.controls['topic'].touched}"
-                   readonly>
-            <div class="invalid-feedback"
-                   *ngIf="form.controls['topic'].invalid && form.controls['topic'].touched">
-                Укажите топик
-            </div>
-          </div>
-          <div class="mb-3">
-            <label for="Article title" class="col-form-label">Заголовок статьи</label>
-            <input type="text"
-                   formControlName="title"
-                   class="form-control"
-                   [ngClass]="{'is-invalid': form.controls['title'].invalid && form.controls['title'].touched}"
-                   id="Article title"
-                   #articleTitle>
-            <div class="invalid-feedback"
-                   *ngIf="form.controls['title'].invalid && form.controls['title'].touched">
-                Укажите заголовок статьи
-            </div>
-          </div>
-    
-          <div class="mb-3">
-            <label for="description" class="col-form-label">Описание</label>
-            <textarea class="form-control"
-                      formControlName="description"
-                      [ngClass]="{'is-invalid': form.controls['description'].invalid && form.controls['description'].touched}"
-                      id="description"
-                      #description>
-            </textarea>
-            <div class="invalid-feedback"
-                   *ngIf="form.controls['description'].invalid && form.controls['description'].touched">
-                Заполните описание статьи
-            </div>
-          </div>
-    
-          <div class="mb-3">
-            <label for="text" class="col-form-label">Текст</label>
-            <textarea class="form-control"
-                      formControlName="content"
-                      [ngClass]="{'is-invalid': form.controls['content'].invalid && form.controls['content'].touched}"
-                      id="text"
-                      #content>
-            </textarea>
-            <div class="invalid-feedback"
-                   *ngIf="form.controls['content'].invalid && form.controls['content'].touched">
-                Содержание статьи не может быть пустым
-            </div>
-          </div>
-    
-          <div class="input-group mb-3">
-            <input type="text"
-                   class="form-control"
-                   placeholder="Напишите тег"
-                   aria-label="tag"
-                   aria-describedby="buttonAddTag"
-                   [formControl]="tagFormControl"
-                   [ngClass]="{'is-invalid': (tagFormControl.invalid && tagFormControl.touched) || tags.length === maxAmountTags}"
-                   #newTag>
-            <button class="btn btn-primary"
-                    type="button"
-                    id="buttonAddTag"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    (click)="addTag(newTag.value)"
-                    title="Добавить тег">
-              <i class="fas fa-check-circle"></i>
-            </button>
-            <div class="invalid-feedback"
-                   *ngIf="tagFormControl.invalid && tagFormControl.touched">
-                кол-во символов: min 2 max 20, первый и последний символы - буква/цифра, также доступны: ["пробел", "_", "-"]
-            </div>
-            <div class="invalid-feedback"
-                   *ngIf="tags.length === maxAmountTags">
-                Максимальное кол-во тегов: {{maxAmountTags}}
-            </div>
-          </div>
-    
-          <div class="d-flex flex-wrap">
-            <div class="pe-2 pt-2" *ngFor="let tag of tags">
-              <button type="button" class="btn btn-secondary text-nowrap" (click)="removeTag(tag)">
-                #{{tag}}<i class="fa-solid fa-xmark ps-2"></i>
-              </button>
-            </div>
-          </div>
-          
+          <ul ngbNav #nav="ngbNav" class="nav-tabs">
+            <li [ngbNavItem]="1">
+              <a ngbNavLink [ngClass]="{'tab-is-invalid':
+                                form.controls['topic'].invalid && form.controls['topic'].touched ||
+                                form.controls['title'].invalid && form.controls['title'].touched}"
+              >Тема и заголовок</a>
+              <ng-template ngbNavContent>
+                <div class="input-group mb-3 mt-3">
+                  <button class="btn btn-outline-secondary dropdown-toggle"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false">Выбрать тему
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li *ngFor="let topic of topics | async">
+                      <a class="dropdown-item" (click)="selectTopic(topic.name)">{{topic.name}}</a>
+                    </li>
+                  </ul>
+                  <input type="text"
+                         formControlName="topic"
+                         class="form-control"
+                         aria-label="Text input with dropdown button"
+                         [ngClass]="{'is-invalid': form.controls['topic'].invalid && form.controls['topic'].touched}"
+                         readonly>
+                  <div class="invalid-feedback"
+                         *ngIf="form.controls['topic'].invalid && form.controls['topic'].touched">
+                      Укажите топик
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="Article title" class="col-form-label">Заголовок статьи</label>
+                  <input type="text"
+                         formControlName="title"
+                         class="form-control"
+                         [ngClass]="{'is-invalid': form.controls['title'].invalid && form.controls['title'].touched}"
+                         id="Article title"
+                         #articleTitle>
+                  <div class="invalid-feedback"
+                         *ngIf="form.controls['title'].invalid && form.controls['title'].touched">
+                      кол-во символов: min 5 max 255, текст не может состоять из одних пробелов!
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="2">
+              <a ngbNavLink
+                 [ngClass]="{'tab-is-invalid': form.controls['description'].invalid && form.controls['description'].touched }"
+              >Описание</a>
+              <ng-template ngbNavContent>
+                <div class="mt-3">
+                  <textarea class="form-control"
+                            formControlName="description"
+                            [ngClass]="{'is-invalid': form.controls['description'].invalid && form.controls['description'].touched}"
+                            id="description">
+                  </textarea>
+                  <div class="invalid-feedback"
+                         *ngIf="form.controls['description'].invalid && form.controls['description'].touched">
+                      Заполните описание статьи
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="3">
+              <a ngbNavLink
+              [ngClass]="{'tab-is-invalid': form.controls['content'].invalid && form.controls['content'].touched }"
+              >Содержание</a>
+              <ng-template ngbNavContent>
+                <div class="mt-3">
+                  <textarea class="form-control"
+                            formControlName="content"
+                            [ngClass]="{'is-invalid': form.controls['content'].invalid && form.controls['content'].touched}"
+                            id="text">
+                  </textarea>
+                  <div class="invalid-feedback"
+                         *ngIf="form.controls['content'].invalid && form.controls['content'].touched">
+                      Содержание статьи не может быть пустым
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="4">
+              <a ngbNavLink>Изображения</a>
+              <ng-template ngbNavContent>
+                <div class="mt-3 mb-3">
+                  <div class="input-group">
+                    <input type="file"
+                           class="form-control"
+                           [formControl]="inputImageControl"
+                           id="inputGroupFile04"
+                           aria-describedby="uploadButton"
+                           aria-label="Upload"
+                           (change)="getFileDetails($event)"
+                           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" multiple>
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            id="uploadButton"
+                            [disabled]="inputImageControl.invalid"
+                            (click)="uploadFiles()">Загрузить</button>
+                  </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                  <ng-container *ngFor="let pic of pictures">
+                      <app-image-card
+                          [picture]="pic"
+                          [primaryId]="mainPicId"
+                          (setMainPicEvent)="setMainPicture($event)"
+                          (removeMainPicEvent)="removeMainPicture()"
+                          (deletePicEvent)="deletePicture($event)">
+                      </app-image-card>
+                  </ng-container>
+                </div>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="5">
+              <a ngbNavLink>Теги</a>
+              <ng-template ngbNavContent>
+                <div class="input-group mb-3 mt-3">
+                  <input type="text"
+                         class="form-control"
+                         placeholder="Напишите тег"
+                         aria-label="tag"
+                         aria-describedby="buttonAddTag"
+                         [formControl]="tagFormControl"
+                         [ngClass]="{'is-invalid': (tagFormControl.invalid && tagFormControl.touched) || tags.length === maxAmountTags}"
+                         #newTag>
+                  <button class="btn btn-primary"
+                          type="button"
+                          id="buttonAddTag"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          (click)="addTag(newTag.value)"
+                          title="Добавить тег">
+                    <i class="fas fa-check-circle"></i>
+                  </button>
+                  <div class="invalid-feedback"
+                         *ngIf="tagFormControl.invalid && tagFormControl.touched">
+                      кол-во символов: min 2 max 20, первый и последний символы - буква/цифра, также доступны: ["пробел", "_", "-"]
+                  </div>
+                  <div class="invalid-feedback"
+                         *ngIf="tags.length === maxAmountTags">
+                      Максимальное кол-во тегов: {{maxAmountTags}}
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap">
+                  <div class="pe-2 pt-2" *ngFor="let tag of tags">
+                    <button type="button" class="btn btn-secondary text-nowrap" (click)="removeTag(tag)">
+                      #{{tag}}<i class="fa-solid fa-xmark ps-2"></i>
+                    </button>
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+          </ul>
+
+          <div [ngbNavOutlet]="nav" class="mt-2"></div>
         </form>
       </div>
       <div class="col test-div">
-        <markdown class="variable-binding" [data]="description.value"></markdown>
-        <markdown class="variable-binding" [data]="content.value"></markdown>
+        <markdown class="variable-binding" [data]="form.get('description')!.value!"></markdown>
+        <markdown class="variable-binding" [data]="form.get('content')!.value!"></markdown>
       </div>
     </div>
   </div>
   <div class="modal-footer">
       <ng-container *ngIf="condition === 'опубликован'">
-        <button type="button" class="btn btn-secondary me-auto" (click)="hide(postId)">Скрыть</button>
+        <button type="button" class="btn btn-secondary me-auto" (click)="hide()">Скрыть</button>
       </ng-container>
       <ng-container *ngIf="condition === 'черновик' || condition === 'скрыт'">
-        <button type="button" class="btn btn-success me-auto" (click)="publish(postId)">Опубликовать</button>
+        <button type="button" class="btn btn-success me-auto" (click)="publish()">Опубликовать</button>
       </ng-container>
       <button (click)="modal.dismiss('Cross click')" type="button" class="btn btn-secondary">Закрыть</button>
       <button *ngIf="form.dirty || otherChanges" type="submit" form="postEditForm" class="btn btn-primary">Сохранить</button>

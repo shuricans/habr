@@ -1,0 +1,58 @@
+<div class="col">
+    <div class="card h-100" [ngClass]="{'text-bg-success': picture.id === primaryId}">
+        <div class="card-header text-end">
+            <button type="button"
+                    class="btn-close"
+                    placement="bottom"
+                    ngbTooltip="удалить изображение"
+                    aria-label="Close"
+                    (click)="delete()"></button>
+        </div>
+        <img class="card-img-top"
+        [src]="imageToShow"
+        [alt]="picture.name"
+        *ngIf="!isImageLoading; else loading">
+
+        <div class="card-body">
+            <h5 class="card-title">{{picture.name}}</h5>
+            <div class="d-grid gap-2">
+                <button type="button"
+                        *ngIf="picture.id !== primaryId"
+                        class="btn btn-outline-secondary"
+                        (click)="setAsPrimary()">
+                        Сделать главной
+                </button>
+                <button type="button"
+                        *ngIf="picture.id === primaryId"
+                        placement="right"
+                        ngbTooltip="снять статус главного изображения"
+                        class="btn btn-warning"
+                        (click)="removePrimary()">
+                        Отмена
+                </button>
+                <button type="button"
+                        placement="bottom"
+                        ngbTooltip="скопировано в буфер"
+                        triggers="click:blur"
+                        class="btn btn-outline-primary"
+                        [ngClass]="{
+                            'btn-outline-primary': picture.id !== primaryId,
+                            'btn-primary': picture.id === primaryId
+                        }"
+                        (click)="getLink()">
+                        Скопировать ссылку
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #loading>
+    <div class="card-img-top">
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</ng-template>

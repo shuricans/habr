@@ -11,15 +11,15 @@
 textarea {
   overflow-y: scroll;
 }
-             
+
 #description {
   width: 100%;
-  height: 100px;
+  height: 50vh;
 }
 
 #text {
   width: 100%;
-  height: 500px;
+  height: 50vh;
 }
 
 .preview-description,
@@ -51,4 +51,8 @@ textarea {
 
 .delete-trash:hover {
   color: orangered;
+}
+
+.tab-is-invalid {
+  color: #ff0000;
 }
