@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +41,7 @@ public class PostDto {
 
     private Long mainPictureId;
 
-    private List<Long> pictures;
+    private List<PictureData> pictures;
 
     private Set<String> tags;
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -41,4 +42,9 @@ public class PostDataRequest {
     private String topic;
 
     private Set<String> tags;
+
+    @Min(1)
+    private Long mainPictureId;
+
+    private Set<@Min(1) Long> picturesIds;
 }

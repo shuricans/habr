@@ -26,7 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 import java.util.Set;
 
-import static no.war.habr.util.user.UserCreator.createUser;
+import static no.war.habr.util.user.UserCreator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +45,15 @@ import static org.springframework.data.domain.Sort.by;
 @DisplayName("Tests for PostServiceImplT")
 class PostServiceImplTest {
 
+    public static final String POST_NOT_FOUND_TEMPLATE = "Post with id [%d] not found.";
+    public static final String USER_NOT_FOUND_TEMPLATE = "User [%s] not found.";
+    public static final String USER_NOT_ACTIVE_TEMPLATE = "User [%s] is not active.";
+    public static final String NOT_OWNER_TEMPLATE = "You are not the owner of this post!";
+    public static final String TOPIC_NOT_FOUND_TEMPLATE = "Topic [%s] does not exist.";
+    public static final String POST_DELETED_ALREADY_TEMPLATE = "Post with id [%d] has already been deleted";
+    public static final String POST_WITH_ID_ACTION_SUCCESSFULLY_TEMPLATE = "Post with id [%d] %s successfully";
+    public static final String USER_MUST_BE_MOD_OR_ADM = "User [%s] must be ADMIN or MODERATOR";
+
     private PostService underTest;
 
     @Mock
@@ -60,6 +69,9 @@ class PostServiceImplTest {
     private UserRepository userRepository;
 
     @Mock
+    private PictureService pictureService;
+
+    @Mock
     private PostMapper postMapper;
 
 
@@ -70,7 +82,8 @@ class PostServiceImplTest {
                 topicRepository,
                 tagRepository,
                 userRepository,
-                postMapper);
+                postMapper,
+                pictureService);
 
         ReflectionTestUtils.setField(underTest, "defaultSortDirection", "ASC");
     }
@@ -152,11 +165,28 @@ class PostServiceImplTest {
         String nonExistentUsername = "username";
         PostDataRequest postDataRequest = PostDataRequest.builder().build();
         given(userRepository.findByUsername(nonExistentUsername)).willReturn(Optional.empty());
+
         // when
         // then
         assertThatThrownBy(() -> underTest.save(nonExistentUsername, postDataRequest))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessageContaining("User with username = %s not found.", nonExistentUsername);
+                .hasMessageContaining(USER_NOT_FOUND_TEMPLATE, nonExistentUsername);
+    }
+
+    @Test
+    @DisplayName("save Should Throw ForbiddenException When User Not Active")
+    void save_ShouldThrowForbiddenException_WhenUserNotActive() {
+        // given
+        User user = createUser();
+        user.setCondition(EUserCondition.DELETED);
+        String username = user.getUsername();
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.save(username, any(PostDataRequest.class)))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(USER_NOT_ACTIVE_TEMPLATE, username);
     }
 
     @Test
@@ -175,41 +205,32 @@ class PostServiceImplTest {
         // then
         assertThatThrownBy(() -> underTest.save(user.getUsername(), postDataRequest))
                 .isInstanceOf(TopicNotFoundException.class)
-                .hasMessageContaining("Topic by name = %s does not exist.", nonExistentTopic);
+                .hasMessageContaining(TOPIC_NOT_FOUND_TEMPLATE, nonExistentTopic);
     }
 
     @Test
-    @DisplayName("save Should Throw BadRequestException When Wrong Owner")
-    void save_ShouldThrowBadRequestException_WhenWrongOwner() {
+    @DisplayName("save Should Throw ForbiddenException When Wrong Owner")
+    void save_ShouldThrowForbiddenException_WhenWrongOwner() {
         // given
         User user = createUser();
-        Topic topic = Topic.builder().name("topic").build();
-        Set<String> tags = Set.of("tag_1", "tag_2");
-        String title = "title";
-        String content = "content";
-        String description = "description";
         long postId = 1L;
         PostDataRequest postDataRequest = PostDataRequest.builder()
                 .postId(postId)
-                .title(title)
-                .content(content)
-                .description(description)
-                .topic(topic.getName())
-                .tags(tags)
+                .topic("")
                 .build();
         Post post = Post.builder()
                 .id(postId)
                 .owner(User.builder().id(42L).build())
                 .build();
         given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
-        given(topicRepository.findByName(anyString())).willReturn(Optional.of(topic));
+        given(topicRepository.findByName(anyString())).willReturn(Optional.of(Topic.builder().build()));
         given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
 
         // when
         // then
         assertThatThrownBy(() -> underTest.save(user.getUsername(), postDataRequest))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("You are not the owner of this post!");
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(NOT_OWNER_TEMPLATE);
     }
 
     @Test
@@ -253,15 +274,14 @@ class PostServiceImplTest {
 
 
     /**
-     * Unit tests for PostServiceImpl.
-     * delete should throw user not found Exception when user not existent
+     * delete should throw {@code UserNotFoundException} when user not exist
      *
      * @author Zalyaletdinova Ilmira
      * @see PostServiceImpl
      */
     @Test
-    @DisplayName("delete Should Throw User Not Found Exception When User Not Existent")
-    void delete_ShouldThrowUserNotFoundException_WhenUserNotExistent() {
+    @DisplayName("delete Should Throw UserNotFoundException When User Not Exist")
+    void delete_ShouldThrowUserNotFoundException_WhenUserNotExist() {
         // given
         String username = "username";
         given(userRepository.findByUsername(username)).willReturn(Optional.empty());
@@ -270,20 +290,19 @@ class PostServiceImplTest {
         // then
         assertThatThrownBy(() -> underTest.delete(username, anyLong()))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessageContaining(String.format("User with username [%s] not found.", username));
+                .hasMessageContaining(USER_NOT_FOUND_TEMPLATE, username);
     }
 
 
     /**
-     * Unit tests for PostServiceImpl.
-     * delete should Throw Precondition Failed Exception when user not active
+     * delete should Throw {@code ForbiddenException} when user not active
      *
      * @author Zalyaletdinova Ilmira
      * @see PostServiceImpl
      */
     @Test
-    @DisplayName("delete Should Throw Precondition Failed Exception When User Not Active")
-    void delete_ShouldThrowPreconditionFailedException_WhenUserNotActive() {
+    @DisplayName("delete Should Throw ForbiddenException When User Not Active")
+    void delete_ShouldThrowForbiddenException_WhenUserNotActive() {
         // given
         User owner = createUser();
         owner.setCondition(EUserCondition.NOT_ACTIVE);
@@ -293,20 +312,19 @@ class PostServiceImplTest {
         // when
         // then
         assertThatThrownBy(() -> underTest.delete(username, anyLong()))
-                .isInstanceOf(PreconditionFailedException.class)
-                .hasMessageContaining(String.format("User [%s] is not ACTIVE", username));
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(USER_NOT_ACTIVE_TEMPLATE, username);
     }
 
 
     /**
-     * Unit tests for PostServiceImpl.
-     * delete should throw post not found Exception when post not found
+     * delete should throw {@code PostNotFoundException} when post not found
      *
      * @author Zalyaletdinova Ilmira
      * @see PostServiceImpl
      */
     @Test
-    @DisplayName("delete Should Throw Post Not Found Exception When Post Not Found")
+    @DisplayName("delete Should Throw PostNotFoundException When Post Not Found")
     void delete_ShouldThrowPostNotFoundException_WhenPostNotFound() {
         // given
         User owner = createUser();
@@ -318,12 +336,11 @@ class PostServiceImplTest {
         // then
         assertThatThrownBy(() -> underTest.delete(anyString(), postId))
                 .isInstanceOf(PostNotFoundException.class)
-                .hasMessageContaining(String.format("Post by id [%d] not found.", postId));
+                .hasMessageContaining(POST_NOT_FOUND_TEMPLATE, postId);
     }
 
 
     /**
-     * Unit tests for PostServiceImpl.
      * delete should Throw Precondition Failed Exception when user not ownerPost
      *
      * @author Zalyaletdinova Ilmira
@@ -346,21 +363,20 @@ class PostServiceImplTest {
         // when
         // then
         assertThatThrownBy(() -> underTest.delete(user.getUsername(), anyLong()))
-                .isInstanceOf(PreconditionFailedException.class)
-                .hasMessageContaining("You are not the owner of this post!");
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(NOT_OWNER_TEMPLATE);
     }
 
 
     /**
-     * Unit tests for PostServiceImpl.
-     * delete should Throw Precondition Failed Exception when post not delete
+     * delete should Throw {@code ForbiddenException} when post deleted already
      *
      * @author Zalyaletdinova Ilmira
      * @see PostServiceImpl
      */
     @Test
-    @DisplayName("delete Should Throw Precondition Failed Exception When Post Delete")
-    void delete_ShouldThrowPreconditionFailedException_WhenPostDelete() {
+    @DisplayName("delete Should Throw ForbiddenException When Post Deleted Already")
+    void delete_ShouldThrowForbiddenException_WhenPostDeletedAlready() {
         // given
 
         User owner = createUser();
@@ -378,8 +394,8 @@ class PostServiceImplTest {
         // when
         // then
         assertThatThrownBy(() -> underTest.delete(username, postId))
-                .isInstanceOf(PreconditionFailedException.class)
-                .hasMessageContaining(String.format("Post by id [%d] deleted already", postId));
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(POST_DELETED_ALREADY_TEMPLATE, postId);
 
     }
 
@@ -400,7 +416,7 @@ class PostServiceImplTest {
                 .id(postId)
                 .build();
         given(postRepository.findById(postId)).willReturn(Optional.of(post));
-        String expectedMessage = String.format("Post with id [%d] deleted successfully", postId);
+        String expectedMessage = String.format(POST_WITH_ID_ACTION_SUCCESSFULLY_TEMPLATE, postId, "deleted");
 
         // when
         MessageResponse messageResponse = underTest.deleteById(postId);
@@ -427,7 +443,7 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.publish(username, anyLong()))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessageContaining("User [%s] not found.", username);
+                .hasMessageContaining(USER_NOT_FOUND_TEMPLATE, username);
     }
 
     @Test
@@ -443,7 +459,7 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.publish(username, anyLong()))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("User [%s] is not active.", username);
+                .hasMessageContaining(USER_NOT_ACTIVE_TEMPLATE, username);
     }
 
     @Test
@@ -460,7 +476,7 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.publish(username, postId))
                 .isInstanceOf(PostNotFoundException.class)
-                .hasMessageContaining("Post with id [%d] not found.", postId);
+                .hasMessageContaining(POST_NOT_FOUND_TEMPLATE, postId);
     }
 
     @Test
@@ -487,7 +503,7 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.publish(username, postId))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("You are not the owner of this post!");
+                .hasMessageContaining(NOT_OWNER_TEMPLATE);
     }
 
     @Test
@@ -526,7 +542,7 @@ class PostServiceImplTest {
 
         String username = user.getUsername();
         long postId = post.getId();
-        String expectedMessageResponse = String.format("Post with id [%d] published successfully", postId);
+        String expectedMessageResponse = String.format(POST_WITH_ID_ACTION_SUCCESSFULLY_TEMPLATE, postId, "published");
 
         given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
         given(postRepository.findById(postId)).willReturn(Optional.of(post));
@@ -556,7 +572,7 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.ban(username, anyLong()))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessageContaining("User [%s] not found.", username);
+                .hasMessageContaining(USER_NOT_FOUND_TEMPLATE, username);
     }
 
     @Test
@@ -572,12 +588,12 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.ban(username, anyLong()))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("User [%s] is not active.", username);
+                .hasMessageContaining(USER_NOT_ACTIVE_TEMPLATE, username);
     }
 
     @Test
-    @DisplayName("ban Should Throw PostNotFoundException When User Not have rights ADMIN or MODERATOR")
-    public void ban_ShouldThrowForbiddenException_WhenUserNotHaveRightsADMINorMODERATOR() {
+    @DisplayName("ban Should Throw ForbiddenException When User Not ADMIN or MODERATOR")
+    public void ban_ShouldThrowForbiddenException_WhenUserNotADMINorMODERATOR() {
         //given
         User user = createUser();
         user.setCondition(EUserCondition.ACTIVE);
@@ -590,18 +606,14 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.ban(username, anyLong()))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("User with username: [%s] must have rights" +
-                        " ADMIN or MODERATOR", username);
+                .hasMessageContaining(USER_MUST_BE_MOD_OR_ADM, username);
     }
 
     @Test
     @DisplayName("ban Should Throw PostNotFoundException When Post Not Found")
     public void ban_ShouldThrowPostNotFoundException_WhenPostNotFound() {
         //given
-        User user = createUser();
-        user.setCondition(EUserCondition.ACTIVE);
-        Set<Role> roleAdmin = Set.of(Role.builder().name(ERole.ROLE_MODERATOR).build());
-        user.setRoles(roleAdmin);
+        User user = createModerator();
         String username = user.getUsername();
         long postId = 1123L;
 
@@ -611,17 +623,14 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.ban(username, postId))
                 .isInstanceOf(PostNotFoundException.class)
-                .hasMessageContaining("Post with id [%d] not found.", postId);
+                .hasMessageContaining(POST_NOT_FOUND_TEMPLATE, postId);
     }
 
     @Test
-    @DisplayName("ban Should Throw BadRequestException When Post Not Has Condition Published")
-    public void ban_ShouldThrowForbiddenException_WhenPostNotHasConditionPublished() {
+    @DisplayName("ban Should Throw ForbiddenException When Post Not Published")
+    public void ban_ShouldThrowForbiddenException_WhenPostNotNotPublished() {
         //given
-        User user = createUser();
-        user.setCondition(EUserCondition.ACTIVE);
-        Set<Role> roleAdmin = Set.of(Role.builder().name(ERole.ROLE_MODERATOR).build());
-        user.setRoles(roleAdmin);
+        User user = createModerator();
         String username = user.getUsername();
         Post post = Post.builder()
                 .id(1111L)
@@ -636,16 +645,14 @@ class PostServiceImplTest {
         //then
         assertThatThrownBy(() -> underTest.ban(username, postId))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("Post with id: [%d] is not PUBLISHED", postId);
+                .hasMessageContaining("Post with id [%d] is not yet PUBLISHED", postId);
     }
 
     @Test
-    @DisplayName("ban Should Should Change Post Condition To BANED When Successful")
-    public void ban_ShouldChangePostConditionToBANED_WhenSuccessful() {
+    @DisplayName("ban Should Should Change Post Condition To BANNED When Successful")
+    public void ban_ShouldChangePostConditionToBANNED_WhenSuccessful() {
         //given
-        User user = createUser();
-        Set<Role> roleAdmin = Set.of(Role.builder().name(ERole.ROLE_ADMIN).build());
-        user.setRoles(roleAdmin);
+        User user = createAdmin();
         String username = user.getUsername();
         Post post = Post.builder()
                 .id(1111L)
@@ -653,7 +660,7 @@ class PostServiceImplTest {
                 .build();
 
         long postId = post.getId();
-        String expectedMessageResponse = String.format("Post with id [%d] baned successfully", postId);
+        String expectedMessageResponse = String.format(POST_WITH_ID_ACTION_SUCCESSFULLY_TEMPLATE, postId, "banned");
 
         given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
         given(postRepository.findById(postId)).willReturn(Optional.of(post));
@@ -665,7 +672,7 @@ class PostServiceImplTest {
         Post capturedPost = argumentCaptor.getValue();
 
         assertThat(capturedPost).isEqualTo(post);
-        assertThat(capturedPost.getCondition()).isEqualByComparingTo(EPostCondition.BANNED);
+        assertThat(capturedPost.getCondition()).isEqualTo(EPostCondition.BANNED);
         assertThat(messageResponse.getMessage()).isEqualTo(expectedMessageResponse);
     }
 }
