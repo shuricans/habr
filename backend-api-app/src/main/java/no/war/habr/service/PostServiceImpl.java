@@ -5,10 +5,7 @@ import no.war.habr.exception.*;
 import no.war.habr.payload.request.PostDataRequest;
 import no.war.habr.payload.response.MessageResponse;
 import no.war.habr.persist.model.*;
-import no.war.habr.persist.repository.PostRepository;
-import no.war.habr.persist.repository.TagRepository;
-import no.war.habr.persist.repository.TopicRepository;
-import no.war.habr.persist.repository.UserRepository;
+import no.war.habr.persist.repository.*;
 import no.war.habr.persist.specification.PostSpecification;
 import no.war.habr.service.dto.PostDto;
 import no.war.habr.service.dto.PostMapper;
@@ -321,6 +318,42 @@ public class PostServiceImpl implements PostService {
     }
 
     /**
+     * Changes {@code Post} condition to {@code EPostCondition.DELETED}
+     * only when {@code User} is active and is {@code EUserCondition.MODERATOR}
+     * or {@code EUserCondition.ADMIN}
+     *
+     * @param  username User "nickname"
+     * @param  postId {@code Post} entity id
+     * @return {@code MessageResponse} when successful
+     *
+     * @throws UserNotFoundException if {@code User} not exist
+     * @throws ForbiddenException
+     *         when {@code User} state(condition) is not {@code EUserCondition.ACTIVE},
+     *         and when {@code User} is not MODERATOR or ADMIN
+     * @throws PostNotFoundException if {@code Post} not exist
+     */
+    @Transactional
+    @Override
+    public MessageResponse deleteAny(String username, long postId) {
+        User user = getUserByUsername(username);
+        isActiveUser(user);
+
+        Set<ERole> roles = Set.of(ERole.ROLE_MODERATOR, ERole.ROLE_ADMIN);
+
+        if (user.getRoles().stream()
+                .map(Role::getName)
+                .noneMatch(roles::contains)) {
+            throw new ForbiddenException(String.format(USER_MUST_BE_MOD_OR_ADM, username));
+        }
+
+        Post post = getPostById(postId);
+        post.setCondition(EPostCondition.BANNED);
+        postRepository.save(post);
+
+        return new MessageResponse(String.format(POST_WITH_ID_ACTION_SUCCESSFULLY_TEMPLATE, postId, "delete"));
+    }
+
+    /**
      * Changes {@code Post} condition to {@code EPostCondition.HIDDEN}
      *
      * @param  postId {@code Post} entity id
@@ -474,6 +507,7 @@ public class PostServiceImpl implements PostService {
                         new PostNotFoundException(String.format(POST_NOT_FOUND_TEMPLATE, postId)));
     }
 
+
     /**
      * Returns the {@code User} by {@code String username}
      *
@@ -500,6 +534,7 @@ public class PostServiceImpl implements PostService {
             throw new ForbiddenException(String.format(USER_NOT_ACTIVE_TEMPLATE, user.getUsername()));
         }
     }
+
 }
 
 

@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -674,6 +675,134 @@ class PostServiceImplTest {
         assertThat(capturedPost).isEqualTo(post);
         assertThat(capturedPost.getCondition()).isEqualTo(EPostCondition.BANNED);
         assertThat(messageResponse.getMessage()).isEqualTo(expectedMessageResponse);
+    }
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * deleteAny should throw user not found Exception when user not existent
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("deleteAny Should Throw UserNotFoundException When User Not Exist")
+    void deleteAny_ShouldThrowUserNotFoundException_WhenUserNotExist() {
+        //given
+        String username = "username";
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.empty());
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.deleteAny(username, anyLong()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining(USER_NOT_FOUND_TEMPLATE, username);
+    }
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * deleteAny should Throw Forbidden Exception  when user not active
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("deleteAny Should Throw For ForbiddenException When User Not Active")
+    void deleteAny_ShouldThrowForbiddenException_WhenUserNotActive() {
+        //given
+        User user = createUser();
+        user.setCondition(EUserCondition.NOT_ACTIVE);
+        String username = user.getUsername();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.deleteAny(username, anyLong()))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(USER_NOT_ACTIVE_TEMPLATE, username);
+    }
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * deleteAny should throw forbidden exception when user not admin and not moderator
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("deleteAny Should Throw ForbiddenException When User Not Admin And Not Moderator")
+    void deleteAny_ShouldThrowForbiddenException_WhenUserNotAdminAndNotModerator(){
+        //given
+        User user = createUser();
+        String username = user.getUsername();
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.deleteAny(username, anyLong()))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(String.format(USER_MUST_BE_MOD_OR_ADM, username));
+
+    }
+
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * deleteAny should throw post not found Exception when post not found
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("deleteAny Should Throw Post Not Found Exception When Post Not Found")
+    void deleteAny_ShouldThrowPostNotFoundException_WhenPostNotFound() {
+        //given
+        User user = createModerator();
+        String username = user.getUsername();
+        long postId = 1L;
+
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.empty());
+        //when
+        //then
+        assertThatThrownBy(() -> underTest.deleteAny(username, postId))
+                .isInstanceOf(PostNotFoundException.class)
+                .hasMessageContaining(POST_NOT_FOUND_TEMPLATE, postId);
+    }
+
+    /**
+     * Unit tests for PostServiceImpl.
+     * deleteAny should change post condition to banned when successful
+     *
+     * @author Zalyaletdinova Ilmira
+     * @see PostServiceImpl
+     */
+    @Test
+    @DisplayName("deleteAny Should Change Post Condition To Banned When Successful")
+    public void deleteAny_ShouldChangePostConditionToBanned_WhenSuccessful() {
+        //given
+        User user = createAdmin();
+        String username = user.getUsername();
+
+        long postId = 1L;
+        Post post = Post.builder()
+                .id(postId)
+                .build();
+        given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+
+        String expectedMessage = (String.format(POST_WITH_ID_ACTION_SUCCESSFULLY_TEMPLATE, postId, "delete"));
+
+        // when
+        MessageResponse messageResponse = underTest.deleteAny(username, postId);
+
+        // then
+        ArgumentCaptor<Post> postArgumentCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(postArgumentCaptor.capture());
+        Post capturedPost = postArgumentCaptor.getValue();
+
+        assertThat(capturedPost).isEqualTo(post);
+        assertThat(capturedPost.getCondition()).isEqualTo(EPostCondition.BANNED);
+        assertThat(messageResponse.getMessage()).isEqualTo(expectedMessage);
     }
 }
 
