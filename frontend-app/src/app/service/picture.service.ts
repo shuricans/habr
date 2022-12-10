@@ -10,7 +10,7 @@ import { PictureData } from '../model/picture-data';
 })
 export class PictureService {
 
-  private readonly getUrl: string = 'api/v1/picture/';
+  private readonly getUrl: string = 'picture/';
   private readonly uploadUrl: string = 'api/v1/upload-pictures/';
 
   constructor(private http: HttpClient,
