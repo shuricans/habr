@@ -1,6 +1,6 @@
 {
   "/picture": {
-    "target": "http://localhost:8081",
+    "target": "http://localhost:8081/api/v1/",
     "secure": false,
     "logLevel": "debug"
   },
