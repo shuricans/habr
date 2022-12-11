@@ -38,6 +38,7 @@ export class PostPageComponent implements OnInit {
         if (this.post.mainPictureId != null) {
           this.getImageFromService();
         }
+        window.scrollTo(0, 0);
       },
       error: (httpErrorResponse: HttpErrorResponse) => {
         let exceptionDetails = httpErrorResponse.error as ExceptionDetails;
@@ -47,6 +48,7 @@ export class PostPageComponent implements OnInit {
         }
         this.otherError = true;
         this.httpErrorResponse = httpErrorResponse;
+        window.scrollTo(0, 0);
       }
     })
   }
