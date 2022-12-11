@@ -3,7 +3,7 @@
     <div class="col-md-6">
       <div class="card px-5 py-5">
         <h2 class="text-center mb-5">Привет</h2>
-        <form (ngSubmit)="submitForm()" [formGroup]="form" autocomplete="off">
+        <form (ngSubmit)="submitForm()" [formGroup]="form">
 
           <div class="alert alert-danger text-center" *ngIf="badCredentials" role="alert">
             Bad Credentials
@@ -28,7 +28,8 @@
                    class="form-control"
                    [ngClass]="{'is-invalid': form.controls['username'].invalid && form.controls['username'].touched}"
                    id="username"
-                   name="username">
+                   name="username"
+                   autocomplete="username">
             <div class="invalid-feedback"
                  *ngIf="form.controls['username'].invalid && form.controls['username'].touched">
               Укажите Ваш username
@@ -42,7 +43,8 @@
                    class="form-control"
                    [ngClass]="{'is-invalid': form.controls['password'].invalid && form.controls['password'].touched}"
                    id="password"
-                   name="password">
+                   name="password"
+                   autocomplete="password">
             <div class="invalid-feedback"
                  *ngIf="form.controls['password'].invalid && form.controls['password'].touched">
               Введите пароль

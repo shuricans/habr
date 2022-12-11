@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Builder
@@ -14,31 +15,14 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 public class UserDto {
-
-    @NotNull()
-    @Min(value = 1)
     private Long id;
-
-    @NotBlank
-    @Size(max = 30)
     private String username;
-
-    @NotBlank
-    @Size(max = 50)
     private String firstName;
-
-    @Size(max = 50)
     private String lastName;
-
     private String aboutMe;
-
-    @Past
     private LocalDate birthday;
-
-    @NotBlank
-    @Size(max = 20)
+    private LocalDateTime created;
+    private LocalDateTime updated;
     private String condition;
-
-    @NotEmpty
     private Set<String> roles;
 }

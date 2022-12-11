@@ -17,6 +17,8 @@ public class UserMapperImpl implements UserMapper {
                 .lastName(user.getLastName())
                 .aboutMe(user.getAboutMe())
                 .birthday(user.getBirthday())
+                .created(user.getCreated())
+                .updated(user.getUpdated())
                 .condition(user.getCondition().name())
                 .roles(user.getRoles().stream()
                         .map(role -> role.getName().name())
