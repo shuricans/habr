@@ -3,8 +3,8 @@ import {AuthService} from "../../service/auth.service";
 import {Router} from "@angular/router";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {Credentials} from "../../model/credentials";
-import { JwtResponse } from 'src/app/model/jwt-response';
 import { AuthResult } from 'src/app/model/authResult';
+import { MessageService } from 'src/app/service/message.service';
 
 @Component({
   selector: 'app-login-page',
@@ -23,7 +23,9 @@ export class LoginPageComponent {
     password: new FormControl(null, Validators.required)
   })
 
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(private authService: AuthService, 
+              private router: Router,
+              private messageService: MessageService) {
   }
 
   submitForm() {
@@ -41,6 +43,7 @@ export class LoginPageComponent {
       .subscribe({
         next: (authresult: AuthResult) => {
           if (authresult.success) {
+            this.messageService.sendMessage('updateSecondHeader');
             this.router.navigate([authresult.redirectUrl]);
           } else {
             let status = authresult.exceptionDetails?.status;

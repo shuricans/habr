@@ -32,6 +32,9 @@ import { UserPageComponent } from './page/user-page/user-page.component';
 import { ConfirmModalComponent } from './component/confirm-modal/confirm-modal.component';
 import { InfoModalComponent } from './component/info-modal/info-modal.component';
 import { ImageCardComponent } from './component/image-card/image-card.component';
+import { AdminNavBarComponent } from './component/admin-nav-bar/admin-nav-bar.component';
+import { AllUsersPageComponent } from './page/all-users-page/all-users-page.component';
+import { AllPostsPageComponent } from './page/all-posts-page/all-posts-page.component';
 
 
 @NgModule({
@@ -59,6 +62,9 @@ import { ImageCardComponent } from './component/image-card/image-card.component'
     ConfirmModalComponent,
     InfoModalComponent,
     ImageCardComponent,
+    AdminNavBarComponent,
+    AllUsersPageComponent,
+    AllPostsPageComponent,
   ],
     imports: [
         BrowserModule,

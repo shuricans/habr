@@ -12,6 +12,7 @@ import jwtDecode from 'jwt-decode';
 import { SignupRequest } from '../model/signup-request';
 import { SignupResult } from '../model/signupResult';
 import { DataService } from './data.service';
+import { MessageService } from './message.service';
 
 
 @Injectable({
@@ -19,6 +20,9 @@ import { DataService } from './data.service';
 })
 export class AuthService {
 
+  private readonly roleUser = 'ROLE_USER';
+  private readonly roleModerator = 'ROLE_MODERATOR';
+  private readonly roleAdmin = 'ROLE_ADMIN';
   private readonly JWT_TOKEN = 'JWT_TOKEN';
   private readonly REFRESH_TOKEN = 'REFRESH_TOKEN';
   private readonly TYPE = 'TYPE';
@@ -27,7 +31,9 @@ export class AuthService {
 
   user: UserModel | null;
 
-  constructor(private http: HttpClient, private dataService: DataService) {
+  constructor(private http: HttpClient, 
+              private dataService: DataService,
+              private messageService: MessageService) {
     this.user = this.getUser(this.getJwtToken()!);
   }
 
@@ -101,7 +107,7 @@ export class AuthService {
       }));
   }
 
-  isLoggedIn() {
+  isLoggedIn(): boolean {
     return !!this.getJwtToken();
   }
 
@@ -125,13 +131,37 @@ export class AuthService {
     return this.DEFAULT_TYPE;
   }
 
+  public isAdmin(): boolean {
+    if (!this.isLoggedIn()) {
+      return false;
+    }
+    return this.user!.scope.includes(this.roleAdmin);
+  }
+
+  public isModerator() {
+    if (!this.isLoggedIn()) {
+      return false;
+    }
+    return this.user!.scope.includes(this.roleModerator);
+  }
+
+  public isModeratorOrAdmin() {
+    if (!this.isLoggedIn()) {
+      return false;
+    }
+    return this.user!.scope.includes(this.roleModerator) ||
+           this.user!.scope.includes(this.roleAdmin);
+  }
+
   private doLoginUser(jwtResponse: JwtResponse) {
     this.storeTokens(jwtResponse);
   }
 
   public doLogoutUser() {
+    this.user = null;
     this.removeTokens();
     this.dataService.clearAllData();
+    this.messageService.sendMessage('updateSecondHeader');   
   }
 
   private getRefreshToken() {

@@ -1,0 +1,89 @@
+<table class="table table-bordered table table-hover" *ngIf="page">
+    <thead>
+        <tr>
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('id')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'id'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Id</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('username')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'username'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Username</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('firstName')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'firstName'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Имя</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('created')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'created'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Дата регистрации</th>
+
+            <th class="clickable-header" scope="col" nowrap="nowrap" (click)="sortBy('condition')">
+                <i class="fa-solid"
+                   *ngIf="sortField === 'condition'"
+                   [ngClass]="{
+                     'fa-sort-down': sortDir === 'DESC',
+                     'fa-sort-up': sortDir === 'ASC'}"></i>
+                Статус</th>
+        </tr>
+    </thead>
+
+    <tbody>
+      <ng-template [ngIf]="page.totalElements > 0" [ngIfElse]="emptyResultSet">
+        <tr *ngFor="let user of page.content |
+          paginate: {
+            id: 'server',
+            itemsPerPage: page.size,
+            currentPage: page.number + 1,
+            totalItems: page.totalElements}"
+        >
+            <th scope="row">
+              {{user.id}}
+            </th>
+
+            <td>
+              {{user.username}}
+            </td>
+
+            <td>
+              {{user.firstName}}
+            </td>
+
+            <td>
+              {{dateFormatService.toLocaleString(user.created)}}
+            </td>
+
+            <td>
+              {{user.condition}}
+            </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptyResultSet>
+        <tr>
+          <td colspan="6">не найдено ни одного пользователя</td>
+        </tr>
+      </ng-template>
+    </tbody>
+</table>
+
+<app-post-pagination *ngIf="page && page.totalElements > 0"
+    [loading]="loading"
+    [size]="pageFilter.size"
+    (changePageEvent)="getPage($event)"
+    (changeSizeEvent)="changeSize($event)">
+</app-post-pagination>

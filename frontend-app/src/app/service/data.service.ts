@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PageFilter } from '../model/page-filter';
 import { PostFilterOwn } from '../model/post-filter-own';
+import { UserFilter } from '../model/user-filter';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,8 @@ export class DataService {
   private readonly WEB_PAGE_FILTER = 'web_page_filter';
   private readonly MOBILE_PAGE_FILTER = 'mobile_page_filter';
   private readonly MARKETING_PAGE_FILTER = 'marketing_page_filter';
+  private readonly USERS_PAGE_FILTER = 'users_page_filter';
+  private readonly USERS_USER_FILTER = 'users_user_filter';
 
   private habrPageFilter!: PageFilter;
   private lkPostPageFilter!: PageFilter;
@@ -24,6 +27,8 @@ export class DataService {
   private webPageFilter!: PageFilter;
   private mobilePageFilter!: PageFilter;
   private marketingPageFilter!: PageFilter;
+  private usersPageFilter!: PageFilter;
+  private usersUserFilter!: UserFilter;
 
   public setHabrPageFilter(pagefilter: PageFilter) {
     this.habrPageFilter = pagefilter;
@@ -90,6 +95,8 @@ export class DataService {
     localStorage.removeItem(this.WEB_PAGE_FILTER);
     localStorage.removeItem(this.MOBILE_PAGE_FILTER);
     localStorage.removeItem(this.MARKETING_PAGE_FILTER);
+    localStorage.removeItem(this.USERS_PAGE_FILTER);
+    localStorage.removeItem(this.USERS_USER_FILTER);
   }
 
   getDesignPageFilter(): PageFilter {
@@ -146,5 +153,33 @@ export class DataService {
   setMarketingPageFilter(pageFilter: PageFilter) {
     this.marketingPageFilter = pageFilter;
     localStorage.setItem(this.MARKETING_PAGE_FILTER, JSON.stringify(this.marketingPageFilter));
+  }
+
+  getUsersPageFilter(): PageFilter {
+    if (localStorage.getItem(this.USERS_PAGE_FILTER)) {
+      this.usersPageFilter = JSON.parse(localStorage.getItem(this.USERS_PAGE_FILTER)!);
+    } else {
+      this.usersPageFilter = new PageFilter();
+    }
+    return this.usersPageFilter;
+  }
+
+  setUsersPageFilter(pageFilter: PageFilter) {
+    this.usersPageFilter = pageFilter;
+    localStorage.setItem(this.USERS_PAGE_FILTER, JSON.stringify(this.usersPageFilter));
+  }
+
+  getUsersUserFilter(): UserFilter {
+    if (localStorage.getItem(this.USERS_USER_FILTER)) {
+      this.usersUserFilter = JSON.parse(localStorage.getItem(this.USERS_USER_FILTER)!);
+    } else {
+      this.usersUserFilter = new UserFilter();
+    }
+    return this.usersUserFilter;
+  }
+
+  setUsersUserFilter(usersUserFilter: UserFilter) {
+    this.usersUserFilter = usersUserFilter;
+    localStorage.setItem(this.USERS_USER_FILTER, JSON.stringify(this.usersUserFilter));
   }
 }
