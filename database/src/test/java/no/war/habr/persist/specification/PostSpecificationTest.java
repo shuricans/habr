@@ -279,9 +279,10 @@ class PostSpecificationTest {
                 .hasSize(1)
                 .contains(post);
 
-        List<Picture> pictures = posts.get(0).getPictures();
-        assertThat(pictures).hasSize(1);
-        assertThat(pictures.get(0).getName()).isEqualTo(picName);
+        Set<Picture> pictures = posts.get(0).getPictures();
+        assertThat(pictures)
+                .hasSize(1)
+                .contains(picture);
 
         Set<Tag> tags = posts.get(0).getTags();
         assertThat(tags)

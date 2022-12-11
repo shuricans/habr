@@ -11,6 +11,7 @@ export class PostPaginationComponent {
   @Output() changeSizeEvent = new EventEmitter<number>();
   @Input() loading: boolean = true;
   @Input() size!: number;
+  @Input() text: string = 'отображать на странице';
 
   pageEvent(event: number) {
     this.changePageEvent.emit(event);

@@ -8,6 +8,7 @@ logging:
 server:
   servlet:
     context-path: /api/v1
+  port: 8080
 
 jwt:
   private.key: classpath:app.key
@@ -42,3 +43,6 @@ app:
   defaultSortDirection:
     users: ASC
     posts: DESC
+  picture:
+    storage:
+      path: /home/shuricans/pictures

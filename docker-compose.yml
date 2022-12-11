@@ -2,17 +2,20 @@ version: "3.9"
 services:
   db:
     container_name: habr-db
-    image: shuricans/habr-db:v-1.4
+    image: shuricans/habr-db:v-1.6
     restart: unless-stopped
     ports:
       - "5432"
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       PGDATA: postgres
+      TZ: Europe/Moscow
+      PGTZ: Europe/Moscow
 
   backend-app:
     container_name: habr-backend-api-app
-    image: shuricans/habr-backend-api-app:v-1.4
+    image: shuricans/habr-backend-api-app:v-1.6
     restart: unless-stopped
     ports:
       - "8080"
@@ -22,13 +25,42 @@ services:
       PROFILE: docker
       DB_HOST: habr-db
       DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+    volumes:
+      - "./images:/storage"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+  pictures-service-app:
+    container_name: picture-service-api-app
+    image: shuricans/picture-service-api-app:v-1.6
+    restart: unless-stopped
+    ports:
+      - "8080"
+    depends_on:
+      - db
+    environment:
+      PROFILE: docker
+      DB_HOST: habr-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+    volumes:
+      - "./images:/storage"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
 
   frontend-app:
     container_name: habr-frontend-app
-    image: shuricans/habr-frontend-app:v-1.4
+    image: shuricans/habr-frontend-app:v-1.6
     restart: unless-stopped
     ports:
       - "8080:80"
     depends_on:
       - db
       - backend-app
+      - pictures-service-app
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"

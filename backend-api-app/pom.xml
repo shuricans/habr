@@ -16,7 +16,7 @@
 
     <properties>
         <app.image.name>habr-backend-api-app</app.image.name>
-        <app.image.tag>v-1.4</app.image.tag>
+        <app.image.tag>v-1.6</app.image.tag>
     </properties>
 
     <dependencies>
@@ -57,6 +57,12 @@
         <dependency>
             <groupId>no.war</groupId>
             <artifactId>database</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.war</groupId>
+            <artifactId>picture-service</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

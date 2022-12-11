@@ -1,5 +1,6 @@
 <app-nav-bar></app-nav-bar>
+<app-admin-nav-bar *ngIf="isModeratorOrAdmin"></app-admin-nav-bar>
 
-<main class="container">
+<main class="container mt-3">
   <router-outlet></router-outlet>
 </main>

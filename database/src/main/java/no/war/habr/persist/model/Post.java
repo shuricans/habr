@@ -70,7 +70,7 @@ public class Post extends BaseEntity {
     @Builder.Default
     @ToString.Exclude
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<Picture> pictures = new ArrayList<>();
+    private Set<Picture> pictures = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

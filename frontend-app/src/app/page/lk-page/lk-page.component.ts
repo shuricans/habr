@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
+import LockableComponent from 'src/app/guard/lockable-component';
 import { DataService } from 'src/app/service/data.service';
 
 @Component({
@@ -6,12 +7,23 @@ import { DataService } from 'src/app/service/data.service';
   templateUrl: './lk-page.component.html',
   styleUrls: ['./lk-page.component.scss']
 })
-export class LkPageComponent implements OnInit {
+export class LkPageComponent implements OnInit, LockableComponent {
 
   activeComponent: number = 1;
+  allowRedirect: boolean = true;
 
-  constructor(private dataService: DataService) { }
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnloadHander() {
+     return this.allowRedirect;
+  }
 
+  constructor(private dataService: DataService) {
+  }
+
+  canDeactivate(): boolean {
+    return this.allowRedirect;
+  }
+  
   ngOnInit(): void {
     this.activeComponent = this.dataService.getLkActiveComponent();
   }

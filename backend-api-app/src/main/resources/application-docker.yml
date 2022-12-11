@@ -1,6 +1,7 @@
 server:
   servlet:
     context-path: /api/v1
+  port: 8080
 
 jwt:
   private.key: classpath:app.key
@@ -8,7 +9,7 @@ jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://habr-db:5432/habr
+    url: jdbc:postgresql://docker-container-name:5432/habr
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: password
@@ -32,3 +33,6 @@ app:
     users: id
   defaultSortDirection:
     users: ASC
+  picture:
+    storage:
+      path: /storage

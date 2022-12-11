@@ -3,7 +3,7 @@
       <div class="col-md-6">
         <div class="card px-5 py-5" *ngIf="!success else success_signup">
           <h2 class="text-center mb-5">Регистрация</h2>
-          <form (ngSubmit)="submitForm()" [formGroup]="form" autocomplete="off">
+          <form (ngSubmit)="submitForm()" [formGroup]="form">
 
             <div class="alert alert-danger text-center" *ngIf="isUsernameAlreadyExists" role="alert" >
               Username already exists
@@ -24,7 +24,8 @@
                        class="form-control"
                        [ngClass]="{'is-invalid': form.controls['username'].invalid && form.controls['username'].touched}"
                        id="username"
-                       name="username">
+                       name="username"
+                       autocomplete="off">
                 <div class="invalid-feedback"
                      *ngIf="form.controls['username'].invalid && form.controls['username'].touched">
                   Укажите username, кол-во символов min = 3, max = 30
@@ -38,7 +39,8 @@
                      class="form-control"
                      [ngClass]="{'is-invalid': form.controls['firstName'].invalid && form.controls['firstName'].touched}"
                      id="firstName"
-                     name="firstName">
+                     name="firstName"
+                     autocomplete="off">
               <div class="invalid-feedback"
                    *ngIf="form.controls['firstName'].invalid && form.controls['firstName'].touched">
                 Укажите Ваше настоящее имя
@@ -52,7 +54,8 @@
                      class="form-control"
                      [ngClass]="{'is-invalid': form.controls['password'].invalid && form.controls['password'].touched}"
                      id="password"
-                     name="password">
+                     name="password"
+                     autocomplete="new-password">
               <div class="invalid-feedback"
                    *ngIf="form.controls['password'].invalid && form.controls['password'].touched">
                 Введите пароль, кол-во символов min = 6

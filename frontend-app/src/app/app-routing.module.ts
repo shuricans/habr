@@ -15,22 +15,93 @@ import { AuthGuard } from './guard/auth-guard';
 import { SignupPageComponent } from './page/signup-page/signup-page.component';
 import { NotFoundPageComponent } from './page/not-found-page/not-found-page.component';
 import { UserPageComponent } from './page/user-page/user-page.component';
+import { CanDeactivateGuard } from './guard/can-deactivate.guard';
+import { HasRoleGuard } from './guard/has-role.guard';
+import { AllUsersPageComponent } from './page/all-users-page/all-users-page.component';
+import { AllPostsPageComponent } from './page/all-posts-page/all-posts-page.component';
 
 const routes: Routes = [
-  {path: "", pathMatch: "full", redirectTo: "habr"},
-  {path: "habr", component: HabrPageComponent},
-  {path: "habr/:postId", component: PostPageComponent},
-  {path: "design", component: DesignPageComponent},
-  {path: "web", component: WebPageComponent},
-  {path: "mobile", component: MobilePageComponent},
-  {path: "marketing", component: MarketingPageComponent},
-  {path: "help", component: HelpPageComponent},
-  {path: "search", component: SearchPageComponent},
-  {path: "login", component: LoginPageComponent, canActivate: [SigninSignupGuard]},
-  {path: "lk", component: LkPageComponent, canActivate: [AuthGuard]},
-  {path: "signup", component: SignupPageComponent, canActivate: [SigninSignupGuard]},
-  {path: "user/:username", component: UserPageComponent},
-  {path: '**', component: NotFoundPageComponent},  // Wildcard route for a 404 page
+  {
+    path: "", 
+    pathMatch: "full", 
+    redirectTo: "habr"
+  },
+  {
+    path: "habr", 
+    component: HabrPageComponent
+  },
+  {
+    path: "habr/:postId", 
+    component: PostPageComponent
+  },
+  {
+    path: "design", 
+    component: DesignPageComponent
+  },
+  {
+    path: "web", 
+    component: WebPageComponent
+  },
+  {
+    path: "user", 
+    component: UserPageComponent
+  },
+  {
+    path: "users", 
+    component: AllUsersPageComponent, 
+    canActivate: [AuthGuard, HasRoleGuard], 
+    data: {
+      roles: ['ROLE_ADMIN', 'ROLE_MODERATOR']
+    }
+  },
+  {
+    path: "posts", 
+    component: AllPostsPageComponent, 
+    canActivate: [AuthGuard, HasRoleGuard], 
+    data: {
+      roles: ['ROLE_ADMIN', 'ROLE_MODERATOR']
+    }
+  },
+  {
+    path: "mobile", 
+    component: MobilePageComponent
+  },
+  {
+    path: "marketing", 
+    component: MarketingPageComponent
+  },
+  {
+    path: "help", 
+    component: HelpPageComponent
+  },
+  {
+    path: "search", 
+    component: SearchPageComponent
+  },
+  {
+    path: "login", 
+    component: LoginPageComponent, 
+    canActivate: [SigninSignupGuard]
+  },
+  {
+    path: "lk", 
+    component: LkPageComponent, 
+    canActivate: [AuthGuard], 
+    canDeactivate: [CanDeactivateGuard]
+  },
+  {
+    path: "signup", 
+    component: SignupPageComponent, 
+    canActivate: [SigninSignupGuard]
+  },
+  {
+    path: "user/:username", 
+    component: UserPageComponent
+  },
+  {
+    path: '**', // Wildcard route for a 404 page
+    component: NotFoundPageComponent
+  },  
 ];
 
 @NgModule({
