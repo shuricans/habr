@@ -194,4 +194,21 @@ public class PostController {
         String username = authentication.getName();
         return ResponseEntity.ok(postService.publish(username, postId));
     }
+
+    @PatchMapping("/delete-any/{id}")
+    @SecurityRequirement(name="bearerAuth")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ROLE_MODERATOR', 'SCOPE_ROLE_ADMIN')")
+    @Operation(summary = "Deletes post. Set post condition to DELETED", tags = "Posts")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "When not authorized"),
+            @ApiResponse(responseCode = "403", description = "When forbidden"),
+            @ApiResponse(responseCode = "404", description = "When post not found"),
+            @ApiResponse(responseCode = "500", description = "When server error")
+    })
+    public ResponseEntity<MessageResponse> deleteAny(@PathVariable("id") Long postId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(postService.delete(username, postId));
+    }
 }
