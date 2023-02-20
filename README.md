@@ -1,7 +1,7 @@
 # Habr, but worse. Anyway...
 See current deployed version 
-[habr v-1.6](http://80.78.240.245:8080/)  
-See [backend-api (swagger)](http://80.78.240.245:8080/api/v1/swagger-ui/index.html#)  
+[habr v-1.6](http://91.201.115.16:8080/)  
+See [backend-api (swagger)](http://91.201.115.16:8080/api/v1/swagger-ui/index.html#)  
 Deployed on [reg.ru](https://www.reg.ru/), cheapest config (15 GB SSD, 1 GB RAM, 1 vCPU)
 
 ### Modules short overview
@@ -51,8 +51,8 @@ __Releases notes:__
 > v-1.0
 - [JWT](https://jwt.io/) authentication & authorization (basic implementation)
 - refresh token, for smooth user experience
-- **markdown** markup language, see example of [post](http://80.78.240.245:8080/habr/1)
-- [backend-api (swagger)](http://80.78.240.245:8080/api/v1/swagger-ui/index.html#)
+- **markdown** markup language, see example of [post](http://91.201.115.16:8080/habr/1)
+- [backend-api (swagger)](http://91.201.115.16:8080/api/v1/swagger-ui/index.html#)
 - default admin user `admin | password`
 - unit & integration tests on backend
 > v-1.2
@@ -61,19 +61,19 @@ __Releases notes:__
 - main images on the article card are fake for now
 - user can edit own data in his personal account on the site
 - user can view their publications in his personal account
-- added several endpoints, see current [backend-api (swagger)](http://80.78.240.245:8080/api/v1/swagger-ui/index.html#)
+- added several endpoints, see current [backend-api (swagger)](http://91.201.115.16:8080/api/v1/swagger-ui/index.html#)
 > v-1.4
 - all pages on topics work, articles of the corresponding category are displayed, new ones first
 - user can create a draft article
 - user can edit all owns articles
 - user can publish, hide and delete own articles
-- added a public user profile page, (displays user information and articles) [see admin page](http://80.78.240.245:8080/user/admin).
-- added a [search page](http://80.78.240.245:8080/search/) with sortable table (*for now with limited functionality)
-- see example search by [**#tag_test** ](http://80.78.240.245:8080/search?tag=tag_test)
-- added several endpoints, see current [backend-api (swagger)](http://80.78.240.245:8080/api/v1/swagger-ui/index.html#)
+- added a public user profile page, (displays user information and articles) [see admin page](http://91.201.115.16:8080/user/admin).
+- added a [search page](http://91.201.115.16:8080/search/) with sortable table (*for now with limited functionality)
+- see example search by [**#tag_test** ](http://91.201.115.16:8080/search?tag=tag_test)
+- added several endpoints, see current [backend-api (swagger)](http://91.201.115.16:8080/api/v1/swagger-ui/index.html#)
 - *main images in the article card are still fake*
 > v-1.6
-- added [help page](http://80.78.240.245:8080/help)
+- added [help page](http://91.201.115.16:8080/help)
 - now user can upload images for their articles
 - user can set the main image for the article, shown on preview
 - redesign modal window for editing article
