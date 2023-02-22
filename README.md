@@ -1,8 +1,7 @@
 # Habr, but worse. Anyway...
 See current deployed version 
 [habr v-1.6](http://91.201.115.16:8080/)  
-See [backend-api (swagger)](http://91.201.115.16:8080/api/v1/swagger-ui/index.html#)  
-Deployed on [reg.ru](https://www.reg.ru/), cheapest config (15 GB SSD, 1 GB RAM, 1 vCPU)
+See [backend-api (swagger)](http://91.201.115.16:8080/api/v1/swagger-ui/index.html#)
 
 ### Modules short overview
 - **backend-api-app** - spring boot application, backend REST API
